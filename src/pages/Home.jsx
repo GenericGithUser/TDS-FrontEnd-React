@@ -1,4 +1,4 @@
-import SummaryBoard from "../components/summaryBoard";
+import SummaryBoard from "../components/SummaryBoard";
 import MostRecent from "../components/MostRecent";
 import MostRecentReceiver from "../components/MostRecentReceiver";
 import { useAuth } from "../context/AuthContext";
