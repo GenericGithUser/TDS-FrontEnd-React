@@ -1,0 +1,42 @@
+.transTable {
+    width: 95%;
+    border: 2px solid black;
+    margin-left: auto;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background-color: white;
+    overflow: auto;
+}
+
+.transTable>.actTransTable {
+    width: 100%;
+    border-collapse: collapse;
+
+}
+
+.transTable>.actTransTable>.transTableHead {
+    background-color: #dcdee8;
+    color: var(--light-blue);
+    font-weight: bolder;
+    text-align: center;
+
+}
+
+.transTable>.actTransTable>.transTableHead>tr>th {
+    padding: 6px;
+}
+
+.transTable>.actTransTable>tbody>tr {
+    font-size: 1.4ch;
+    text-align: center;
+}
+
+.transTable>.actTransTable>tbody>tr>td {
+    padding: 3px;
+    border-top: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+
+
+

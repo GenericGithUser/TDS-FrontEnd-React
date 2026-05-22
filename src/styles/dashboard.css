@@ -1,0 +1,44 @@
+.container{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.board {
+    width: 95vw;
+    height: 94vh;
+    background-color: var(--blue-white);
+    display: flex;
+    justify-self: center;
+    align-self: center;
+    border-radius: 15px;
+    padding: 10px;
+    flex-direction: column;
+    overflow: auto;
+}
+
+header{
+    margin-bottom: 15px;
+}
+
+.green {
+    color: var(--dark-green);
+}
+
+.board>header>.title {
+    color: var(--dark-blue);
+}
+
+.board>header>.title>.green {
+    color: var(--dark-green);
+}
+
+.board>header>.subtitle>.userTitle {
+    color: var(--light-green);
+    text-decoration: underline;
+}
+
+.board>header>.subtitle>.branchTitle {
+    color: var(--light-blue);
+    text-decoration: underline;
+}

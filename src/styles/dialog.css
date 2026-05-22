@@ -1,0 +1,155 @@
+.diagBox {
+    background-color: var(--blue-white);
+    margin: auto;
+    padding: 10px;
+    border: 0;
+    border-radius: 15px;
+    width: 58vw;
+
+}
+
+.diagBox::backdrop {
+    background-color: rgba(0, 0, 0, 0.521);
+    backdrop-filter: blur(3px);
+}
+
+.diagEdit::backdrop {
+    background-color: rgba(0, 0, 0, 0.377);
+    backdrop-filter: blur(2px);
+}
+
+.diagEdit {
+    background-color: var(--blue-white);
+    margin: auto;
+    padding: 10px;
+    border: 0;
+    border-radius: 15px;
+
+
+}
+
+.diagBox[open] {
+    box-shadow: 0 10px 50px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.diagEdit[open] {
+    box-shadow: 0 10px 50px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.contents {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.diagBox>.contents>.contentList {
+    padding: 3px;
+}
+
+.titleD {
+    color: var(--dark-blue);
+    text-align: right;
+    padding-top: 2px;
+    padding-right: 10px;
+}
+
+.contents>.contentList>tbody>tr>.data {
+    width: 17vw;
+}
+
+.diagEdit>.diagTitle {
+    margin-bottom: 10px;
+}
+
+.diagEdit>.changes {
+    display: flex;
+    flex-direction: column;
+}
+
+.diagEdit>.changes>#changeForm {
+    font-size: 2.5ch;
+    width: 25vw;
+    height: 35vh;
+    border: 3px solid var(--dark-blue);
+    outline: none;
+    border-radius: 15px;
+}
+
+.diagEdit>.contents {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.diagEdit>.contents>.contentList {
+    padding: 5px;
+}
+
+.diagEdit>.contents>.contentList>tbody>tr>.title {
+    color: var(--dark-blue);
+    text-align: right;
+    padding-top: 2px;
+    padding-right: 10px;
+}
+
+.diagEdit>.contents>.contentList>tbody>tr>.data {
+    width: 20vw;
+}
+
+.buttons{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.delPrompt {
+    background-color: var(--blue-white);
+    margin: auto;
+    padding: 10px;
+    border: 0;
+    border-radius: 15px;
+    width: 35vw;
+}
+
+.delPrompt::backdrop {
+    background-color: rgba(0, 0, 0, 0.521);
+    backdrop-filter: blur(3px);
+}
+
+.delPrompt[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 10px 50px 10px rgba(0, 0, 0, 0.3);
+}
+
+.delPrompt>img {
+    width: 8vw;
+}
+
+.delPrompt>.confirmMesg {
+    text-align: center;
+}
+
+.checkCont{
+    margin: auto;
+    width: 25vw;
+    
+}
+.items{
+    display: grid;
+    grid-template-columns: 1fr 0.5fr 0.5fr;
+    gap: 10px;
+    padding: 2px;
+}
+.limHeight{
+    height: 20px;
+    
+}

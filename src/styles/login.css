@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+}
+.content{
+    background-image: url(/assets/loginBg.jpg);
+    background-repeat: no-repeat;
+    width: 100vw;
+    height: 100vh;
+    
+}
+.main{
+    width: 100vw;
+    height: 100vh;
+    background-color: #054a8a9c;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.main > .loginForm{
+    overflow: visible;
+    background-color: #f3fdff;
+    width: 33%;
+    height: 65%;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 3px 4px 4px #31a9199c;
+}
+.main > .loginForm > .logoImg{
+    width: 17vw;
+    margin-top: -80px;
+}
+
+.main > .loginForm > .txtLogo{
+    width: 90%;
+    text-align: center;
+    font-size: 3ch;
+    color: #31a919;
+}
+
+
+.main >.loginForm > .innerForm{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+}
+
+.main>.loginForm>.innerForm >.inputs{
+    padding: 10px;
+    font-size: 1.8ch;
+    width: 29vw;
+    border-radius: 10px;
+    border: 1px solid black;
+    outline: none;
+    
+}
+.main>.loginForm>.innerForm>.inputs:focus{
+    border: 2px solid #7ad168;
+}
+
+.main>.loginForm>.innerForm>.lblInput{
+    font-weight: bold;
+    color:#054a8a;
+}
+.main>.loginForm>.innerForm>.forgotPass{
+    color: #31a919;
+}
+
+.main>.loginForm>.innerForm>.logButton{
+    background-color: #3d97b6;
+    border-radius: 10px;
+    font-size: 2ch;
+    padding: 10px;
+    margin-top: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #f3fdff;
+    border: 0;
+    transition: 0.2s all ease-in-out;
+}
+.main>.loginForm>.innerForm>.logButton:hover{
+    background-color: #7ad168;
+
+}
+.main>.loginForm>.innerForm>.logButton:active{
+    background-color: #054a8a;
+}
+

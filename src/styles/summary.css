@@ -1,0 +1,73 @@
+.summaries {
+    display: grid;
+    grid-template-rows: 1fr min-content 0.1fr;
+}
+.summaries>.data>.dataBox {
+    display: grid;
+    border: 2px solid gray;
+    grid-template-columns: repeat(4, 1fr);
+
+}
+
+.summaries>.data>.dataBox2 {
+    display: grid;
+    border: 2px solid gray;
+    grid-template-columns: repeat(3, 1fr);
+
+}
+
+.dBox {
+    padding: 5px;
+    border-left: 2px solid gray;
+    border-right: 2px solid gray;
+
+
+}
+
+.boxDesc {
+    width: 80%;
+    text-align: center;
+    line-height: 1.2ch;
+    margin: auto;
+}
+
+.summaries>.buttonGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 2px solid gray;
+    height: 6vh;
+}
+
+.summaries>.buttonGrid2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 2px solid gray;
+    height: 6vh;
+}
+
+.viewButton {
+    margin: auto;
+}
+
+.viewButton>.btn {
+    padding: 5px;
+    font-size: 1.6ch;
+    font-weight: bolder;
+    color: var(--blue-white);
+    border: 0;
+    border-radius: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    cursor: pointer;
+    transition: 0.2s all ease-in-out;
+}
+
+.viewButton>.btn:hover {
+    background-color: var(--bg);
+    color: black;
+}
+
+.viewButton>.btn:active {
+    background-color: seagreen;
+    color: var(--blue-white);
+}

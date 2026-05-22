@@ -1,0 +1,30 @@
+.container3 {
+    padding: 5px;
+    border: 2px solid;
+    height: 70vh;
+    border-radius: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.extendWidth {
+    width: 100% !important;
+}
+
+.restrictWidth {
+    width: 20vw !important;
+    margin: auto;
+}
+.buttonCont {
+    margin-top: -10px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.outlet{
+    position: absolute;
+    z-index: 2;
+}

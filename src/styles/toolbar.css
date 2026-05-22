@@ -1,0 +1,71 @@
+.toolBar {
+    background-color: var(--dark-blue);
+    padding: 10px;
+    height: 100vh;
+    display: flex;
+    width: 50px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toolBar>.circle {
+    border-radius: 50%;
+    background-color: var(--blue-white);
+
+}
+
+.toolBar>.circle>.logo {
+    width: 2.5vw;
+}
+
+.toolBar>.circle>.settings {
+    width: 3vw;
+}
+
+/* NAV BAR*/
+.toolBar>.nav {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    width: 3vw;
+}
+
+.toolBar>.nav>.aNavItem {
+    color: var(--blue-white);
+    text-decoration: none;
+    font-size: 0.9ch;
+    text-align: center;
+
+}
+
+.toolBar>.nav>.aNavItem>.navItem {
+    width: 3vw;
+    border-radius: 5px;
+    padding: 2px;
+    background-color: var(--light-blue);
+
+
+}
+
+.active {
+    background-color: var(--light-green) !important;
+    border-radius: 5px;
+}
+.logout{
+    fill: var(--blue-white);
+    font-size: 3.5ch;
+    background-color: var(--light-green);
+    padding: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+.logDiv p{
+    font-size: 0.9ch;
+    color: var(--blue-white);
+}
+
+.logout:hover{
+    background-color: var(--red);
+}

@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+}
+
+:root {
+  --dark-blue: #054a8a;
+  --dark-green: #31a919;
+  --light-blue: #3d97b6;
+  --light-green: #7ad168;
+  --blue-white: #f3fdff;
+  --bg: #a3dcea;
+  --yellow: #ebc42a;
+  --violet: #5e17eb;
+  --red: #ff5757;
+
+}
+
+body {
+  background-color: var(--bg);
+  display: flex;
+  gap: 10px;
+
+}
+
+.fin {
+  color: var(--light-green);
+}
+
+.sen {
+  color: var(--light-blue);
+  width: 60% !important;
+}
+
+.inc {
+  color: var(--yellow);
+}
+
+.pen {
+  color: var(--violet);
+}
+
+.num {
+  font-size: 5ch;
+  text-align: center;
+}
+
+.btnFin {
+  background-color: var(--light-green) !important;
+}
+
+.btnSen {
+  background-color: var(--light-blue);
+}
+
+.btnInc {
+  background-color: var(--yellow) !important;
+}
+
+.btnPen {
+  background-color: var(--violet);
+}
+
+.btnRed {
+  background-color: var(--red) !important;
+}
+
+.btnCancel {
+  background-color: var(--light-blue);
+  padding: 4px;
+  border: 0;
+  border-radius: 5px;
+  font-weight: bold;
+  color: var(--blue-white);
+  cursor: pointer;
+  font-size: 2ch;
+  padding-left: 30px;
+  padding-right: 30px;
+  margin-top: 30px;
+  transition: 0.2s all ease-in-out;
+}
+
+.btnGreen {
+  background-color: var(--light-green);
+  padding: 4px;
+  border: 0;
+  border-radius: 5px;
+  font-weight: bold;
+  color: var(--blue-white);
+  cursor: pointer;
+  font-size: 2ch;
+  padding-left: 30px;
+  padding-right: 30px;
+  margin-top: 30px;
+  transition: 0.2s all ease-in-out;
+}
+
+.received {
+  background-color: var(--dark-green);
+  color: white;
+  font-size: 1.1ch;
+  border-radius: 5px;
+  padding: 5px;
+  font-weight: bolder;
+}
+
+.sent {
+  background-color: var(--dark-blue);
+  color: white;
+  font-size: 1.1ch;
+  border-radius: 5px;
+  padding: 5px;
+  font-weight: bolder;
+}
+
+.incomplete {
+  background-color: var(--yellow);
+  color: white;
+  font-size: 1.1ch;
+  border-radius: 5px;
+  padding: 5px;
+  font-weight: bolder;
+}
+
+.pending {
+  background-color: var(--violet);
+  color: white;
+  font-size: 1.1ch;
+  border-radius: 5px;
+  padding: 5px;
+  font-weight: bolder;
+}
+
+.btnView {
+  padding: 4px;
+  color: var(--blue-white);
+  background-color: var(--light-blue);
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s all ease-in-out;
+  margin-right: 5px;
+}
+
+
+.btnEdit {
+  padding: 4px;
+  color: var(--blue-white);
+  background-color: var(--light-green);
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s all ease-in-out;
+  margin-right: 5px;
+}
+
+.btnEdit:hover {
+  background-color: var(--dark-blue);
+}
+
+.btnEdit:active {
+  background-color: var(--dark-green);
+}
+
+.btnView:hover {
+  background-color: var(--dark-blue);
+}
+
+.btnView:active {
+  background-color: var(--dark-green);
+}
+
+.delBtn {
+  padding: 4px;
+  color: var(--blue-white);
+  background-color: var(--red);
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s all ease-in-out;
+}
+
+.delBtn:hover {
+  background-color: orangered;
+}
+
+.delBtn:active {
+  background-color: darkred;
+}
+
+.btnCancel:hover {
+  background-color: var(--light-green);
+}
+
+.btnCancel:active {
+  background-color: var(--dark-blue);
+}
+
+.btnGreen:hover {
+  background-color: var(--light-blue);
+}
+
+.btnGreen:active {
+  background-color: var(--dark-blue);
+}

@@ -1,0 +1,65 @@
+.includedRecord{
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.3ch;
+    padding: 5px;
+    outline: none;
+    border-radius: 10px;
+    border: 1px solid var(--dark-blue);
+    width: 30vw;
+    background-color: white;
+    
+}
+.delItemBtn{
+    background: none;
+    outline: none;
+    border: 2px;
+    cursor: pointer;
+}
+
+.delItemBtnImg{
+    width: 30px;
+    height: 30px;
+}
+
+.recordBox {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    border-radius: 10px;
+    border: 2px solid var(--dark-green);
+    min-width: 45vw;
+    background-color: var(--light-blue);
+}
+
+
+.inputDiag {
+    background-color: var(--blue-white);
+    margin: auto;
+    padding: 10px;
+    border: 0;
+    border-radius: 15px;
+    width: 90vw;
+
+}
+
+.inputDiag::backdrop {
+    background-color: rgba(0, 0, 0, 0.521);
+    backdrop-filter: blur(3px);
+}
+
+.btnFrame{
+    display: flex;
+    justify-content: center;
+}
+
+.records{
+    display: flex;
+    flex-direction: column;
+}
+
+.recordData{
+    display: grid;
+    text-align: center;
+    grid-template-columns: 0.5fr 1fr 2fr 0.5fr;
+}

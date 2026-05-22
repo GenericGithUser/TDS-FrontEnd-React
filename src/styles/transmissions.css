@@ -1,0 +1,16 @@
+.container2{
+    padding: 5px;
+    border: 2px solid;
+    min-height: 70vh;
+    border-radius: 15px;
+    overflow: auto;
+}
+
+.extendWidth {
+    width: 100% !important;
+}
+
+.restrictWidth{
+    width: 20vw !important;
+    margin: auto;
+}

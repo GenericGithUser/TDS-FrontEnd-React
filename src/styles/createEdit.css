@@ -1,0 +1,161 @@
+.ceTitle {
+    text-align: center;
+    
+}
+
+.createBox {
+    width: 100%;
+    border-radius: 15px;
+    border: 3px double var(--yellow);
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.createBox>form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+}
+
+.r1 {
+    display: grid;
+    width: 80%;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: flex-start;
+    margin-left: 6vw;
+
+}
+
+.r2{
+    display: grid;
+    width: 80%;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: flex-start;
+    margin-left: 1vw;
+}
+
+.recLabel {
+    font-weight: bold;
+    color: var(--dark-blue);
+    text-align: right;
+    font-size: 2ch;
+    width: 10vw;
+}
+
+.transLabel{
+    font-weight: bold;
+    color: var(--dark-blue);
+    text-align: right;
+    font-size: 2ch;
+    width: 8vw;   
+}
+
+.recInput {
+    font-size: 2ch;
+    padding: 5px;
+    outline: none;
+    border-radius: 10px;
+    border: 1px solid var(--dark-blue);
+    width: 25vw;
+}
+
+
+.recInput.special {
+    width: 25vw;
+    height: 18vh;
+
+}
+
+.item {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+}
+
+.item.itmSpecial {
+    flex-direction: column;
+}
+
+.subtext {
+    font-size: 1ch;
+    color: var(--light-green);
+}
+
+.preparer {
+    padding: 10px;
+    margin-top: 50px;
+    color: var(--dark-blue);
+}
+
+.prepName {
+    color: var(--light-green);
+    text-decoration: underline;
+}
+/* ── Division multi-select tags ─────────────────────────────────── */
+
+.divisionTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    min-height: 28px;
+}
+
+.divisionTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #1a6b3c;
+    /* adjust to your green brand color */
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 10px 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.divisionTagRemove {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0 0 2px;
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+}
+
+.divisionTagRemove:hover {
+    opacity: 1;
+}
+
+/* Input + Add button on same row */
+.divisionInputRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.divisionInputRow .recInput {
+    flex: 1;
+}
+
+.btnAddDiv {
+    white-space: nowrap;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+}
+
+/* Hint text below input */
+.divisionHint {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: #555;
+}
