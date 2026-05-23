@@ -1,4 +1,5 @@
 import SummaryBoard from "../components/SummaryBoard";
+import SummaryBoardAdmin from "../components/SummaryBoardAdmin";
 import MostRecent from "../components/MostRecent";
 import MostRecentReceiver from "../components/MostRecentReceiver";
 import { useAuth } from "../context/AuthContext";
@@ -14,9 +15,9 @@ function Home(){
           <title>Dashboard | Home </title>
         </Helmet>
         <div className="container1">
-          <h2 className="sTitle">SUMMARY DASHBOARD</h2>
-          <SummaryBoard />
-          <h2 className="sTitle">Most Recent Transmissions</h2>
+          <h2 className="sTitle">{user.role === "admin" && <>ADMIN </>}SUMMARY DASHBOARD</h2>
+          {user.role !== "admin" ? <SummaryBoard /> : <SummaryBoardAdmin/>}
+          <h2 className="sTitle">Most Recent {user.role === "admin" ? "Events" : "Transmissions"}</h2>
           {user.role === "receiver" ? <MostRecentReceiver /> : <MostRecent />}
           <h1 className="total">
             Total Transmissions:{" "}

@@ -18,6 +18,11 @@ function TransTable() {
     const { user } = useAuth();
 
 
+
+   const recStatus = (user.role === "admin" || user.role === "receiver") ? "FINISHED" : "RECEIVED";
+   const sentStatus = (user.role === "receiver") ? "INCOMING" : "SENT";
+        
+
     const openDialog = (item, delBtn) => {
        setDialogData(item);
        setIsDialogOpen(true)
@@ -58,20 +63,39 @@ function TransTable() {
         <div className="transTable extendWidth">
           <table className="actTransTable">
             <colgroup>
-              <col style={{ width: "10px" }} />
-              <col style={{ width: "10vw" }} />
-              <col style={{ width: "16vw" }} />
-              <col style={{ width: "5vw" }} />
-              <col style={{ width: "20vw" }} />
+              {user.role === "admin" || user.role === "receiver" ? (
+                <>
+                  <col style={{ width: "10px" }} />
+                  <col style={{ width: "10px" }} />
+                  <col style={{ width: "10vw" }} />
+                  <col style={{ width: "10vw" }} />
+                  <col style={{ width: "5vw" }} />
+                  <col style={{ width: "16vw" }} />
+                </>
+              ) : (
+                <>
+                  <col style={{ width: "10px" }} />
+                  <col style={{ width: "10vw" }} />
+                  <col style={{ width: "16vw" }} />
+                  <col style={{ width: "5vw" }} />
+                  <col style={{ width: "20vw" }} />
+                </>
+              )}
             </colgroup>
             <thead className="transTableHead">
               <tr>
                 <th>TransmissionsID</th>
                 <th>RecordID</th>
+                {(user.role === "admin" || user.role === "receiver") && (
+                  <th>Office</th>
+                )}
                 <th>Division</th>
                 <th>Item No.</th>
                 <th>Title</th>
                 <th>Date Sent</th>
+                {(user.role === "admin" || user.role === "receiver") && (
+                  <th>Date Received</th>
+                )}
                 <th>Status</th>
                 <th>⠀⠀⠀⠀⠀⠀⠀⠀⠀</th>
               </tr>
@@ -88,16 +112,24 @@ function TransTable() {
                   <tr key={data.id}>
                     <td>{data.transId}</td>
                     <td>{data.recordId}</td>
+                    {user.role === "admin" || user.role === "receiver" ? (
+                      <td>{data.branch}</td>
+                    ) : (
+                      ""
+                    )}
                     <td>{data.division}</td>
                     <td>{data.itemNo}</td>
                     <td>{data.title}</td>
                     <td>{data.sentDate}</td>
+                    {(user.role === "admin" || user.role === "receiver") && (
+                      <td>{data.recDate}</td>
+                    )}
                     <td>
                       {data.status === "RECEIVED" && (
-                        <span className="received">{data.status}</span>
+                        <span className="received">{recStatus}</span>
                       )}
                       {data.status === "SENT" && (
-                        <span className="sent">{data.status}</span>
+                        <span className="sent">{sentStatus}</span>
                       )}
                       {data.status === "PENDING" && (
                         <span className="pending">{data.status}</span>
@@ -108,22 +140,44 @@ function TransTable() {
                     </td>
                     <td>
                       {data.type === "view" && (
-                        <button
-                          type="button"
-                          className="btnView"
-                          onClick={() => openDialog(data, false)}
-                        >
-                          View
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="btnView"
+                            onClick={() => openDialog(data, false)}
+                          >
+                            View
+                          </button>
+                          {user.role === "admin" && (
+                            <button
+                              type="button"
+                              className="btnEdit"
+                              onClick={() => handleEditTrans(data)}
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </>
                       )}
                       {data.type === "sent" && (
-                        <button
-                          type="button"
-                          className="btnView"
-                          onClick={() => openDialog(data, false)}
-                        >
-                          View
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="btnView"
+                            onClick={() => openDialog(data, false)}
+                          >
+                            View
+                          </button>
+                          {user.role === "admin" && (
+                            <button
+                              type="button"
+                              className="btnEdit"
+                              onClick={() => handleEditTrans(data)}
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </>
                       )}
                       {data.type === "pending" && (
                         <>
@@ -134,15 +188,15 @@ function TransTable() {
                           >
                             Check
                           </button>
-                          {user.role === "preparer" && (
-                            <button
-                              type="button"
-                              className="btnEdit"
-                              onClick={() => handleEditTrans(data)}
-                            >
-                              Edit
-                            </button>
-                          )}
+                          {user.role === "preparer" || user.role === "admin" ? (
+                              <button
+                                type="button"
+                                className="btnEdit"
+                                onClick={() => handleEditTrans(data)}
+                              >
+                                Edit
+                              </button>
+                            ): ""}
                         </>
                       )}
                       {data.type === "incomplete" && (

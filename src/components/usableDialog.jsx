@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
+
 import '../styles/dialog.css'
 
 
@@ -70,6 +71,17 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
 
     const handleEditTrans = (data) => {
 
+      const sendData = {
+        mode: "edit",
+        data: data,
+        returnTo: location,
+        callback: () => console.log("Success"),
+      };
+      setRouteData(sendData);
+      navigate("edit");
+    };
+
+    const handleEditUser = (data) => {
       const sendData = {
         mode: "edit",
         data: data,
@@ -815,13 +827,111 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         </>
       );
     }
-    // if (onRequestEdits === true) {
-    //   return (
-    //     <>
-    //       
-    //     </>
-    //   );
-    // }
+    
+    if (user.role === "admin" && /MEM/.test(data.id)) {
+      return (
+        <>
+          <dialog className="diagEdit" ref={dialogRef}>
+            <h1 className="diagTitle">User Details</h1>
+            <div className="contents">
+              <table className="contentList">
+                <tbody>
+                  <tr>
+                    <td className="titleD">Employee ID: </td>
+                    <td id="transIDData" className="data">
+                      {data.id}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Name: </td>
+                    <td id="recordIdData" className="data">
+                      {data.name}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Role: </td>
+                    <td id="feedbackData" className="data">
+                      {data.role}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Email: </td>
+                    <td id="feedbackData" className="data">
+                      {data.email}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="buttons">
+                <button className="btnCancel" onClick={onClose}>
+                  OK
+                </button>
+                <button className="btnInc btnCancel" onClick={onClose}>
+                  Reset Password
+                </button>
+                <button
+                  onClick={() => handleEditUser(data)}
+                  className="btnFin btnCancel"
+                >
+                  Edit
+                </button>
+                <button className="btnRed btnCancel" onClick={openNestedDialog}>
+                  DELETE
+                </button>
+              </div>
+            </div>
+          </dialog>
+          <dialog className="delPrompt" ref={nestedDialogRef}>
+            <h1 className="diagTitle">Confirm Deletion</h1>
+            <img src="/assets/warning.png" alt="warning" srcset="" />
+            <h3 className="confirmMesg">
+              Are you sure you want to Delete this User??
+            </h3>
+            <div className="contents">
+              <table className="contentList">
+                <tbody>
+                  <tr>
+                    <td className="titleD">Employee ID: </td>
+                    <td id="transIDData" className="data">
+                      {data.id}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Name: </td>
+                    <td id="recordIdData" className="data">
+                      {data.name}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Role: </td>
+                    <td id="titleIDData" className="data">
+                      {data.role}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Branch: </td>
+                    <td id="titleIDData" className="data">
+                      {data.branch}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="buttons">
+              <button className="btnCancel" onClick={closeNestedDialog}>
+                Go Back
+              </button>
+              <button
+                onClick={handleNestedDialogSubmit}
+                className="btnRed btnCancel"
+              >
+                DELETE
+              </button>
+            </div>
+          </dialog>
+        </>
+      );
+    }
 
 }
 

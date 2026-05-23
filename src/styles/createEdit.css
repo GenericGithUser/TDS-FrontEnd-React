@@ -159,3 +159,8 @@
     font-size: 0.78rem;
     color: #555;
 }
+
+.lblSpecial{
+    text-align: justify;
+    width: 30vw;
+}

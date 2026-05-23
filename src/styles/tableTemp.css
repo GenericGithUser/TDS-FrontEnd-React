@@ -7,11 +7,13 @@
     border-bottom-right-radius: 5px;
     background-color: white;
     overflow: auto;
+    
 }
 
 .transTable>.actTransTable {
     width: 100%;
     border-collapse: collapse;
+    font-size: 2ch;
 
 }
 

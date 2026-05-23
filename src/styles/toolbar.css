@@ -45,7 +45,10 @@
     padding: 2px;
     background-color: var(--light-blue);
 
+}
 
+.toolBar>.nav>.aNavItem>.expand{
+    font-size: 8ch !important;
 }
 
 .active {

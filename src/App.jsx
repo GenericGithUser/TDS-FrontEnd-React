@@ -8,6 +8,8 @@ import Records from './pages/Records'
 import CreateEditRecord from './pages/CreateEditRecords'
 import CreateEditTrans from './pages/CreateEditTrans'
 import ProtectedRoute from './components/ProtectedRoute'
+import Users from './pages/Users'
+import CreateEditUser from './pages/CreateEditUser'
 import { useAuth } from './context/AuthContext'
 import './App.css'
 
@@ -54,6 +56,9 @@ function App() {
             <Route path="home/edit" element={<CreateEditRecord />} />
             <Route path="transmissions/edit" element={<CreateEditTrans />} />
             <Route path="transmissions/create" element={<CreateEditTrans />} />
+            <Route path="users" element={<Users />} />
+            <Route path="users/create" element={<CreateEditUser />} />
+            <Route path="users/edit" element={<CreateEditUser />} />
           </Route>
         </Routes>
       )}

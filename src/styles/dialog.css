@@ -84,12 +84,14 @@
 }
 
 .diagEdit>.contents {
-    margin-top: 10px;
+    margin-top: 5px;
     font-weight: bold;
 }
 
 .diagEdit>.contents>.contentList {
+    font-size: 1.7ch;
     padding: 5px;
+    margin: auto;
 }
 
 .diagEdit>.contents>.contentList>tbody>tr>.title {
@@ -101,6 +103,7 @@
 
 .diagEdit>.contents>.contentList>tbody>tr>.data {
     width: 20vw;
+    text-align: left;
 }
 
 .buttons{

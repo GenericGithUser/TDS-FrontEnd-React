@@ -4,6 +4,9 @@
     min-height: 70vh;
     border-radius: 15px;
     overflow: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .extendWidth {
@@ -12,5 +15,7 @@
 
 .restrictWidth{
     width: 20vw !important;
-    margin: auto;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
 }
