@@ -1,5 +1,6 @@
 import '../styles/summary.css'
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 function summaryBoardAdmin(){
     const { user } = useAuth();
 
@@ -7,7 +8,7 @@ function summaryBoardAdmin(){
       <>
         <div className="summaries">
           <div className="data">
-            <div className='dataBox'>
+            <div className="dataBox">
               <div className="dBox">
                 <h2 className="boxDesc fin">Total Transmissions</h2>
                 <h1 className="finNum num" id="finNum">
@@ -29,21 +30,25 @@ function summaryBoardAdmin(){
               <div className="dBox ">
                 <h2 className="boxDesc pen">Problem Tickets</h2>
                 <h1 className="finNum num" id="penNum">
-                    0
+                  15
                 </h1>
               </div>
             </div>
           </div>
-          <div className='buttonGrid'>
+          <div className="buttonGrid">
             <div className="viewButton">
-              <button type="submit" className="btnFin btn">
-                View All
-              </button>
+              <Link to={"/dashboard/transmissions"}>
+                <button type="submit" className="btnFin btn">
+                  View All
+                </button>
+              </Link>
             </div>
             <div className="viewButton">
-              <button type="submit" className="btnSen btn">
-                View All
-              </button>
+              <Link to={"/dashboard/records"}>
+                <button type="submit" className="btnSen btn">
+                  View All
+                </button>
+              </Link>
             </div>
             <div className="viewButton">
               <button type="submit" className="btnInc btn">
@@ -51,9 +56,11 @@ function summaryBoardAdmin(){
               </button>
             </div>
             <div className="viewButton">
+              <Link to={"/dashboard/tickets"}>
                 <button type="submit" className="btnPen btn">
                   View Tickets
                 </button>
+              </Link>
             </div>
           </div>
         </div>

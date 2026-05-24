@@ -1,6 +1,6 @@
 import '../styles/records.css'
 import '../styles/createEdit.css'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNavigationData } from '../components/NavigationDataContext'
 import { Helmet } from 'react-helmet-async'
@@ -9,10 +9,12 @@ function CreateEditUser() {
     const { navData, clearRouteData } = useNavigationData();
     const navigate = useNavigate();
 
+    const [checked, setChecked] = useState(true);
+
     console.log(navData);
     const titlePrefix = 
-          navData.mode === "edit" ? "Edit":
-          navData.mode === "create" ? "Create": "No Nav Data";
+          navData?.mode === "edit" ? "Edit":
+          navData?.mode === "create" ? "Create": "No Nav Data";
 
     const pageTitle = `${titlePrefix} User`.trim();      
     
@@ -73,13 +75,13 @@ function CreateEditUser() {
               </div>
               <div className="r1">
                 <div className="item">
-                  <label htmlFor="recChkItems" className="recLabel">
+                  <label htmlFor="recName" className="recLabel">
                     Name:
                   </label>
                   <input
                     type="text"
-                    name="chkItems"
-                    id="recChkItems"
+                    name="name"
+                    id="recName"
                     className="recInput"
                   />
                 </div>
@@ -99,13 +101,13 @@ function CreateEditUser() {
               </div>
               <div className="r1">
                 <div className="item">
-                  <label htmlFor="recChkItems" className="recLabel">
+                  <label htmlFor="recEmail" className="recLabel">
                     Company Email:
                   </label>
                   <input
                     type="email"
-                    name="chkItems"
-                    id="recChkItems"
+                    name="email"
+                    id="recEmail"
                     className="recInput"
                   />
                 </div>
@@ -165,13 +167,13 @@ function CreateEditUser() {
               </div>
               <div className="r1">
                 <div className="item">
-                  <label htmlFor="recChkItems" className="recLabel">
+                  <label htmlFor="recName" className="recLabel">
                     Name:
                   </label>
                   <input
                     type="text"
-                    name="chkItems"
-                    id="recChkItems"
+                    name="name"
+                    id="recName"
                     className="recInput"
                     defaultValue={navData.data.name}
                   />
@@ -193,22 +195,22 @@ function CreateEditUser() {
               </div>
               <div className="r1">
                 <div className="item">
-                  <label htmlFor="recChkItems" className="recLabel">
+                  <label htmlFor="recEmail" className="recLabel">
                     Company Email:
                   </label>
                   <input
                     type="email"
-                    name="chkItems"
-                    id="recChkItems"
+                    name="email"
+                    id="recEmail"
                     className="recInput"
                     defaultValue={navData.data.email}
                   />
                 </div>
                 <div className="item">
-                  <label className="recLabel lblSpecial">
-                    Password would be Generated Automatically, a link would be
-                    sent on the users email
+                  <label className="recLabel" htmlFor='passRet'>
+                    Retain Old Password? : 
                   </label>
+                  <input type="checkbox" name="passRet" id="passRet" checked={checked} onChange={(e)=> setChecked(e.target.checked)}/>
                 </div>
               </div>
               <div className="r1">

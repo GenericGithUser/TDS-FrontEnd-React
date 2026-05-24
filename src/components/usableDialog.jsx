@@ -57,6 +57,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        // Optionally close the main dialog too
        // onClose();
      };
+     const handleNestedDialogResolve = () => {
+       // Handle the submit logic here
+       console.log("Request edits submitted");
+       closeNestedDialog();
+       // Optionally close the main dialog too
+       onClose();
+     };
 
     const addRemoveMissingItems = (item) => {
         setMissingItems((prev) => {
@@ -287,7 +294,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             </dialog>
              <dialog className="delPrompt" ref={nestedDialogRef}>
               <h1 className="diagTitle">Confirm Cancellation</h1>
-              <img src="/assets/warning.png" alt="warning" srcset="" />
+              <img src="/assets/warning.png" alt="warning"  />
               <h3 className="confirmMesg">
                 Are you sure you want to Cancel this transmission?
               </h3>
@@ -681,7 +688,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         <>
           <dialog className="delPrompt" ref={dialogRef}>
             <h1 className="diagTitle">Confirm Deletion</h1>
-            <img src="/assets/warning.png" alt="warning" srcset="" />
+            <img src="/assets/warning.png" alt="warning"  />
             <h3 className="confirmMesg">
               Are you sure you want to delete this transmission?
             </h3>
@@ -718,6 +725,24 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               </button>
             </div>
           </dialog>
+          <dialog className="diagEdit" ref={nestedDialogRef}>
+              <h1 className="diagTitle">Request Edits</h1>
+              <form action="" method="post" className="changes">
+                <label htmlFor="changeForm">Enter Edits to be made:</label>
+                <textarea name="changeForm" id="changeForm"></textarea>
+              </form>
+              <div className="buttons">
+                <button
+                  className="btnInc btnCancel"
+                  onClick={handleNestedDialogSubmit}
+                >
+                  Send Requests
+                </button>
+                <button onClick={closeNestedDialog} className="btnCancel">
+                  Cancel
+                </button>
+              </div>
+            </dialog>
         </>
       );
     } else if (isDeleteButton === true && onRecords === true ){
@@ -725,7 +750,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         <>
           <dialog className="delPrompt" ref={dialogRef}>
             <h1 className="diagTitle">Confirm Deletion</h1>
-            <img src="/assets/warning.png" alt="warning" srcset="" />
+            <img src="/assets/warning.png" alt="warning"  />
             <h3 className="confirmMesg">
               Are you sure you want to delete this Record?
             </h3>
@@ -883,7 +908,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           </dialog>
           <dialog className="delPrompt" ref={nestedDialogRef}>
             <h1 className="diagTitle">Confirm Deletion</h1>
-            <img src="/assets/warning.png" alt="warning" srcset="" />
+            <img src="/assets/warning.png" alt="warning"  />
             <h3 className="confirmMesg">
               Are you sure you want to Delete this User??
             </h3>
@@ -933,6 +958,90 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       );
     }
 
+    if (user.role === "admin" && /#PT/.test(data.id) ) {
+      return (
+        <>
+          <dialog className="diagEdit extender" ref={dialogRef}>
+            <h1 className="diagTitle">
+              {data.status === "Open" ? "Resolve" : "View"} Ticket
+            </h1>
+            <div className="contents">
+              <table className="contentList">
+                <tbody>
+                  <tr>
+                    <td className="titleD">TicketID: </td>
+                    <td id="transIDData" className="data dataOverride">
+                      {data.id}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Title: </td>
+                    <td id="recordIdData" className="data dataOverride">
+                      {data.title}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Urgency: </td>
+                    <td id="recordIdData" className="data dataOverride">
+                      {data.urgency}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Date Sent: </td>
+                    <td id="recordIdData" className="data dataOverride">
+                      {data.date_sent}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Message: </td>
+                    <td id="feedbackData" className="data dataOverride">
+                      {data.message}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="buttons">
+                {data.status === "Open" ? (
+                  <>
+                    <button
+                      className="btnFin btnCancel"
+                      onClick={openNestedDialog}
+                    >
+                      Resolve
+                    </button>
+                    <button onClick={onClose} className="btnCancel">
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button onClick={onClose} className="btnCancel">
+                    OK
+                  </button>
+                )}
+              </div>
+            </div>
+          </dialog>
+          <dialog className="diagEdit" ref={nestedDialogRef}>
+            <h1 className="diagTitle">Resolved Message</h1>
+            <form action="" method="post" className="changes">
+              <label htmlFor="changeForm">Enter Resolve Message:</label>
+              <textarea name="changeForm" id="changeForm"></textarea>
+            </form>
+            <div className="buttons">
+              <button
+                className="btnInc btnCancel"
+                onClick={handleNestedDialogResolve}
+              >
+                Send Resolve Message and Close
+              </button>
+              <button onClick={closeNestedDialog} className="btnCancel">
+                Cancel
+              </button>
+            </div>
+          </dialog>
+        </>
+      );
+    }
 }
 
 export default UsableDialog

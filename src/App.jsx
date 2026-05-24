@@ -10,6 +10,7 @@ import CreateEditTrans from './pages/CreateEditTrans'
 import ProtectedRoute from './components/ProtectedRoute'
 import Users from './pages/Users'
 import CreateEditUser from './pages/CreateEditUser'
+import ProbTickets from './pages/ProbTickets'
 import { useAuth } from './context/AuthContext'
 import './App.css'
 
@@ -27,7 +28,7 @@ function App() {
     <>
       {isMobile ? (
         <>
-          <h1>Mobile Is Not Allowed to Use this tool</h1>
+          <h1 style={{margin: "auto"}}>Mobile Is Not Allowed to Use this tool</h1>
         </>
       ) : (
         <Routes>
@@ -59,6 +60,7 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="users/create" element={<CreateEditUser />} />
             <Route path="users/edit" element={<CreateEditUser />} />
+            <Route path='tickets' element={<ProbTickets/>}/>
           </Route>
         </Routes>
       )}

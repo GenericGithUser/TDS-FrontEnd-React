@@ -1,9 +1,9 @@
 .container2{
     padding: 5px;
     border: 2px solid;
-    min-height: 70vh;
+    height: 70vh;
     border-radius: 15px;
-    overflow: auto;
+    overflow: hidden;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

@@ -5,13 +5,16 @@
 .summaries>.data>.dataBox {
     display: grid;
     border: 2px solid gray;
+    border-radius: 10px;
     grid-template-columns: repeat(4, 1fr);
+    overflow: hidden;
 
 }
 
 .summaries>.data>.dataBox2 {
     display: grid;
     border: 2px solid gray;
+    border-radius: 10px;
     grid-template-columns: repeat(3, 1fr);
 
 }
@@ -49,7 +52,7 @@
     margin: auto;
 }
 
-.viewButton>.btn {
+.btn {
     padding: 5px;
     font-size: 1.6ch;
     font-weight: bolder;
@@ -62,12 +65,12 @@
     transition: 0.2s all ease-in-out;
 }
 
-.viewButton>.btn:hover {
+.btn:hover {
     background-color: var(--bg);
     color: black;
 }
 
-.viewButton>.btn:active {
+.btn:active {
     background-color: seagreen;
     color: var(--blue-white);
 }

@@ -28,6 +28,10 @@
 
 }
 
+.extender{
+    width: 50vw;
+}
+
 .diagBox[open] {
     box-shadow: 0 10px 50px 10px rgba(0, 0, 0, 0.3);
     display: flex;
@@ -104,6 +108,10 @@
 .diagEdit>.contents>.contentList>tbody>tr>.data {
     width: 20vw;
     text-align: left;
+}
+
+.dataOverride{
+    width: 35vw !important;
 }
 
 .buttons{
