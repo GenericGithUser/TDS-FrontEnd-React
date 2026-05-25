@@ -19,6 +19,7 @@
 
 }
 
+
 .r1 {
     display: grid;
     width: 80%;
@@ -31,9 +32,10 @@
 .r2{
     display: grid;
     width: 80%;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    margin-left: 1vw;
+    justify-items: center;
+    margin: auto;
 }
 
 .recLabel {
@@ -148,9 +150,9 @@
 }
 
 .btnAddDiv {
-    white-space: nowrap;
+    margin: auto;
     padding: 6px 14px;
-    font-size: 0.85rem;
+    font-size: 1rem;
 }
 
 /* Hint text below input */

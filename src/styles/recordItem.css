@@ -25,6 +25,9 @@
 .recordBox {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    height: 30vh;
+    overflow-x: auto;
     padding: 5px;
     border-radius: 10px;
     border: 2px solid var(--dark-green);

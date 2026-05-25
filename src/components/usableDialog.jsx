@@ -10,7 +10,9 @@ import '../styles/dialog.css'
 function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
     const dialogRef = useRef(null);
     const nestedDialogRef = useRef(null);
+    const nestedSiblingDialogRef = useRef(null);
     const [isNestedDialogOpen, setIsNestedDialogOpen] = useState(false);
+    const [isNestedSiblingDialogOpen, setIsNestedSiblingDialogOpen] = useState(false);
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const [missingItems, setMissingItems] = useState([]);
@@ -42,12 +44,31 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        }
      }, [isNestedDialogOpen]);
 
+     useEffect(()=>{
+      const nestedSiblingDialog = nestedSiblingDialogRef.current;
+      if(!nestedSiblingDialog) return;
+
+      if(isNestedSiblingDialogOpen){
+        nestedSiblingDialog.showModal();
+      }else{
+        nestedSiblingDialog.close();
+      }
+     }, [isNestedSiblingDialogOpen]);
+
      const openNestedDialog = () => {
        setIsNestedDialogOpen(true);
      };
 
      const closeNestedDialog = () => {
        setIsNestedDialogOpen(false);
+     };
+
+     const openSiblingNestedDialog = () => {
+        setIsNestedSiblingDialogOpen(true);
+     }
+
+     const closeSiblingNestedDialog = () => {
+       setIsNestedSiblingDialogOpen(false);
      };
 
      const handleNestedDialogSubmit = () => {
@@ -81,6 +102,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       const sendData = {
         mode: "edit",
         data: data,
+        transId: data.transId,
         returnTo: location,
         callback: () => console.log("Success"),
       };
@@ -148,7 +170,9 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Checklist Items: </td>
                       <td id="checklistData" className="data">
-                        {data.checkList.join(", ")}
+                        <div className="btnFin btnCancel restrictSizeBtn" onClick={openNestedDialog}>
+                          See Checklist Items
+                        </div>
                       </td>
                     </tr>
                     <tr>
@@ -196,6 +220,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 OK
               </button>
             </dialog>
+            <dialog className="diagEdit" ref={nestedDialogRef}>
+              <h1 className="diagTitle">Checklist Items</h1>
+                  {data.checkList.map((item)=>(
+                    <div className="chkItem">
+                      {item}
+                    </div>
+                  ))}
+              <div className="buttons">
+                <button onClick={closeNestedDialog} className="btnCancel">
+                  OK
+                </button>
+              </div>
+            </dialog>
           </>
         );
     }
@@ -240,7 +277,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Checklist Items: </td>
                       <td id="checklistData" className="data">
-                        {data.checkList.join(",")}
+                        <div
+                          className="btnFin btnCancel restrictSizeBtn"
+                          onClick={openSiblingNestedDialog}
+                        >
+                          See Checklist Items
+                        </div>
                       </td>
                     </tr>
                     <tr>
@@ -288,13 +330,20 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 <button onClick={onClose} className="btnCancel ">
                   OK
                 </button>
-                <button className="btnFin btnCancel" onClick={()=> handleEditTrans(data)}>EDIT</button>
-                <button className="btnRed btnCancel" onClick={openNestedDialog}>CANCEL</button>
+                <button
+                  className="btnFin btnCancel"
+                  onClick={() => handleEditTrans(data)}
+                >
+                  EDIT
+                </button>
+                <button className="btnRed btnCancel" onClick={openNestedDialog}>
+                  CANCEL
+                </button>
               </div>
             </dialog>
-             <dialog className="delPrompt" ref={nestedDialogRef}>
+            <dialog className="delPrompt" ref={nestedDialogRef}>
               <h1 className="diagTitle">Confirm Cancellation</h1>
-              <img src="/assets/warning.png" alt="warning"  />
+              <img src="/assets/warning.png" alt="warning" />
               <h3 className="confirmMesg">
                 Are you sure you want to Cancel this transmission?
               </h3>
@@ -326,8 +375,25 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 <button className="btnCancel" onClick={closeNestedDialog}>
                   Go Back
                 </button>
-                <button onClick={handleNestedDialogSubmit} className="btnRed btnCancel">
+                <button
+                  onClick={handleNestedDialogSubmit}
+                  className="btnRed btnCancel"
+                >
                   CANCEL TRANSMISSION
+                </button>
+              </div>
+            </dialog>
+            <dialog className="diagEdit" ref={nestedSiblingDialogRef}>
+              <h1 className="diagTitle">Checklist Items</h1>
+              {data.checkList.map((item) => (
+                <div className="chkItem">{item}</div>
+              ))}
+              <div className="buttons">
+                <button
+                  onClick={closeSiblingNestedDialog}
+                  className="btnCancel"
+                >
+                  OK
                 </button>
               </div>
             </dialog>
@@ -500,7 +566,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Checklist Items: </td>
                       <td id="checklistData" className="data">
-                        {data.checkList.join(",")}
+                        <div
+                          className="btnFin btnCancel restrictSizeBtn"
+                          onClick={openSiblingNestedDialog}
+                        >
+                          See Checklist Items
+                        </div>
                       </td>
                     </tr>
                     <tr>
@@ -545,13 +616,24 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 </table>
                 <div className="feedback">
                   {user.role === "preparer" && (
-                    <>  
-                      <p className="feedback">{data.feedback.toLowerCase() === "none" ? "Waiting for Approval": data.feedback }</p>
+                    <>
+                      <p className="feedback">
+                        {data.feedback.toLowerCase() === "none"
+                          ? "Waiting for Approval"
+                          : data.feedback}
+                      </p>
                     </>
                   )}
                 </div>
               </div>
               {user.role === "preparer" && (
+                <div className="buttons">
+                  <button onClick={onClose} className="btnCancel">
+                    OK
+                  </button>
+                </div>
+              )}
+              {user.role === "admin" && (
                 <div className="buttons">
                   <button onClick={onClose} className="btnCancel">
                     OK
@@ -590,6 +672,20 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 </button>
                 <button onClick={closeNestedDialog} className="btnCancel">
                   Cancel
+                </button>
+              </div>
+            </dialog>
+            <dialog className="diagEdit" ref={nestedSiblingDialogRef}>
+              <h1 className="diagTitle">Checklist Items</h1>
+              {data.checkList.map((item) => (
+                <div className="chkItem">{item}</div>
+              ))}
+              <div className="buttons">
+                <button
+                  onClick={closeSiblingNestedDialog}
+                  className="btnCancel"
+                >
+                  OK
                 </button>
               </div>
             </dialog>
@@ -814,7 +910,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Checklist Items: </td>
                     <td id="checklistData" className="data">
-                      {data.checkList.join(",")}
+                      <div
+                        className="btnFin btnCancel restrictSizeBtn"
+                        onClick={openNestedDialog}
+                      >
+                        See Checklist Items
+                      </div>
                     </td>
                   </tr>
                   <tr>
@@ -843,9 +944,25 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               </table>
             </div>
             <div className="buttons">
-              <button className="btnFin btnCancel" onClick={()=> handleEditTrans(data)}>EDIT</button>
+              <button
+                className="btnFin btnCancel"
+                onClick={() => handleEditTrans(data)}
+              >
+                EDIT
+              </button>
               <button className="btnCancel" onClick={onClose}>
                 CANCEL
+              </button>
+            </div>
+          </dialog>
+          <dialog className="diagEdit" ref={nestedDialogRef}>
+            <h1 className="diagTitle">Checklist Items</h1>
+            {data.checkList.map((item) => (
+              <div className="chkItem">{item}</div>
+            ))}
+            <div className="buttons">
+              <button onClick={closeNestedDialog} className="btnCancel">
+                OK
               </button>
             </div>
           </dialog>

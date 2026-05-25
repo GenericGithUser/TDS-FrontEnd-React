@@ -125,23 +125,6 @@ function CreateEditTrans() {
           <div className="item">
             <label className="transLabel">Division(s):</label>
 
-            {/* Tag chips */}
-            <div className="divisionTags">
-              {selectedDivisions.map((div) => (
-                <span key={div} className="divisionTag">
-                  {div}
-                  <button
-                    type="button"
-                    className="divisionTagRemove"
-                    onClick={() => removeDivision(div)}
-                    aria-label={`Remove ${div}`}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-
             {/* Dropdown + text input combo */}
             <div className="divisionInputRow">
               <input
@@ -169,7 +152,26 @@ function CreateEditTrans() {
                 Add
               </button>
             </div>
-
+          </div>
+        </div>
+        <div className="r2">
+          <div className="item">
+            {/* Tag chips */}
+            <div className="divisionTags">
+              {selectedDivisions.map((div) => (
+                <span key={div} className="divisionTag">
+                  {div}
+                  <button
+                    type="button"
+                    className="divisionTagRemove"
+                    onClick={() => removeDivision(div)}
+                    aria-label={`Remove ${div}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
             {selectedDivisions.length > 0 && (
               <p className="divisionHint">
                 Showing records from:{" "}
@@ -178,7 +180,6 @@ function CreateEditTrans() {
             )}
           </div>
         </div>
-
         {/* Record picker — filtered by selected divisions */}
         <div className="r2">
           <div className="item">
@@ -219,7 +220,7 @@ function CreateEditTrans() {
       <Helmet>
         <title>{pageTitle}</title>
       </Helmet>
-      <h1 className="ceTitle">Send A Transmission</h1>
+      <h1 className="ceTitle">{navData.mode === "create" ? "Send" : "Edit"} Transmission</h1>
       {(navData.mode === "create" || navData.mode === "edit") && formContent}
     </>
   );

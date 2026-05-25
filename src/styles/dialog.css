@@ -56,6 +56,7 @@
 
 .diagBox>.contents>.contentList {
     padding: 3px;
+    border-collapse: collapse;
 }
 
 .titleD {
@@ -65,8 +66,10 @@
     padding-right: 10px;
 }
 
+
 .contents>.contentList>tbody>tr>.data {
     width: 17vw;
+    border-bottom: 2px solid var(--dark-blue);
 }
 
 .diagEdit>.diagTitle {
@@ -163,4 +166,21 @@
 .limHeight{
     height: 20px;
     
+}
+
+.chkItem{
+    background-color: var(--light-green);
+    padding: 2px;
+    border-radius: 5px;
+    align-self: flex-start !important;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--blue-white);
+    font-size: 2ch;
+}
+
+.restrictSizeBtn{
+    margin: auto;
+    font-size: 1.5ch;
 }
