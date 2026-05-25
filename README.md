@@ -8,6 +8,6 @@ This repo serves as the place to find the source code for the front end of our I
 - Views for Creating Records and Transmissions, as well as editing said things
 
 ### Things that still needed to be done:
-- [ ] Admin Dashboard
+- [x] Admin Dashboard
 - [ ] Backend
 - [ ] Some other stuff that would probably come out sooner or later
