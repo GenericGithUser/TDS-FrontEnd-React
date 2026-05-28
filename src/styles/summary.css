@@ -4,15 +4,16 @@
 }
 .summaries>.data>.dataBox {
     display: grid;
+    border: 2px solid gray;
     border-radius: 10px;
     grid-template-columns: repeat(4, 1fr);
     overflow: hidden;
-    gap: 10px;
 
 }
 
 .summaries>.data>.dataBox2 {
     display: grid;
+    border: 2px solid gray;
     border-radius: 10px;
     grid-template-columns: repeat(3, 1fr);
 
@@ -20,22 +21,17 @@
 
 .dBox {
     padding: 5px;
-    background-color: rgb(197, 233, 197);
-    display: flex;
-    border-radius: 10px;
-    color: rgb(75, 80, 85);
-    padding: 10px;
+    border-left: 2px solid gray;
+    border-right: 2px solid gray;
+
 
 }
 
 .boxDesc {
     width: 80%;
+    text-align: center;
     line-height: 1.2ch;
-    
-}
-
-#finNum, #sentNum, #incNum, #penNum{
-    text-align: end  !important;
+    margin: auto;
 }
 
 .summaries>.buttonGrid {

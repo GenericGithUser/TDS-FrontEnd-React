@@ -31,10 +31,6 @@
     padding: 6px;
 }
 
-.transTable>.actTransTable>tbody>:nth-child(even){
-    background-color: rgb(171, 192, 219);
-}
-
 .transTable>.actTransTable>tbody>tr {
     font-size: 1.4ch;
     text-align: center;

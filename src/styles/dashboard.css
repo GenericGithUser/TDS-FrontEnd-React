@@ -1,11 +1,11 @@
 .container{
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 10px;
 }
 
 .board {
-    width: 94vw;
+    width: 95vw;
     height: 94vh;
     background-color: var(--blue-white);
     display: flex;
@@ -25,10 +25,8 @@ header{
     color: var(--dark-green);
 }
 
-.boardHead>.title {
+.board>header>.title {
     color: var(--dark-blue);
-    width: 80vw;
-    padding: 5px;
 }
 
 .board>header>.title>.green {

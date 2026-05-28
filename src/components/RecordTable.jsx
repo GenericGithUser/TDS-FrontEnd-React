@@ -3,7 +3,6 @@ import "../styles/transtable.css";
 import { useState } from "react";
 import UsableDialog from "./usableDialog";
 import dummyData from "../assets/dummyData.js";
-import { useAuth } from "../context/AuthContext.jsx";
 
 function recordTable() {
 
@@ -11,8 +10,6 @@ function recordTable() {
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);
     const [onRecords, setOnRecords] = useState(false);
-
-    const { user } = useAuth();
 
     const openDialog = (item, delBtn) => {
       setDialogData(item);

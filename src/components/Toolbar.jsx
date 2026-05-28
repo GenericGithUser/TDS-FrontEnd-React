@@ -22,7 +22,7 @@ function Toolbar(){
               <>
                 <NavLink to={"home"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -33,12 +33,12 @@ function Toolbar(){
                         <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                       </svg>
                       <p>Home</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
                 <NavLink to={"transmissions"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -49,12 +49,12 @@ function Toolbar(){
                         <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
                       </svg>
                       <p>Trans- missions</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
                 <NavLink to={"records"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -69,7 +69,7 @@ function Toolbar(){
                         <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                       </svg>
                       <p>Records</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
               </>
@@ -78,7 +78,7 @@ function Toolbar(){
               <>
                 <NavLink to={"home"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -89,12 +89,12 @@ function Toolbar(){
                         <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                       </svg>
                       <p>Home</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
                 <NavLink to={"transmissions"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -105,12 +105,12 @@ function Toolbar(){
                         <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
                       </svg>
                       <p>Trans- missions</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
                 <NavLink to={"records"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -125,19 +125,19 @@ function Toolbar(){
                         <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                       </svg>
                       <p>Records</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
                 <NavLink to={"users"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <FaCircleUser
                         className={
                           isActive ? "expand navItem active" : "expand navItem"
                         }
                       />
                       <p>Users</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
                 {/* <NavLink to={"branches"} className="aNavItem">
@@ -154,14 +154,14 @@ function Toolbar(){
                 </NavLink> */}
                 <NavLink to={"tickets"} className="aNavItem">
                   {({ isActive }) => (
-                    <div>
+                    <>
                       <LuTicketX
                         className={
                           isActive ? "expand navItem active" : "expand navItem"
                         }
                       />
                       <p>Tickets</p>
-                    </div>
+                    </>
                   )}
                 </NavLink>
               </>
