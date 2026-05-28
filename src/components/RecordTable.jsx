@@ -3,6 +3,7 @@ import "../styles/transtable.css";
 import { useState } from "react";
 import UsableDialog from "./usableDialog";
 import dummyData from "../assets/dummyData.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function recordTable() {
 
@@ -10,6 +11,8 @@ function recordTable() {
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);
     const [onRecords, setOnRecords] = useState(false);
+
+    const { user } = useAuth();
 
     const openDialog = (item, delBtn) => {
       setDialogData(item);
@@ -35,13 +38,29 @@ function recordTable() {
         <div className="transTable extendWidth">
           <table className="actTransTable">
             <colgroup>
-              <col style={{ width: "6px" }} />
-              <col style={{ width: "15vw" }} />
-              <col style={{ width: "18vw" }} />
+              {user.role === "admin" || user.role === "receiver" ? (
+                <>
+                  <col style={{ width: "6px" }} />
+                  <col style={{ width: "9vw" }} />
+                  <col style={{ width: "9vw" }} />
+                  <col style={{ width: "13vw" }} />
+                </>
+              ) : (
+                <>
+                  <col style={{ width: "6px" }} />
+                  <col style={{ width: "15vw" }} />
+                  <col style={{ width: "18vw" }} />
+                </>
+              )}
             </colgroup>
             <thead className="transTableHead">
               <tr>
                 <th>RecordID</th>
+                {user.role === "receiver" || user.role === "admin" ? (
+                  <th>Office</th>
+                ) : (
+                  ""
+                )}
                 <th>Title</th>
                 <th>Description</th>
                 <th>Code</th>
@@ -63,6 +82,11 @@ function recordTable() {
                 dummyData.slice(0, 10).map((data) => (
                   <tr key={data.id}>
                     <td>{data.recordId}</td>
+                    {user.role === "receiver" || user.role === "admin" ? (
+                      <td>{data.branch}</td>
+                    ) : (
+                      ""
+                    )}
                     <td>{data.title}</td>
                     <td>{data.desc}</td>
                     <td>{data.code}</td>

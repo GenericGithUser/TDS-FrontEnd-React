@@ -1,13 +1,19 @@
 .searcherSorter {
     text-align: center;
     font-size: 2ch;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 
 }
 
 .searcherSorter {
     display: flex;
     justify-content: center;
+    gap: 15px;
+    align-items: center;
+}
+
+.searcherSorter>form{
+    display: flex;
     gap: 10px;
     align-items: center;
 }

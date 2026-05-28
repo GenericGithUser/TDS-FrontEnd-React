@@ -3,7 +3,7 @@
     padding: 10px;
     height: 100vh;
     display: flex;
-    width: 50px;
+    width: 4vw;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
@@ -16,7 +16,7 @@
 }
 
 .toolBar>.circle>.logo {
-    width: 2.5vw;
+    width: 2.6vw;
 }
 
 .toolBar>.circle>.settings {
@@ -28,23 +28,34 @@
     display: flex;
     flex-direction: column;
     row-gap: 20px;
-    width: 3vw;
+    width: 3.2vw;
 }
 
 .toolBar>.nav>.aNavItem {
     color: var(--blue-white);
     text-decoration: none;
-    font-size: 0.9ch;
+    font-size: 1ch;
     text-align: center;
+    padding: 3px;
+    transition: all 0.2s ease-in-out;
 
 }
 
+.toolBar>.nav>.aNavItem:hover{
+    background-color: var(--light-blue);
+    border-radius: 5px;
+}
+
 .toolBar>.nav>.aNavItem>.navItem {
-    width: 3vw;
+    width: 3.2vw;
     border-radius: 5px;
     padding: 2px;
     background-color: var(--light-blue);
 
+}
+
+.toolBar>.nav>.aNavItem>div>p{
+    font-size: 1.4ch;
 }
 
 .toolBar>.nav>.aNavItem>.expand{
@@ -57,7 +68,7 @@
 }
 .logout{
     fill: var(--blue-white);
-    font-size: 3.5ch;
+    font-size: 3.7ch;
     background-color: var(--light-green);
     padding: 5px;
     border-radius: 10px;
@@ -65,7 +76,7 @@
     transition: all 0.2s ease-in-out;
 }
 .logDiv p{
-    font-size: 0.9ch;
+    font-size: 0.95ch;
     color: var(--blue-white);
 }
 
