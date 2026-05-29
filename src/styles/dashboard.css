@@ -5,8 +5,8 @@
 }
 
 .board {
-    width: 95vw;
-    height: 94vh;
+    width: 94vw;
+    height: 92vh;
     background-color: var(--blue-white);
     display: flex;
     justify-self: center;
@@ -25,8 +25,10 @@ header{
     color: var(--dark-green);
 }
 
-.board>header>.title {
+.boardHead>.title {
     color: var(--dark-blue);
+    width: 80vw;
+    padding: 5px;
 }
 
 .board>header>.title>.green {

@@ -7,7 +7,7 @@ function IncRecordList({ includedRecords, delItm }){
             <div className="recordBox">
                 {includedRecords.map((recordItem)=>(
                     <RecordItem
-                        key={recordItem.recordId} 
+                        key={recordItem.record_id} 
                         recordData={recordItem}
                         delItm={delItm}
                     />

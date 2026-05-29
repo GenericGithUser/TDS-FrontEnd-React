@@ -155,7 +155,7 @@ function CreateEditRecord() {
                     name="title"
                     id="recTitle"
                     className="recInput"
-                    defaultValue={navData?.data?.title}
+                    defaultValue={navData?.data?.record_titles}
                   />
                 </div>
                 <div className="item">
@@ -167,7 +167,7 @@ function CreateEditRecord() {
                     name="code"
                     id="recCode"
                     className="recInput"
-                    defaultValue={navData?.data?.code}
+                    defaultValue={navData?.data?.rec_code}
                   />
                 </div>
               </div>
@@ -183,7 +183,7 @@ function CreateEditRecord() {
                       id="recDesc"
                       className="recInput special"
                       maxLength="300"
-                      defaultValue={navData?.data?.desc}
+                      defaultValue={navData?.data?.rec_description}
                     ></textarea>
                   </div>
                   <div className="item">
@@ -210,7 +210,7 @@ function CreateEditRecord() {
                       name="retPeriod"
                       id="recRetPeriod"
                       className="recInput"
-                      defaultValue={navData?.data?.retPeriod}
+                      defaultValue={navData?.data?.retention_period}
                     />
                   </div>
                   <div className="item">

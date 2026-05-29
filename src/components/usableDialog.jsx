@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
-
+import { GetChecklistItems } from "./GetChecklistItems";
 import '../styles/dialog.css'
 
 
@@ -18,6 +18,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
     const [missingItems, setMissingItems] = useState([]);
     const { user } = useAuth(); 
     const location = useLocation();
+
+    const { checkItems, loading, error, fetchChecklist } = GetChecklistItems();
 
 
     
@@ -97,12 +99,21 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         })
     };
 
+    const checkListButtonOpening = (recordId, type) =>{
+        fetchChecklist(recordId);
+        if (type === "received") {
+          openNestedDialog();
+        } else{
+          openSiblingNestedDialog();
+        }
+    }
+
     const handleEditTrans = (data) => {
 
       const sendData = {
         mode: "edit",
         data: data,
-        transId: data.transId,
+        transId: data.trans_id,
         returnTo: location,
         callback: () => console.log("Success"),
       };
@@ -123,7 +134,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
 
     if (!data) return null;
 
-    if (data.type == "view" && isDeleteButton === false && onRecords === false ) {
+    if (data.record_status == "received" && isDeleteButton === false && onRecords === false ) {
         return (
           <>
             <dialog className="diagBox" ref={dialogRef}>
@@ -134,13 +145,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.transId}
+                        {data.trans_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.recordId}
+                        {data.record_id}
                       </td>
                     </tr>
                     <tr>
@@ -152,25 +163,30 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Item No.: </td>
                       <td id="itemData" className="data">
-                        {data.itemNo}
+                        {data.item_no}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Title: </td>
                       <td id="titleIDData" className="data">
-                        {data.title}
+                        {data.record_titles}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Description: </td>
                       <td id="descData" className="data">
-                        {data.desc}
+                        {data.rec_description}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Checklist Items: </td>
                       <td id="checklistData" className="data">
-                        <div className="btnFin btnCancel restrictSizeBtn" onClick={openNestedDialog}>
+                        <div
+                          className="btnFin btnCancel restrictSizeBtn"
+                          onClick={() =>
+                            checkListButtonOpening(data.record_id, "received")
+                          }
+                        >
                           See Checklist Items
                         </div>
                       </td>
@@ -178,29 +194,29 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Code </td>
                       <td id="codeData" className="data">
-                        {data.code}
+                        {data.rec_code}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Retention Period: </td>
                       <td id="retentionData" className="data">
-                        {data.retPeriod}
+                        {data.retention_period}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Prepared By: </td>
                       <td id="prepData" className="data">
-                        {data.prepName}
+                        {data.preparer_name}
                       </td>
                       <td className="titleD">Approved By: </td>
                       <td id="apprData" className="data">
-                        {data.apprName}
+                        {data.approver_name}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Received By: </td>
                       <td id="receivrData" className="data">
-                        {data.recName}
+                        {data.receiver_name}
                       </td>
                       <td className="titleD">Received On: </td>
                       <td id="recDateData" className="data">
@@ -222,11 +238,15 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             </dialog>
             <dialog className="diagEdit" ref={nestedDialogRef}>
               <h1 className="diagTitle">Checklist Items</h1>
-                  {data.checkList.map((item)=>(
-                    <div className="chkItem">
-                      {item}
-                    </div>
-                  ))}
+              {error ? (
+                <p>{error}</p>
+              ) : loading ? (
+                <p>Loading</p>
+              ) : (
+                checkItems.map((item) => (
+                  <div className="chkItem">{item.checklist_item}</div>
+                ))
+              )}
               <div className="buttons">
                 <button onClick={closeNestedDialog} className="btnCancel">
                   OK
@@ -236,7 +256,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           </>
         );
     }
-    else if (data.type == "sent" && isDeleteButton === false && onRecords === false &&  user.role != "receiver"){
+    else if (data.record_status == "sent" && isDeleteButton === false && onRecords === false &&  user.usr_role != "RECEIVER"){
         return (
           <>
             <dialog className="diagBox" ref={dialogRef}>
@@ -247,13 +267,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.transId}
+                        {data.trans_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.recordId}
+                        {data.record_id}
                       </td>
                     </tr>
                     <tr>
@@ -265,13 +285,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Title: </td>
                       <td id="titleIDData" className="data">
-                        {data.title}
+                        {data.record_titles}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Description: </td>
                       <td id="descData" className="data">
-                        {data.desc}
+                        {data.rec_description}
                       </td>
                     </tr>
                     <tr>
@@ -279,7 +299,9 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                       <td id="checklistData" className="data">
                         <div
                           className="btnFin btnCancel restrictSizeBtn"
-                          onClick={openSiblingNestedDialog}
+                          onClick={() =>
+                            checkListButtonOpening(data.record_id, "")
+                          }
                         >
                           See Checklist Items
                         </div>
@@ -288,29 +310,29 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Code </td>
                       <td id="codeData" className="data">
-                        {data.code}
+                        {data.rec_code}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Retention Period: </td>
                       <td id="retentionData" className="data">
-                        {data.retPeriod}
+                        {data.retention_period}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Prepared By: </td>
                       <td id="prepData" className="data">
-                        {data.prepName}
+                        {data.preparer_name}
                       </td>
                       <td className="titleD">Approved By: </td>
                       <td id="apprData" className="data">
-                        {data.apprName}
+                        {data.approver_name}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Received By: </td>
-                      <td id="receivrData" className="data">
-                        {data.recName}
+                      <td id="receiverData" className="data">
+                        {data.receiver_name}
                       </td>
                       <td className="titleD">Received On: </td>
                       <td id="recDateData" className="data">
@@ -353,19 +375,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.transId}
+                        {data.trans_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.recordId}
+                        {data.record_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Title: </td>
                       <td id="titleIDData" className="data">
-                        {data.title}
+                        {data.record_titles}
                       </td>
                     </tr>
                   </tbody>
@@ -385,9 +407,15 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             </dialog>
             <dialog className="diagEdit" ref={nestedSiblingDialogRef}>
               <h1 className="diagTitle">Checklist Items</h1>
-              {data.checkList.map((item) => (
-                <div className="chkItem">{item}</div>
-              ))}
+              {error ? (
+                <p>{error}</p>
+              ) : loading ? (
+                <p>Loading</p>
+              ) : (
+                checkItems.map((item) => (
+                  <div className="chkItem">{item.checklist_item}</div>
+                ))
+              )}
               <div className="buttons">
                 <button
                   onClick={closeSiblingNestedDialog}
@@ -400,7 +428,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           </>
         );
     }
-    else if (data.type == "sent" && isDeleteButton === false && onRecords === false &&  user.role === "receiver"){
+    else if (data.record_status == "sent" && isDeleteButton === false && onRecords === false &&  user.usr_role === "RECEIVER"){
         return (
           <>
             <dialog className="diagBox" ref={dialogRef}>
@@ -411,19 +439,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.transId}
+                        {data.trans_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.recordId}
+                        {data.record_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Office: </td>
                       <td id="recordIdData" className="data">
-                        {data.branch}
+                        {data.office_dept}
                       </td>
                     </tr>
                     <tr>
@@ -435,7 +463,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Title: </td>
                       <td id="titleIDData" className="data">
-                        {data.title}
+                        {data.record_titles}
                       </td>
                       <td colSpan={2}>
                         <div className="checkCont">
@@ -461,7 +489,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Description: </td>
                       <td id="descData" className="data">
-                        {data.desc}
+                        {data.rec_description}
                       </td>
                       {missingItems.length > 0 && (
                         <td colSpan={2}>
@@ -479,23 +507,23 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Code </td>
                       <td id="codeData" className="data">
-                        {data.code}
+                        {data.rec_code}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Retention Period: </td>
                       <td id="retentionData" className="data">
-                        {data.retPeriod}
+                        {data.retention_period}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Prepared By: </td>
                       <td id="prepData" className="data">
-                        {data.prepName}
+                        {data.preparer_name}
                       </td>
                       <td className="titleD">Approved By: </td>
                       <td id="apprData" className="data">
-                        {data.apprName}
+                        {data.approver_name}
                       </td>
                     </tr>
                     <tr>
@@ -525,7 +553,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           </>
         );
     }
-    else if (data.type == "pending" && isDeleteButton === false && onRecords === false ){
+    else if (data.record_status == "pending" && isDeleteButton === false && onRecords === false ){
         return (
           <>
             <dialog className="diagBox" ref={dialogRef}>
@@ -536,13 +564,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.transId}
+                        {data.trans_id}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.recordId}
+                        {data.record_id}
                       </td>
                     </tr>
                     <tr>
@@ -554,13 +582,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Title: </td>
                       <td id="titleIDData" className="data">
-                        {data.title}
+                        {data.record_titles}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Description: </td>
                       <td id="descData" className="data">
-                        {data.desc}
+                        {data.rec_description}
                       </td>
                     </tr>
                     <tr>
@@ -577,29 +605,29 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     <tr>
                       <td className="titleD">Code </td>
                       <td id="codeData" className="data">
-                        {data.code}
+                        {data.rec_code}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Retention Period: </td>
                       <td id="retentionData" className="data">
-                        {data.retPeriod}
+                        {data.retention_period}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Prepared By: </td>
                       <td id="prepData" className="data">
-                        {data.prepName}
+                        {data.preparer_name}
                       </td>
                       <td className="titleD">Approved By: </td>
                       <td id="apprData" className="data">
-                        {data.apprName}
+                        {data.approver_name}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Received By: </td>
                       <td id="receivrData" className="data">
-                        {data.recName}
+                        {data.receiver_name}
                       </td>
                       <td className="titleD">Received On: </td>
                       <td id="recDateData" className="data">
@@ -615,7 +643,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   </tbody>
                 </table>
                 <div className="feedback">
-                  {user.role === "preparer" && (
+                  {user.usr_role === "PREPARER" && (
                     <>
                       <p className="feedback">
                         {data.feedback.toLowerCase() === "none"
@@ -626,21 +654,21 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   )}
                 </div>
               </div>
-              {user.role === "preparer" && (
+              {user.usr_role === "PREPARER" && (
                 <div className="buttons">
                   <button onClick={onClose} className="btnCancel">
                     OK
                   </button>
                 </div>
               )}
-              {user.role === "admin" && (
+              {user.usr_role === "ADMIN" && (
                 <div className="buttons">
                   <button onClick={onClose} className="btnCancel">
                     OK
                   </button>
                 </div>
               )}
-              {user.role === "approver" && (
+              {user.usr_role === "APPROVER" && (
                 <div className="buttons">
                   <button className="btnFin btnCancel" onClick={onClose}>
                     APPROVE FOR TRANSMISSION
@@ -692,7 +720,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           </>
         );
     }
-    else if (data.type == "incomplete" && isDeleteButton === false && onRecords === false && user.role != "receiver" && user.role != "approver") {
+    else if (data.record_status == "incomplete" && isDeleteButton === false && onRecords === false && user.usr_role != "RECEIVER" && user.usr_role != "APPROVER") {
       return (
         <>
           <dialog className="diagEdit" ref={dialogRef}>
@@ -703,13 +731,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">TransmissionID: </td>
                     <td id="transIDData" className="data">
-                      {data.transId}
+                      {data.trans_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.recordId}
+                      {data.record_id}
                     </td>
                   </tr>
                   <tr>
@@ -735,7 +763,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       );
     }
 
-    else if (data.type == "incomplete" && isDeleteButton === false && onRecords === false && user.role === "receiver" || user.role === "approver") {
+    else if (data.record_status == "incomplete" && isDeleteButton === false && onRecords === false && user.usr_role === "RECEIVER" || user.usr_role === "APPROVER") {
       return (
         <>
           <dialog className="diagEdit" ref={dialogRef}>
@@ -746,20 +774,20 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">TransmissionID: </td>
                     <td id="transIDData" className="data">
-                      {data.transId}
+                      {data.trans_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.recordId}
+                      {data.record_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Feedback: </td>
                     <td id="feedbackData" className="data">
                       {data.feedback}
-                      <p>Waiting for {user.role == "receiver" ? <>Branch</> : <>Preparer</>} Response...</p>
+                      <p>Waiting for {user.usr_role == "RECEIVER" ? <>Branch</> : <>Preparer</>} Response...</p>
                     </td>
                   </tr>
                 </tbody>
@@ -794,19 +822,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">TransmissionID: </td>
                     <td id="transIDData" className="data">
-                      {data.transId}
+                      {data.trans_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.recordId}
+                      {data.record_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Title: </td>
                     <td id="titleIDData" className="data">
-                      {data.title}
+                      {data.record_titles}
                     </td>
                   </tr>
                 </tbody>
@@ -856,13 +884,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.recordId}
+                      {data.record_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Title: </td>
                     <td id="titleIDData" className="data">
-                      {data.title}
+                      {data.record_titles}
                     </td>
                   </tr>
                 </tbody>
@@ -892,19 +920,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.recordId}
+                      {data.record_id}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Title: </td>
                     <td id="titleIDData" className="data">
-                      {data.title}
+                      {data.record_titles}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Description: </td>
                     <td id="descData" className="data">
-                      {data.desc}
+                      {data.rec_description}
                     </td>
                   </tr>
                   <tr>
@@ -921,13 +949,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Code </td>
                     <td id="codeData" className="data">
-                      {data.code}
+                      {data.rec_code}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Retention Period: </td>
                     <td id="retentionData" className="data">
-                      {data.retPeriod}
+                      {data.retention_period}
                     </td>
                   </tr>
                   <tr>
@@ -970,7 +998,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       );
     }
     
-    if (user.role === "admin" && /MEM/.test(data.id)) {
+    if (user.usr_role === "ADMIN" && /MEM/.test(data.id)) {
       return (
         <>
           <dialog className="diagEdit" ref={dialogRef}>
@@ -987,13 +1015,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Name: </td>
                     <td id="recordIdData" className="data">
-                      {data.name}
+                      {data.emp_name}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Role: </td>
                     <td id="feedbackData" className="data">
-                      {data.role}
+                      {data.usr_role}
                     </td>
                   </tr>
                   <tr>
@@ -1041,19 +1069,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Name: </td>
                     <td id="recordIdData" className="data">
-                      {data.name}
+                      {data.emp_name}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Role: </td>
                     <td id="titleIDData" className="data">
-                      {data.role}
+                      {data.usr_role}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">Branch: </td>
                     <td id="titleIDData" className="data">
-                      {data.branch}
+                      {data.office_dept}
                     </td>
                   </tr>
                 </tbody>
@@ -1075,12 +1103,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       );
     }
 
-    if (user.role === "admin" && /#PT/.test(data.id) ) {
+    if (user.usr_role === "ADMIN" && /#PT/.test(data.id) ) {
       return (
         <>
           <dialog className="diagEdit extender" ref={dialogRef}>
             <h1 className="diagTitle">
-              {data.status === "Open" ? "Resolve" : "View"} Ticket
+              {data.record_status === "Open" ? "Resolve" : "View"} Ticket
             </h1>
             <div className="contents">
               <table className="contentList">
@@ -1094,7 +1122,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Title: </td>
                     <td id="recordIdData" className="data dataOverride">
-                      {data.title}
+                      {data.record_titles}
                     </td>
                   </tr>
                   <tr>
@@ -1118,7 +1146,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 </tbody>
               </table>
               <div className="buttons">
-                {data.status === "Open" ? (
+                {data.record_status === "Open" ? (
                   <>
                     <button
                       className="btnFin btnCancel"

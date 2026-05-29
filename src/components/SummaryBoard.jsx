@@ -1,42 +1,60 @@
 import '../styles/summary.css'
 import { useAuth } from '../context/AuthContext';
+import { GetTransmissionStats } from './GetTranssmissionsStats';
 function summaryBoard(){
     const { user } = useAuth();
+    const { stats, loading, error } = GetTransmissionStats();
 
     return (
       <>
         <div className="summaries">
           <div className="data">
-            <div className={user.role != "receiver" ? "dataBox" : "dataBox2"}>
+            <div className={user.usr_role != "RECEIVER" ? "dataBox" : "dataBox2"}>
               <div className="dBox">
                 <h2 className="boxDesc fin">Finished Transmissions</h2>
                 <h1 className="finNum num" id="finNum">
-                  10
+                  {
+                    error ? <p>{error}</p> :
+                    loading ? "0" :
+                    stats.Finished
+                  }
                 </h1>
               </div>
               <div className="dBox">
                 <h2 className="boxDesc sen">Sent Transmissions</h2>
                 <h1 className="finNum num" id="sentNum">
-                  6
+                  {
+                    error ? <p>{error}</p> :
+                    loading ? "0" :
+                    stats.Sent
+                  }
                 </h1>
               </div>
               <div className="dBox">
                 <h2 className="boxDesc inc">Incomplete Transmissions</h2>
                 <h1 className="finNum num" id="incNum">
-                  2
+                  {
+                    error ? <p>{error}</p> :
+                    loading ? "0" :
+                    stats.Incomplete
+                  }
                 </h1>
               </div>
-              {user.role !== "receiver" && (
+              {user.usr_role !== "RECEIVER" && (
                 <div className="dBox ">
                   <h2 className="boxDesc pen">Pending Transmissions</h2>
                   <h1 className="finNum num" id="penNum">
-                    2
+                    {
+                    error ? <p>{error}</p> :
+                    loading ? "0" :
+                    stats.Pending
+                  }
                   </h1>
                 </div>
               )}
             </div>
           </div>
-          <div className={user.role !== "receiver" ? "buttonGrid" : "buttonGrid2"}>
+          <div className={user.usr_role !== "RECEIVER" ? "buttonGrid" : "buttonGrid2"}>
             <div className="viewButton">
               <button type="submit" className="btnFin btn">
                 View Recent
@@ -52,7 +70,7 @@ function summaryBoard(){
                 View Recent
               </button>
             </div>
-            {user.role !== "receiver" && (
+            {user.usr_role !== "RECEIVER" && (
               <div className="viewButton">
                 <button type="submit" className="btnPen btn">
                   View Recent

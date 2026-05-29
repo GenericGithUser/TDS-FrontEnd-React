@@ -31,13 +31,13 @@ function CreateEditTrans() {
   // On edit mode: pre-populate records and divisions from transId
   useEffect(() => {
     console.log("navData:", navData);
-    console.log("useEffect fired", isEdit, navData?.transId);
-    if (isEdit && navData?.transId) {
+    console.log("useEffect fired", isEdit, navData?.trans_id);
+    if (isEdit && navData?.trans_id) {
       const matchingRecords = dummyData
-        .filter((r) => r.transId === navData.transId)
+        .filter((r) => r.trans_id === navData.trans_id)
         .map((r, index) => ({
-          recordId: r.recordId,
-          title: r.title,
+          recordId: r.record_id,
+          title: r.record_titles,
           division: r.division,
           itemNum: index + 1,
         }));
@@ -48,7 +48,7 @@ function CreateEditTrans() {
       const divisions = [...new Set(matchingRecords.map((r) => r.division))];
       setSelectedDivisions(divisions);
     }
-  }, [isEdit, navData?.transId]);
+  }, [isEdit, navData?.trans_id]);
 
   if (!navData) {
     return <h1>No NavData</h1>;
@@ -76,8 +76,8 @@ function CreateEditTrans() {
   const addIncludedRecords = (recordsArray) => {
     if (!recordsArray?.length) return;
     setIncludedRecords((prev) => {
-      const existings = new Set(prev.map((r) => r.recordId));
-      const newUnique = recordsArray.filter((r) => !existings.has(r.recordId));
+      const existings = new Set(prev.map((r) => r.record_id));
+      const newUnique = recordsArray.filter((r) => !existings.has(r.record_id));
       const combined = [...prev, ...newUnique];
       return combined.map((record, index) => ({
         ...record,
@@ -87,7 +87,7 @@ function CreateEditTrans() {
   };
 
   const delItm = (id) => {
-    const items = includedRecords.filter((record) => record.recordId !== id);
+    const items = includedRecords.filter((record) => record.record_id !== id);
     setIncludedRecords(
       items.map((record, index) => ({
         ...record,

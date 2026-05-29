@@ -4,10 +4,12 @@ import MostRecent from "../components/MostRecent";
 import MostRecentReceiver from "../components/MostRecentReceiver";
 import { useAuth } from "../context/AuthContext";
 import { Helmet } from "react-helmet-async";
+import { GetTransmissionStats } from "../components/GetTranssmissionsStats";
 import '../styles/home.css'
 
 function Home(){
-  const { user } = useAuth()
+  const { user } = useAuth();
+  const { stats, loading, error } = GetTransmissionStats();
 
     return (
       <>
@@ -15,14 +17,28 @@ function Home(){
           <title>Dashboard | Home </title>
         </Helmet>
         <div className="container1">
-          <h2 className="sTitle">{user.role === "admin" && <>ADMIN </>}SUMMARY DASHBOARD</h2>
-          {user.role !== "admin" ? <SummaryBoard /> : <SummaryBoardAdmin/>}
-          <h2 className="sTitle">Most Recent {user.role === "admin" ? "Events" : "Transmissions"}</h2>
-          {user.role === "receiver" ? <MostRecentReceiver /> : <MostRecent />}
+          <h2 className="sTitle">
+            {user.usr_role === "ADMIN" && <>ADMIN </>}SUMMARY DASHBOARD
+          </h2>
+          {user.usr_role !== "ADMIN" ? <SummaryBoard /> : <SummaryBoardAdmin />}
+          <h2 className="sTitle">
+            Most Recent {user.usr_role === "ADMIN" ? "Events" : "Transmissions"}
+          </h2>
+          {user.usr_role === "RECEIVER" ? (
+            <MostRecentReceiver />
+          ) : (
+            <MostRecent />
+          )}
           <h1 className="total">
             Total Transmissions:{" "}
             <span className="fin" id="totalNum">
-              20 Transmissions
+              {error ? (
+                <p>{error}</p>
+              ) : loading ? (
+                "0 Transmissions"
+              ) : (
+                `${stats.total_records} Transmissions`
+              )}
             </span>
           </h1>
         </div>

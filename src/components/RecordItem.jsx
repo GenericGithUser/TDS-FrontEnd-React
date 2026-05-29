@@ -6,12 +6,12 @@ function RecordItem({ recordData, delItm }){
         <div className="includedRecord">
           <div className="recordData">
             <span className="num1">{recordData.itemNum} </span>
-            <span className="id">{recordData.recordId} </span>
-            <span className="title">{recordData.title}</span>
+            <span className="id">{recordData.record_id} </span>
+            <span className="title">{recordData.record_titles}</span>
 
             <button
               className="delItemBtn"
-              onClick={() => delItm(recordData.recordId)}
+              onClick={() => delItm(recordData.record_id)}
             >
               <svg
                 className="delItemBtnImg"

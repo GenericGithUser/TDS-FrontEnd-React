@@ -52,7 +52,7 @@ const DUMMY_USR = [
     email: "ga.abril@mayniladwater.com.ph",
     name: "Gianmarlo Adrian S. Abril",
     password: "abril123",
-    role: "receiver",
+    role: "RECEIVER",
     branch: "Head Office",
   },
   {

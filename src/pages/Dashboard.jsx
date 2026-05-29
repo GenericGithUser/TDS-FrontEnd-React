@@ -18,8 +18,8 @@ function Dashboard(){
             <div className="board">
               <header>
                 <h2 className="subtitle">
-                  Hello <span className="userTitle">{user?.name}</span>! from{" "}
-                  <span className="branchTitle">{user.branch}</span>
+                  Hello <span className="userTitle">{user?.emp_name}</span>! from{" "}
+                  <span className="branchTitle">{user.office_dept}</span>
                 </h2>
               </header>
               <Outlet />

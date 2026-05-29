@@ -26,7 +26,7 @@ function Records(){
           <h2 className="green">Records</h2>
           <RecordTable />
         </div>
-        {user.role === "preparer" && (
+        {user.usr_role === "PREPARER" && (
           <div className="buttonCont">
             <button className="btnCancel" onClick={handleCreateRecord}>
               CREATE NEW RECORD

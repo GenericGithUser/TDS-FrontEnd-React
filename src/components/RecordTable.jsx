@@ -35,7 +35,7 @@ function recordTable() {
         <div className="transTable extendWidth">
           <table className="actTransTable">
             <colgroup>
-              {user.role === "admin" || user.role === "receiver" ? (
+              {user.usr_role === "ADMIN" || user.usr_role === "RECEIVER" ? (
                 <>
                   <col style={{ width: "6px" }} />
                   <col style={{ width: "9vw" }} />
@@ -53,7 +53,7 @@ function recordTable() {
             <thead className="transTableHead">
               <tr>
                 <th>RecordID</th>
-                {user.role === "receiver" || user.role === "admin" ? (
+                {user.usr_role === "RECEIVER" || user.usr_role === "ADMIN" ? (
                   <th>Office</th>
                 ) : (
                   ""
@@ -78,16 +78,16 @@ function recordTable() {
               ) : (
                 dummyData.slice(0, 10).map((data) => (
                   <tr key={data.id}>
-                    <td>{data.recordId}</td>
-                    {user.role === "receiver" || user.role === "admin" ? (
-                      <td>{data.branch}</td>
+                    <td>{data.record_id}</td>
+                    {user.usr_role === "RECEIVER" || user.usr_role === "ADMIN" ? (
+                      <td>{data.office_dept}</td>
                     ) : (
                       ""
                     )}
-                    <td>{data.title}</td>
-                    <td>{data.desc}</td>
-                    <td>{data.code}</td>
-                    <td>{data.retPeriod}</td>
+                    <td>{data.record_titles}</td>
+                    <td>{data.rec_description}</td>
+                    <td>{data.rec_code}</td>
+                    <td>{data.retention_period}</td>
                     <td>{data.remarks}</td>
                     <td>{data.creDate}</td>
                     <td>{data.modDate}</td>

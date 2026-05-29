@@ -5,7 +5,7 @@
 
 }
 
-.searcherSorter {
+.searcherSorter>form {
     display: flex;
     justify-content: center;
     gap: 10px;

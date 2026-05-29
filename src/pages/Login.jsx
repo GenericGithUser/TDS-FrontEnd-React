@@ -9,14 +9,17 @@ function Login(){
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
-        const result = login(id, password);
+        const parsedId = parseInt(id.replace(/^\D+/, ""), 10);
+
+        const result = await login(parsedId, password);
 
         if (result.success) {
             navigate('/dashboard');
@@ -24,6 +27,8 @@ function Login(){
         else{
             setError(result.error);
         }
+
+         setIsLoading(false);
 
     }
 
@@ -78,7 +83,12 @@ function Login(){
                 >
                   Forgot Password?
                 </a>
-                <input type="submit" value="LOG-IN" className="logButton" />
+                <input
+                  type="submit"
+                  value={isLoading ? "LOGGING IN..." : "LOG-IN"}
+                  className="logButton"
+                  disabled={isLoading}
+                />
               </form>
             </div>
           </div>

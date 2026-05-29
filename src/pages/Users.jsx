@@ -11,7 +11,7 @@ function Users(){
     const { setRouteData } = useNavigationData();
     const { user } = useAuth();
 
-    if(user.role !== "admin"){
+    if(user.usr_role !== "ADMIN"){
       const redirect = () => {
         navigate("/dashboard/home");
       }

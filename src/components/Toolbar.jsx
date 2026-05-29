@@ -18,7 +18,7 @@ function Toolbar(){
             <img src="/assets/mlogo.png" alt="logo" className="logo" />
           </div>
           <div className="nav">
-            {user.role !== "admin" && (
+            {user.usr_role !== "ADMIN" && (
               <>
                 <NavLink to={"home"} className="aNavItem">
                   {({ isActive }) => (
@@ -74,7 +74,7 @@ function Toolbar(){
                 </NavLink>
               </>
             )}
-            {user.role === "admin" && (
+            {user.usr_role === "ADMIN" && (
               <>
                 <NavLink to={"home"} className="aNavItem">
                   {({ isActive }) => (

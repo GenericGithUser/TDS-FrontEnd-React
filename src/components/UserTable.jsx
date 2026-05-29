@@ -59,9 +59,9 @@ function UserTable() {
                 DUMMY_USR.slice(0, 10).map((data) => (
                   <tr key={data.id}>
                     <td>{data.id}</td>
-                    <td>{data.name}</td>
-                    <td>{data.role.toUpperCase()}</td>
-                    <td>{data.branch}</td>
+                    <td>{data.emp_name}</td>
+                    <td>{data.usr_role.toUpperCase()}</td>
+                    <td>{data.office_dept}</td>
                     <td>
                       <>
                         <button

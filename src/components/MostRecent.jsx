@@ -1,10 +1,11 @@
 import '../styles/tableTemp.css'
 import { useState } from 'react';
 import UsableDialog from './usableDialog';
-import dummyData from '../assets/dummyData.js'
+// import dummyData from '../assets/dummyData.js'
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import { useAuth } from '../context/AuthContext.jsx';
+import { GetTransmissions } from "../components/GetTranssmissions.jsx";
 
 function mostRecent(){
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -14,6 +15,7 @@ function mostRecent(){
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth(); 
+    const { transmissions, loading, error } = GetTransmissions();
 
     const handleEditTrans = (data) => {
         const sendData = { mode: 'edit', data: data, returnTo: "/dashboard/home",callback: ()=> console.log('Success') }
@@ -33,6 +35,9 @@ function mostRecent(){
       setIsDialogOpen(false);
       setIsDeleteButton(false);
     }
+
+     if (loading) return <p>Loading transmissions...</p>;
+     if (error) return <p>Error: {error}</p>;
     
     
     return (
@@ -59,37 +64,45 @@ function mostRecent(){
               </tr>
             </thead>
             <tbody>
-              {dummyData.length === 0 ? (
+              {transmissions.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center" }}>
                     <h1>No Data Available</h1>
                   </td>
                 </tr>
               ) : (
-                dummyData.slice(0, 4).map((data) => (
-                  <tr key={data.id}>
-                    <td>{data.transId}</td>
-                    <td>{data.recordId}</td>
+                transmissions.slice(0, 4).map((data) => (
+                  <tr key={data.record_id}>
+                    <td>{data.trans_id}</td>
+                    <td>{data.record_id}</td>
                     <td>{data.division}</td>
-                    <td>{data.itemNo}</td>
-                    <td>{data.title}</td>
-                    <td>{data.sentDate}</td>
+                    <td>{data.item_no}</td>
+                    <td>{data.record_titles}</td>
+                    <td>{data.sent_date}</td>
                     <td>
-                      {data.status === "RECEIVED" && (
-                        <span className="received">{data.status}</span>
+                      {data.record_status.toUpperCase() === "RECEIVED" && (
+                        <span className="received">
+                          {data.record_status.toUpperCase()}
+                        </span>
                       )}
-                      {data.status === "SENT" && (
-                        <span className="sent">{data.status}</span>
+                      {data.record_status.toUpperCase() === "SENT" && (
+                        <span className="sent">
+                          {data.record_status.toUpperCase()}
+                        </span>
                       )}
-                      {data.status === "PENDING" && (
-                        <span className="pending">{data.status}</span>
+                      {data.record_status.toUpperCase() === "PENDING" && (
+                        <span className="pending">
+                          {data.record_status.toUpperCase()}
+                        </span>
                       )}
-                      {data.status === "INCOMPLETE" && (
-                        <span className="incomplete">{data.status}</span>
+                      {data.record_status.toUpperCase() === "INCOMPLETE" && (
+                        <span className="incomplete">
+                          {data.record_status.toUpperCase()}
+                        </span>
                       )}
                     </td>
                     <td>
-                      {data.type === "view" && (
+                      {data.record_status === "received" && (
                         <button
                           type="button"
                           className="btnView"
@@ -98,7 +111,7 @@ function mostRecent(){
                           View
                         </button>
                       )}
-                      {data.type === "sent" && (
+                      {data.record_status === "sent" && (
                         <button
                           type="button"
                           className="btnView"
@@ -107,7 +120,7 @@ function mostRecent(){
                           View
                         </button>
                       )}
-                      {data.type === "pending" && (
+                      {data.record_status === "pending" && (
                         <>
                           <button
                             type="button"
@@ -116,7 +129,7 @@ function mostRecent(){
                           >
                             Check
                           </button>
-                          {user.role === "preparer" && (
+                          {user.usr_role === "PREPARER" && (
                             <button
                               type="button"
                               className="btnEdit"
@@ -127,7 +140,7 @@ function mostRecent(){
                           )}
                         </>
                       )}
-                      {data.type === "incomplete" && (
+                      {data.record_status === "incomplete" && (
                         <button
                           type="button"
                           className="btnEdit"

@@ -2,10 +2,11 @@ import "../styles/tableTemp.css";
 import '../styles/transtable.css';
 import { useState } from "react";
 import UsableDialog from "./usableDialog";
-import dummyData from "../assets/dummyData.js";
+// import dummyData from "../assets/dummyData.js";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import { useAuth } from "../context/AuthContext";
+import { GetTransmissions } from "./GetTranssmissions.jsx";
 
 function TransTable() {
 
@@ -16,11 +17,12 @@ function TransTable() {
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth();
+    const { transmissions, loading, error } = GetTransmissions();
 
 
 
-   const recStatus = (user.role === "admin" || user.role === "receiver") ? "FINISHED" : "RECEIVED";
-   const sentStatus = (user.role === "receiver") ? "INCOMING" : "SENT";
+   const recStatus = (user.usr_role === "ADMIN" || user.usr_role === "RECEIVER") ? "FINISHED" : "RECEIVED";
+   const sentStatus = (user.usr_role === "RECEIVER") ? "INCOMING" : "SENT";
         
 
     const openDialog = (item, delBtn) => {
@@ -40,7 +42,7 @@ function TransTable() {
       const sendData = {
         mode: "edit",
         data: data,
-        transId: data.transId,
+        transId: data.trans_id,
         returnTo: "/dashboard/transmissions",
         callback: () => console.log("Success"),
       };
@@ -48,7 +50,9 @@ function TransTable() {
       navigate("edit");
     };
 
-    const ddummyData = user.role != "receiver" ? dummyData : dummyData.filter(data=> data.type != "pending");
+    // const ddummyData = user.usr_role != "RECEIVER" ? dummyData : dummyData.filter(data=> data.type != "pending");
+     if (loading) return <p>Loading transmissions...</p>;
+     if (error) return <p>Error: {error}</p>;
     
 
     return (
@@ -63,7 +67,7 @@ function TransTable() {
         <div className="transTable extendWidth">
           <table className="actTransTable">
             <colgroup>
-              {user.role === "admin" || user.role === "receiver" ? (
+              {user.usr_role === "ADMIN" || user.usr_role === "RECEIVER" ? (
                 <>
                   <col style={{ width: "10px" }} />
                   <col style={{ width: "10px" }} />
@@ -86,60 +90,64 @@ function TransTable() {
               <tr>
                 <th>TransmissionsID</th>
                 <th>RecordID</th>
-                {(user.role === "admin" || user.role === "receiver") && (
-                  <th>Office</th>
-                )}
+                {(user.usr_role === "ADMIN" ||
+                  user.usr_role === "RECEIVER") && <th>Office</th>}
                 <th>Division</th>
                 <th>Item No.</th>
                 <th>Title</th>
                 <th>Date Sent</th>
-                {(user.role === "admin" || user.role === "receiver") && (
-                  <th>Date Received</th>
-                )}
+                {(user.usr_role === "ADMIN" ||
+                  user.usr_role === "RECEIVER") && <th>Date Received</th>}
                 <th>Status</th>
                 <th>⠀⠀⠀⠀⠀⠀⠀⠀⠀</th>
               </tr>
             </thead>
             <tbody>
-              {ddummyData.length === 0 ? (
+              {transmissions.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center" }}>
                     <h1>No Data Available</h1>
                   </td>
                 </tr>
               ) : (
-                ddummyData.slice(0, 10).map((data) => (
-                  <tr key={data.id}>
-                    <td>{data.transId}</td>
-                    <td>{data.recordId}</td>
-                    {user.role === "admin" || user.role === "receiver" ? (
-                      <td>{data.branch}</td>
+                transmissions.slice(0, 10).map((data) => (
+                  <tr key={data.record_id}>
+                    <td>{data.trans_id}</td>
+                    <td>{data.record_id}</td>
+                    {user.usr_role === "ADMIN" ||
+                    user.usr_role === "RECEIVER" ? (
+                      <td>{data.office_dept}</td>
                     ) : (
                       ""
                     )}
                     <td>{data.division}</td>
-                    <td>{data.itemNo}</td>
-                    <td>{data.title}</td>
-                    <td>{data.sentDate}</td>
-                    {(user.role === "admin" || user.role === "receiver") && (
-                      <td>{data.recDate}</td>
+                    <td>{data.item_no}</td>
+                    <td>{data.record_titles}</td>
+                    <td>{data.sent_date}</td>
+                    {(user.usr_role === "ADMIN" ||
+                      user.usr_role === "RECEIVER") && (
+                      <td>{data.date_time_received}</td>
                     )}
                     <td>
-                      {data.status === "RECEIVED" && (
+                      {data.record_status.toUpperCase() === "RECEIVED" && (
                         <span className="received">{recStatus}</span>
                       )}
-                      {data.status === "SENT" && (
+                      {data.record_status.toUpperCase() === "SENT" && (
                         <span className="sent">{sentStatus}</span>
                       )}
-                      {data.status === "PENDING" && (
-                        <span className="pending">{data.status}</span>
+                      {data.record_status.toUpperCase() === "PENDING" && (
+                        <span className="pending">
+                          {data.record_status.toUpperCase()}
+                        </span>
                       )}
-                      {data.status === "INCOMPLETE" && (
-                        <span className="incomplete">{data.status}</span>
+                      {data.record_status.toUpperCase() === "INCOMPLETE" && (
+                        <span className="incomplete">
+                          {data.record_status.toUpperCase()}
+                        </span>
                       )}
                     </td>
                     <td>
-                      {data.type === "view" && (
+                      {data.record_status === "received" && (
                         <>
                           <button
                             type="button"
@@ -148,7 +156,7 @@ function TransTable() {
                           >
                             View
                           </button>
-                          {user.role === "admin" && (
+                          {user.usr_role === "ADMIN" && (
                             <button
                               type="button"
                               className="btnEdit"
@@ -159,7 +167,7 @@ function TransTable() {
                           )}
                         </>
                       )}
-                      {data.type === "sent" && (
+                      {data.record_status === "sent" && (
                         <>
                           <button
                             type="button"
@@ -168,7 +176,7 @@ function TransTable() {
                           >
                             View
                           </button>
-                          {user.role === "admin" && (
+                          {user.usr_role === "ADMIN" && (
                             <button
                               type="button"
                               className="btnEdit"
@@ -179,7 +187,7 @@ function TransTable() {
                           )}
                         </>
                       )}
-                      {data.type === "pending" && (
+                      {data.record_status === "pending" && (
                         <>
                           <button
                             type="button"
@@ -188,18 +196,21 @@ function TransTable() {
                           >
                             Check
                           </button>
-                          {user.role === "preparer" || user.role === "admin" ? (
-                              <button
-                                type="button"
-                                className="btnEdit"
-                                onClick={() => handleEditTrans(data)}
-                              >
-                                Edit
-                              </button>
-                            ): ""}
+                          {user.usr_role === "PREPARER" ||
+                          user.usr_role === "ADMIN" ? (
+                            <button
+                              type="button"
+                              className="btnEdit"
+                              onClick={() => handleEditTrans(data)}
+                            >
+                              Edit
+                            </button>
+                          ) : (
+                            ""
+                          )}
                         </>
                       )}
-                      {data.type === "incomplete" && (
+                      {data.record_status === "incomplete" && (
                         <button
                           type="button"
                           className="btnEdit"

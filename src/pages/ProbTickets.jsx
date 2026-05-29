@@ -20,8 +20,8 @@ function ProbTickets() {
 
 
     useEffect(()=>{
-        const openCount = ticketData.filter(item => item.status === 'Open').length;
-        const closeCount = ticketData.filter(item=> item.status === 'Closed').length;
+        const openCount = ticketData.filter(item => item.record_status === 'Open').length;
+        const closeCount = ticketData.filter(item=> item.record_status === 'Closed').length;
         const highCount = ticketData.filter(item=> item.urgency === 'High').length;
         const medCount = ticketData.filter(item=> item.urgency === 'Medium').length;
         const lowCount = ticketData.filter(item=> item.urgency === 'Low').length;
@@ -34,7 +34,7 @@ function ProbTickets() {
 
     });
 
-    if(user.role !== "admin"){
+    if(user.usr_role !== "ADMIN"){
       const redirect = () => {
         navigate("/dashboard/home");
       }
@@ -110,7 +110,7 @@ function ProbTickets() {
               {ticketData.map((item) => (
                 <div className="tickItem">
                   <span className="tickId">{item.id}</span>
-                  <span className="title">{item.title}</span>
+                  <span className="title">{item.record_titles}</span>
                   <div className="severity">
                     <div
                       className={`label ${item.urgency === "High" ? `red` : item.urgency === "Medium" ? `yellow` : `blue`}`}
@@ -120,9 +120,9 @@ function ProbTickets() {
                   </div>
                   <div className="dateSent">{item.date_sent}</div>
                   <div
-                    className={`status ${item.status === "Open" ? `orangeBg` : `greenBg`}`}
+                    className={`status ${item.record_status === "Open" ? `orangeBg` : `greenBg`}`}
                   >
-                    {item.status}
+                    {item.record_status}
                   </div>
                   <div className="buttons">
                     <div

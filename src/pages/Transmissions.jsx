@@ -28,7 +28,7 @@ function Transmissions(){
           <h2 className="green">Transmissions</h2>
           <TransTable />
         </div>
-        {user.role === "preparer" && (
+        {user.usr_role === "PREPARER" && (
           <button
             className="btnCancel restrictWidth"
             onClick={handleCreateTrans}

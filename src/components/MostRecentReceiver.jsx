@@ -69,22 +69,22 @@ function mostRecentReceiver(){
               ) : (
                 dummyData.filter(data=> data.type != "pending").slice(0, 4).map((data) => (
                   <tr key={data.id}>
-                    <td>{data.transId}</td>
-                    <td>{data.recordId}</td>
-                    <td>{data.branch}</td>
+                    <td>{data.trans_id}</td>
+                    <td>{data.record_id}</td>
+                    <td>{data.office_dept}</td>
                     <td>{data.division}</td>
-                    <td>{data.itemNo}</td>
-                    <td>{data.title}</td>
+                    <td>{data.item_no}</td>
+                    <td>{data.record_titles}</td>
                     <td>{data.sentDate}</td>
                     <td>
-                      {data.status === "RECEIVED" && (
+                      {data.record_status === "RECEIVED" && (
                         <span className="received">FINISHED</span>
                       )}
-                      {data.status === "SENT" && (
+                      {data.record_status === "SENT" && (
                         <span className="sent">INCOMING</span>
                       )}
-                      {data.status === "INCOMPLETE" && (
-                        <span className="incomplete">{data.status}</span>
+                      {data.record_status === "INCOMPLETE" && (
+                        <span className="incomplete">{data.record_status}</span>
                       )}
                     </td>
                     <td>{data.recDate}</td>

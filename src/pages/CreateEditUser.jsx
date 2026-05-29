@@ -161,7 +161,7 @@ function CreateEditUser() {
                     name="code"
                     id="recCode"
                     className="recInput"
-                    defaultValue={navData.data.branch}
+                    defaultValue={navData.data.office_dept}
                   />
                 </div>
               </div>
@@ -175,7 +175,7 @@ function CreateEditUser() {
                     name="name"
                     id="recName"
                     className="recInput"
-                    defaultValue={navData.data.name}
+                    defaultValue={navData.data.emp_name}
                   />
                 </div>
                 <div className="item itmSpecial">
@@ -188,7 +188,7 @@ function CreateEditUser() {
                       name="retPeriod"
                       id="recRetPeriod"
                       className="recInput"
-                      defaultValue={navData.data.role}
+                      defaultValue={navData.data.usr_role}
                     />
                   </div>
                 </div>

@@ -33,17 +33,17 @@ function RecordInput({ recordList, addIncludedRecords }){
       setSelectedRecords(prev => {
         const newState = { ...prev };
 
-        if (newState[item.recordId]) {
-          delete newState[item.recordId];
+        if (newState[item.record_id]) {
+          delete newState[item.record_id];
         } else {
-          newState[item.recordId] = item;
+          newState[item.record_id] = item;
         }
         return newState;
       });
       
     }
 
-    const selected = [...new Map(Object.values(selectedRecords).map(item=> [item.recordId, item])).values()];
+    const selected = [...new Map(Object.values(selectedRecords).map(item=> [item.record_id, item])).values()];
 
 
     const handleSubmit = (e) =>{
@@ -92,9 +92,9 @@ function RecordInput({ recordList, addIncludedRecords }){
               ) : (
                 recordList.slice(0, 10).map((records) => (
                   <tr key={records.id}>
-                    <td>{records.recordId}</td>
-                    <td>{records.title}</td>
-                    <td><input type="checkbox" checked={!!selectedRecords[records.recordId]} onChange={()=> handleCheckbox(records)} /></td>
+                    <td>{records.record_id}</td>
+                    <td>{records.record_titles}</td>
+                    <td><input type="checkbox" checked={!!selectedRecords[records.record_id]} onChange={()=> handleCheckbox(records)} /></td>
                   </tr>
                 ))
               )}
