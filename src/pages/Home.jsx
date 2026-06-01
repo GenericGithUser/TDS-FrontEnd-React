@@ -4,7 +4,7 @@ import MostRecent from "../components/MostRecent";
 import MostRecentReceiver from "../components/MostRecentReceiver";
 import { useAuth } from "../context/AuthContext";
 import { Helmet } from "react-helmet-async";
-import { GetTransmissionStats } from "../components/GetTranssmissionsStats";
+import { GetTransmissionStats } from "../hooks/GetTranssmissionsStats";
 import '../styles/home.css'
 
 function Home(){
@@ -37,7 +37,7 @@ function Home(){
               ) : loading ? (
                 "0 Transmissions"
               ) : (
-                `${stats.total_records} Transmissions`
+                `${stats.total_transmissions} Transmissions`
               )}
             </span>
           </h1>

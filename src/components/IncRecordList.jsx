@@ -1,7 +1,7 @@
 import '../styles/recordItem.css'
 import RecordItem from "./RecordItem.jsx";
 
-function IncRecordList({ includedRecords, delItm }){
+function IncRecordList({ includedRecords, delItm, transId }){
     return(
         <>
             <div className="recordBox">
@@ -10,6 +10,7 @@ function IncRecordList({ includedRecords, delItm }){
                         key={recordItem.record_id} 
                         recordData={recordItem}
                         delItm={delItm}
+                        transId={transId}
                     />
                 ))}
             </div>

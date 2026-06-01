@@ -184,3 +184,15 @@
     margin: auto;
     font-size: 1.5ch;
 }
+.feedback{
+    text-align: center;
+    font-size: 3ch;
+    
+}
+
+.feedbackText{
+    color: var(--dark-green);
+}
+.blau{
+    color: var(--dark-blue);
+}

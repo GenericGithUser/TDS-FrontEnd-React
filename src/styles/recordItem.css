@@ -6,7 +6,7 @@
     outline: none;
     border-radius: 10px;
     border: 1px solid var(--dark-blue);
-    width: 30vw;
+    width: 40vw;
     background-color: white;
     
 }
@@ -15,11 +15,21 @@
     outline: none;
     border: 2px;
     cursor: pointer;
+    transition: 0.2s all ease-in-out;
+    border-radius: 10px;
+    background-color: var(--red);
 }
 
 .delItemBtnImg{
     width: 30px;
     height: 30px;
+}
+
+.delItemBtn:hover{
+    background-color: red;
+}
+.delItemBtn:active{
+    background-color: orange;
 }
 
 .recordBox {
@@ -64,5 +74,23 @@
 .recordData{
     display: grid;
     text-align: center;
-    grid-template-columns: 0.5fr 1fr 2fr 0.5fr;
+    gap: 10px;
+    width: 100%;
+    grid-template-columns: 0.5fr 1fr 2fr 0.5fr 0.5fr;
+}
+
+.editItemButton{
+    color: var(--blue-white);
+    background-color: var(--light-green);
+    border: 0;
+    border-radius: 10px;
+    font-size: 3ch;
+    cursor: pointer;
+    transition: 0.2s all ease-in-out;
+}
+.editItemButton:hover{
+    background-color: var(--light-blue);
+}
+.editItemButton:active{
+    background-color: var(--dark-green);
 }

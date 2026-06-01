@@ -91,9 +91,9 @@ function RecordInput({ recordList, addIncludedRecords }){
                 </tr>
               ) : (
                 recordList.slice(0, 10).map((records) => (
-                  <tr key={records.id}>
+                  <tr key={records.record_id}>
                     <td>{records.record_id}</td>
-                    <td>{records.record_titles}</td>
+                    <td>{records.records_title}</td>
                     <td><input type="checkbox" checked={!!selectedRecords[records.record_id]} onChange={()=> handleCheckbox(records)} /></td>
                   </tr>
                 ))

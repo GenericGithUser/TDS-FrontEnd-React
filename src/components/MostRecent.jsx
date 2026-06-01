@@ -1,11 +1,13 @@
-import '../styles/tableTemp.css'
-import { useState } from 'react';
+import '../styles/tableTemp.css';
+import "../styles/loading.css";
+import { useState, useEffect } from 'react';
 import UsableDialog from './usableDialog';
 // import dummyData from '../assets/dummyData.js'
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import { useAuth } from '../context/AuthContext.jsx';
-import { GetTransmissions } from "../components/GetTranssmissions.jsx";
+import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
+import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 
 function mostRecent(){
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -17,8 +19,15 @@ function mostRecent(){
     const { user } = useAuth(); 
     const { transmissions, loading, error } = GetTransmissions();
 
-    const handleEditTrans = (data) => {
-        const sendData = { mode: 'edit', data: data, returnTo: "/dashboard/home",callback: ()=> console.log('Success') }
+    const handleEditTrans = async (data) => {
+        // let chkData; 
+        // if(!data?.record_id){
+        //   return
+        // }
+        // else{
+        //   chkData = await instantFetchChecklist(data.record_id);
+        // }
+        const sendData = { mode: 'edit', data: data, transId: data.trans_id, returnTo: "/dashboard/home",callback: ()=> console.log('Success') }
         setRouteData(sendData);
         navigate("edit");
 
@@ -35,9 +44,6 @@ function mostRecent(){
       setIsDialogOpen(false);
       setIsDeleteButton(false);
     }
-
-     if (loading) return <p>Loading transmissions...</p>;
-     if (error) return <p>Error: {error}</p>;
     
     
     return (
@@ -64,7 +70,16 @@ function mostRecent(){
               </tr>
             </thead>
             <tbody>
-              {transmissions.length === 0 ? (
+              {loading ? (
+                // Skeleton stays inside the table - no layout shift
+                <TableSkeleton rowCount={5} colCount={8} />
+              ) : error ? (
+                <tr>
+                  <td colSpan={8}>
+                    <ErrorMessage message={error} onRetry={refetch} />
+                  </td>
+                </tr>
+              ) : transmissions.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center" }}>
                     <h1>No Data Available</h1>
@@ -72,7 +87,7 @@ function mostRecent(){
                 </tr>
               ) : (
                 transmissions.slice(0, 4).map((data) => (
-                  <tr key={data.record_id}>
+                  <tr key={data.record_id} className='fade-in'>
                     <td>{data.trans_id}</td>
                     <td>{data.record_id}</td>
                     <td>{data.division}</td>

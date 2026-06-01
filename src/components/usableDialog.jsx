@@ -3,7 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
-import { GetChecklistItems } from "./GetChecklistItems";
+import { GetChecklistItems } from "../hooks/GetChecklistItems";
+import { GetRecords } from "../hooks/GetRecords";
+import { GetTransmissions } from "../hooks/GetTranssmissions";
 import '../styles/dialog.css'
 
 
@@ -18,8 +20,10 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
     const [missingItems, setMissingItems] = useState([]);
     const { user } = useAuth(); 
     const location = useLocation();
-
     const { checkItems, loading, error, fetchChecklist } = GetChecklistItems();
+    const { updateFeedback } = GetRecords();
+    const { updateStatusApprover, updateStatus } = GetTransmissions();
+    const [feedback, setFeedback] = useState('');
 
 
     
@@ -57,6 +61,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       }
      }, [isNestedSiblingDialogOpen]);
 
+     
+
+     useEffect(() => {
+        if (!data?.record_id) return;
+          
+          fetchChecklist(data.record_id);
+            
+     },[data?.record_id]);
+     if (!data) return;
+    
+       
+        
+
      const openNestedDialog = () => {
        setIsNestedDialogOpen(true);
      };
@@ -73,20 +90,57 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        setIsNestedSiblingDialogOpen(false);
      };
 
-     const handleNestedDialogSubmit = () => {
+     const handleFeedbackSubmit = () => {
+       updateFeedback(data.record_id, {
+        feedback: feedback
+       });
+       setFeedback("");
+     };
+
+     const handleIncomplete = () => {
+        if (missingItems.length < 0) {
+            alert("No Missing Items");
+            return
+        }
+        const message = `Missing Items: ${missingItems.map((i) => i).join(",")}`;
+        updateStatus(data.trans_id, "incomplete", null);
+        updateFeedback(data.record_id, {feedback: message});
+        setFeedback("");
+        onClose();
+     }
+
+     const handleComplete = () =>{
+        updateStatus(data.trans_id, "received", user.employee_id);
+        onClose();
+     }
+
+     const handleNestedDialogSubmit = (onFeedback) => {
        // Handle the submit logic here
        console.log("Request edits submitted");
+       if (onFeedback == 1) {
+        handleFeedbackSubmit();
+       }
        closeNestedDialog();
        // Optionally close the main dialog too
        // onClose();
      };
-     const handleNestedDialogResolve = () => {
+     const handleNestedDialogResolve = (onFeedback) => {
        // Handle the submit logic here
        console.log("Request edits submitted");
+       
        closeNestedDialog();
        // Optionally close the main dialog too
        onClose();
      };
+
+     const handleReTransmit = () =>{
+
+     }
+
+     const handleReApprove = () =>{
+      updateStatus(data.trans_id, "pending", null);
+      onClose();
+     }
 
     const addRemoveMissingItems = (item) => {
         setMissingItems((prev) => {
@@ -97,25 +151,31 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             return prev.filter((itm)=> itm !== item);
           }
         })
+        
     };
 
     const checkListButtonOpening = (recordId, type) =>{
         fetchChecklist(recordId);
-        if (type === "received") {
+        
+        if (type === "received" || onRecords === true) {
+          
           openNestedDialog();
-        } else{
+        } 
+        else if(type === "special") return;
+        else{
           openSiblingNestedDialog();
         }
     }
 
     const handleEditTrans = (data) => {
-
+      const chkData = checkItems;
       const sendData = {
         mode: "edit",
         data: data,
         transId: data.trans_id,
+        recordId: data.record_id,
+        checklistData: chkData,
         returnTo: location,
-        callback: () => console.log("Success"),
       };
       setRouteData(sendData);
       navigate("edit");
@@ -131,6 +191,14 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       setRouteData(sendData);
       navigate("edit");
     };
+
+    const handleApproval = () => {
+        updateStatusApprover(data.trans_id, "sent", user.employee_id);
+        console.log("Success?");
+        onClose();
+    }
+
+    
 
     if (!data) return null;
 
@@ -225,8 +293,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     </tr>
                     <tr>
                       <td className="titleD">Sent On: </td>
-                      <td id="sentDate" className="data">
-                        {data.sentDate}
+                      <td id="sent_date" className="data">
+                        {data.sent_date}
                       </td>
                     </tr>
                   </tbody>
@@ -336,13 +404,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                       </td>
                       <td className="titleD">Received On: </td>
                       <td id="recDateData" className="data">
-                        {data.recDate}
+                        {data.date_time_received}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">Sent On: </td>
-                      <td id="sentDate" className="data">
-                        {data.sentDate}
+                      <td id="sent_date" className="data">
+                        {data.sent_date}
                       </td>
                     </tr>
                   </tbody>
@@ -468,16 +536,17 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                       <td colSpan={2}>
                         <div className="checkCont">
                           <span className="titleD">Checklist Items: </span>
-                          {data.checkList.map((item) => (
-                            <div className="items" key={item}>
-                              <h4>{item}</h4>
+                          {}
+                          {checkItems.map((item) => (
+                            <div className="items" key={item.checklist_id}>
+                              <h4>{item.checklist_item}</h4>
                               <button
                                 className={
-                                  missingItems.includes(item)
+                                  missingItems.includes(item.checklist_item)
                                     ? "limHeight btnEdit"
                                     : "limHeight delBtn"
                                 }
-                                onClick={() => addRemoveMissingItems(item)}
+                                onClick={() => addRemoveMissingItems(item.checklist_item)}
                               >
                                 Missing
                               </button>
@@ -494,9 +563,11 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                       {missingItems.length > 0 && (
                         <td colSpan={2}>
                           <div className="checkCont">
-                            <span className="titleD">Missing Message: </span><br />
-                            <p className="messageBox">Missing Items: 
-                              {missingItems.map((item)=>(
+                            <span className="titleD">Missing Message: </span>
+                            <br />
+                            <p className="messageBox">
+                              Missing Items:
+                              {missingItems.map((item) => (
                                 <span key={item}> {item}, </span>
                               ))}
                             </p>
@@ -528,8 +599,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     </tr>
                     <tr>
                       <td className="titleD">Sent On: </td>
-                      <td id="sentDate" className="data">
-                        {data.sentDate}
+                      <td id="sent_date" className="data">
+                        {data.sent_date}
                       </td>
                     </tr>
                   </tbody>
@@ -537,11 +608,11 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               </div>
               <div className="buttons">
                 {missingItems.length > 0 ? (
-                  <button onClick={onClose} className="btnInc btnCancel ">
+                  <button onClick={handleIncomplete} className="btnInc btnCancel ">
                     Mark As Incomplete
                   </button>
                 ) : (
-                  <button onClick={onClose} className="btnFin btnCancel ">
+                  <button onClick={handleComplete} className="btnFin btnCancel ">
                     Mark As Finished
                   </button>
                 )}
@@ -636,8 +707,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                     </tr>
                     <tr>
                       <td className="titleD">Sent On: </td>
-                      <td id="sentDate" className="data">
-                        {data.sentDate}
+                      <td id="sent_date" className="data">
+                        {data.sent_date}
                       </td>
                     </tr>
                   </tbody>
@@ -645,12 +716,25 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 <div className="feedback">
                   {user.usr_role === "PREPARER" && (
                     <>
-                      <p className="feedback">
-                        {data.feedback.toLowerCase() === "none"
+                      <p className="feedbackText">
+                        <span className="blau">FeedBack: </span>
+                        {data.feedback === null
                           ? "Waiting for Approval"
                           : data.feedback}
                       </p>
                     </>
+                  )}
+                  {user.usr_role === "APPROVER" ? (
+                    <>
+                      <p className="feedbackText">
+                        <span className="blau">FeedBack: </span>
+                        {data.feedback === null
+                          ? "All Good"
+                          : `Waiting for Response on: ${data.feedback}`}
+                      </p>
+                    </>
+                  ) : (
+                    ""
                   )}
                 </div>
               </div>
@@ -670,7 +754,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               )}
               {user.usr_role === "APPROVER" && (
                 <div className="buttons">
-                  <button className="btnFin btnCancel" onClick={onClose}>
+                  <button className="btnFin btnCancel" onClick={handleApproval}>
                     APPROVE FOR TRANSMISSION
                   </button>
                   <button
@@ -689,12 +773,17 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               <h1 className="diagTitle">Request Edits</h1>
               <form action="" method="post" className="changes">
                 <label htmlFor="changeForm">Enter Edits to be made:</label>
-                <textarea name="changeForm" id="changeForm"></textarea>
+                <textarea
+                  name="changeForm"
+                  id="changeForm"
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                ></textarea>
               </form>
               <div className="buttons">
                 <button
                   className="btnInc btnCancel"
-                  onClick={handleNestedDialogSubmit}
+                  onClick={() => handleNestedDialogSubmit(1)}
                 >
                   Send Requests
                 </button>
@@ -705,9 +794,15 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             </dialog>
             <dialog className="diagEdit" ref={nestedSiblingDialogRef}>
               <h1 className="diagTitle">Checklist Items</h1>
-              {data.checkList.map((item) => (
-                <div className="chkItem">{item}</div>
-              ))}
+              {error ? (
+                <p>{error}</p>
+              ) : loading ? (
+                <p>Loading</p>
+              ) : (
+                checkItems.map((item) => (
+                  <div className="chkItem">{item.checklist_item}</div>
+                ))
+              )}
               <div className="buttons">
                 <button
                   onClick={closeSiblingNestedDialog}
@@ -749,8 +844,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 </tbody>
               </table>
               <div className="buttons">
-                <button className="btnFin btnCancel" onClick={onClose}>
-                  Re-Transmit
+                <button className="btnFin btnCancel" onClick={handleReApprove}>
+                  Submit for Re-Approval
                 </button>
                 <button className="btnInc btnCancel" onClick={()=> handleEditTrans(data)}>Edit Transmission</button>
                 <button onClick={onClose} className="btnCancel">
@@ -961,11 +1056,11 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Created On: </td>
                     <td id="prepData" className="data">
-                      {data.creDate}
+                      {data.created_at}
                     </td>
                     <td className="titleD">Modified On: </td>
                     <td id="apprData" className="data">
-                      {data.modDate}
+                      {data.modified_at}
                     </td>
                   </tr>
                 </tbody>
@@ -985,9 +1080,15 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           </dialog>
           <dialog className="diagEdit" ref={nestedDialogRef}>
             <h1 className="diagTitle">Checklist Items</h1>
-            {data.checkList.map((item) => (
-              <div className="chkItem">{item}</div>
-            ))}
+            {error ? (
+              <p>{error}</p>
+            ) : loading ? (
+              <p>Loading</p>
+            ) : (
+              checkItems.map((item) => (
+                <div className="chkItem">{item.checklist_item}</div>
+              ))
+            )}
             <div className="buttons">
               <button onClick={closeNestedDialog} className="btnCancel">
                 OK

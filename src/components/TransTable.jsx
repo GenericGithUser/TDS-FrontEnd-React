@@ -6,7 +6,10 @@ import UsableDialog from "./usableDialog";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import { useAuth } from "../context/AuthContext";
-import { GetTransmissions } from "./GetTranssmissions.jsx";
+import { GetTransmissions } from "../hooks/GetTranssmissions";
+
+import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
+import "../styles/loading.css";
 
 function TransTable() {
 
@@ -17,7 +20,9 @@ function TransTable() {
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth();
-    const { transmissions, loading, error } = GetTransmissions();
+    const [searchInput, setSearchInput] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const { transmissions, loading, error } = GetTransmissions(searchQuery);
 
 
 
@@ -50,17 +55,37 @@ function TransTable() {
       navigate("edit");
     };
 
+    const handleSearch = (e) => {
+      e.preventDefault();
+      setSearchQuery(searchInput);
+    };
+
+    
+    const handleSearchChange = (e) =>{
+      setSearchInput(e.target.value);
+
+      if (e.target.value === '') {
+        setSearchQuery('');
+      }
+    }
+
     // const ddummyData = user.usr_role != "RECEIVER" ? dummyData : dummyData.filter(data=> data.type != "pending");
-     if (loading) return <p>Loading transmissions...</p>;
-     if (error) return <p>Error: {error}</p>;
+    //  if (loading) return <p>Loading transmissions...</p>;
+    //  if (error) return <p>Error: {error}</p>;
     
 
     return (
       <>
         <div className="searcherSorter">
-          <form action="" method="get">
+          <form onSubmit={handleSearch}>
             <label htmlFor="searchBar">Search For a Transmission</label>
-            <input type="search" name="searchBar" id="searchBar" />
+            <input
+              type="search"
+              name="searchBar"
+              value={searchInput}
+              onChange={handleSearchChange}
+              id="searchBar"
+            />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
         </div>
@@ -103,15 +128,26 @@ function TransTable() {
               </tr>
             </thead>
             <tbody>
-              {transmissions.length === 0 ? (
+              {loading ? (
+                // Skeleton stays inside the table - no layout shift
+                <TableSkeleton rowCount={5} colCount={8} />
+              ) : error ? (
+                <tr>
+                  <td colSpan={8}>
+                    <ErrorMessage message={error} onRetry={refetch} />
+                  </td>
+                </tr>
+              ) : transmissions.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center" }}>
-                    <h1>No Data Available</h1>
+                    <h1>
+                      {searchInput ? "No Record of Found" : "No Data Available"}
+                    </h1>
                   </td>
                 </tr>
               ) : (
                 transmissions.slice(0, 10).map((data) => (
-                  <tr key={data.record_id}>
+                  <tr key={data.record_id} className="fade-in">
                     <td>{data.trans_id}</td>
                     <td>{data.record_id}</td>
                     {user.usr_role === "ADMIN" ||

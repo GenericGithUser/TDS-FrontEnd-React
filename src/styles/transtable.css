@@ -36,4 +36,12 @@
     font-weight: bold;
     color: var(--blue-white);
     background-color: var(--light-blue);
+    transition: all 0.2s ease-in-out;
+}
+
+.searchBtn:hover{
+    background-color: var(--light-green);
+}
+.searchBtn:active{
+    background-color: var(--dark-blue);
 }

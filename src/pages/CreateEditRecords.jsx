@@ -1,17 +1,33 @@
 import '../styles/records.css'
 import '../styles/createEdit.css'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNavigationData } from '../components/NavigationDataContext'
+import { useAuth } from '../context/AuthContext'
 import { Helmet } from 'react-helmet-async'
+import { GetRecords } from '../hooks/GetRecords'
+import { GetChecklistItems } from '../hooks/GetChecklistItems'
 
 function CreateEditRecord() {
-    const { navData, clearRouteData } = useNavigationData();
+    const { navData, clearRouteData, setRouteData } = useNavigationData();
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [checklist, setChecklist] = useState('');
+    const [retPeriod, setRetPeriod] = useState('');
+    const [code, setCode] = useState('');
+    const [remark, setRemarks] = useState('');
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { records, loading, error, createRecord, updateRecord} = GetRecords();
+    const { checkItems, createChecklist, updateChecklist } = GetChecklistItems();
+    
 
-    const titlePrefix = 
-          navData.mode === "edit" ? "Edit":
-          navData.mode === "create" ? "Create": "No Nav Data";
+    const isEdit = navData?.mode === "edit";
+    const titlePrefix = isEdit
+      ? "Edit"
+      : navData?.mode === "create"
+        ? "Create"
+        : "No Nav Data";
 
     const pageTitle = `${titlePrefix} Record`.trim();      
     
@@ -20,26 +36,101 @@ function CreateEditRecord() {
       return <h1>No NavData</h1>;
     }
 
-    
+       
     const handleSave = () => {
       const destination = navData.returnTo;
-
+      const recordData = {records_title: title, rec_description: description, rec_code: code, retention_period: retPeriod, remarks: remark}
+      const checklistItems = checklist.split(',');
+      createRecord(recordData, checklistItems);
       clearRouteData(); // ✅ Clear ONLY after successful action
       navigate(destination); // Go back
     };
-
-    const handleCancel = () => {
+    const handleUpdate = () => {
+      let origItems = navData?.checklistData.map((i) => i.checklist_item);
       const destination = navData.returnTo;
-      clearRouteData(); // ✅ Clear on cancel
+      const recordData = {
+        records_title: title,
+        rec_description: description,
+        rec_code: code,
+        retention_period: retPeriod,
+        remarks: remark,
+      };
+      const availItems = checklist.split(","); 
+      const removedItems = origItems.filter(
+        item=>!availItems.includes(item)
+      );
+
+      const addedItems = availItems.filter(
+          item=> !origItems.includes(item)
+      );
+
+      const updatedChecklist = navData.checklistData.filter(
+          item => !removedItems.includes(item.checklist_item)
+      );
+
+      addedItems.forEach(item => {
+        updatedChecklist.push({
+          chk_record_id: navData.checklistData[0]?.chk_record_id,
+          checklist_id: null, // DB will generate this
+          checklist_item: item
+        });
+      });
+
+      
+     console.log("🎯 Calling updateRecord with:", {
+        recordData: { recordData /* ... */ },
+        checklistItems: updatedChecklist, // ← Your actual checklist state variable
+        checklistStateLength: updatedChecklist?.length,
+        firstItem: updatedChecklist?.[0],
+      });
+      updateRecord(navData.recordId, recordData, updatedChecklist);  
+      if (navData.fromTransEdit) {
+        const sendData = {
+          mode: "edit",
+          data: navData.data,
+          transId: navData.trans_id,
+          returnTo: "/dashboard/home",
+        };
+        setRouteData(sendData);
+      } else {
+        clearRouteData();
+      }
+      navigate(destination); // Go back
+    }
+
+    const handleCancel = (e) => {
+      const destination = navData.returnTo;
+      e.preventDefault();
+      if (navData.fromTransEdit) {
+        const sendData = {
+          mode: "edit",
+          data: navData.data,
+          transId: navData.trans_id,
+          returnTo: "/dashboard/home",
+        };
+        setRouteData(sendData);
+      }else{
+        clearRouteData();
+      }
       navigate(destination);
     };
+
+    if (navData.mode === "edit") {
+      useEffect(()=>{
+        setTitle(navData?.data?.records_title);
+        setCode(navData?.data?.rec_code);
+        setDescription(navData?.data?.rec_description);
+        // console.log(navData.checklistData);
+        setChecklist(navData?.checklistData.map((i)=> i.checklist_item).join(","));
+        setRetPeriod(navData?.data?.retention_period);
+        setRemarks(navData?.data?.remarks);
+      }, [])
+    }
     
     return (
       <>
         <Helmet>
-          <title>
-            {pageTitle}
-          </title>
+          <title>{pageTitle}</title>
         </Helmet>
         <h1 className="ceTitle">
           {navData.mode === "create" && <>Create</>}
@@ -47,7 +138,7 @@ function CreateEditRecord() {
         </h1>
         {navData.mode === "create" && (
           <div className="createBox">
-            <form action="" id="createForm" method="post">
+            <form onSubmit={handleSave}>
               <div className="r1">
                 <div className="item">
                   <label htmlFor="recTitle" className="recLabel">
@@ -58,6 +149,9 @@ function CreateEditRecord() {
                     name="title"
                     id="recTitle"
                     className="recInput"
+                    onChange={(e) => setTitle(e.target.value)}
+                    value={title}
+                    required
                   />
                 </div>
                 <div className="item">
@@ -69,6 +163,9 @@ function CreateEditRecord() {
                     name="code"
                     id="recCode"
                     className="recInput"
+                    onChange={(e) => setCode(e.target.value)}
+                    value={code}
+                    required
                   />
                 </div>
               </div>
@@ -84,6 +181,9 @@ function CreateEditRecord() {
                       id="recDesc"
                       className="recInput special"
                       maxLength="300"
+                      onChange={(e) => setDescription(e.target.value)}
+                      value={description}
+                      required
                     ></textarea>
                   </div>
                   <div className="item">
@@ -96,6 +196,8 @@ function CreateEditRecord() {
                       name="chkItems"
                       id="recChkItems"
                       className="recInput"
+                      value={checklist}
+                      onChange={(e) => setChecklist(e.target.value)}
                     />
                   </div>
                 </div>
@@ -109,6 +211,9 @@ function CreateEditRecord() {
                       name="retPeriod"
                       id="recRetPeriod"
                       className="recInput"
+                      onChange={(e) => setRetPeriod(e.target.value)}
+                      value={retPeriod}
+                      required
                     />
                   </div>
                   <div className="item">
@@ -120,6 +225,8 @@ function CreateEditRecord() {
                       name="remarks"
                       id="recRemarks"
                       className="recInput special"
+                      onChange={(e) => setRemarks(e.target.value)}
+                      value={remark}
                     />
                   </div>
                 </div>
@@ -133,7 +240,6 @@ function CreateEditRecord() {
                   type="submit"
                   defaultValue="CREATE NEW RECORD"
                   className="btnGreen"
-                  onClick={handleSave}
                 ></input>
                 <button className="btnCancel" onClick={handleCancel}>
                   CANCEL
@@ -144,7 +250,7 @@ function CreateEditRecord() {
         )}
         {navData.mode === "edit" && (
           <div className="createBox">
-            <form action="" id="createForm" method="post">
+            <form onSubmit={handleUpdate}>
               <div className="r1">
                 <div className="item">
                   <label htmlFor="recTitle" className="recLabel">
@@ -155,7 +261,9 @@ function CreateEditRecord() {
                     name="title"
                     id="recTitle"
                     className="recInput"
-                    defaultValue={navData?.data?.record_titles}
+                    onChange={(e) => setTitle(e.target.value)}
+                    value={title}
+                    
                   />
                 </div>
                 <div className="item">
@@ -167,7 +275,8 @@ function CreateEditRecord() {
                     name="code"
                     id="recCode"
                     className="recInput"
-                    defaultValue={navData?.data?.rec_code}
+                    onChange={(e) => setCode(e.target.value)}
+                    value={code}
                   />
                 </div>
               </div>
@@ -182,8 +291,9 @@ function CreateEditRecord() {
                       name="desc"
                       id="recDesc"
                       className="recInput special"
-                      maxLength="300"
-                      defaultValue={navData?.data?.rec_description}
+                      maxLength="300"                    
+                      onChange={(e) => setDescription(e.target.value)}
+                      value={description}
                     ></textarea>
                   </div>
                   <div className="item">
@@ -196,7 +306,8 @@ function CreateEditRecord() {
                       name="chkItems"
                       id="recChkItems"
                       className="recInput"
-                      defaultValue={navData?.data?.checkList.join(",")}
+                      onChange={(e) => setChecklist(e.target.value)}
+                      value={checklist}
                     />
                   </div>
                 </div>
@@ -210,7 +321,8 @@ function CreateEditRecord() {
                       name="retPeriod"
                       id="recRetPeriod"
                       className="recInput"
-                      defaultValue={navData?.data?.retention_period}
+                      onChange={(e) => setRetPeriod(e.target.value)}
+                      value={retPeriod}
                     />
                   </div>
                   <div className="item">
@@ -222,7 +334,8 @@ function CreateEditRecord() {
                       name="remarks"
                       id="recRemarks"
                       className="recInput special"
-                      defaultValue={navData?.data?.remarks}
+                      onChange={(e) => setRemarks(e.target.value)}
+                      value={remark}
                     />
                   </div>
                 </div>
@@ -234,11 +347,10 @@ function CreateEditRecord() {
               <div className="buttonCont">
                 <input
                   type="submit"
-                  defaultValue="CREATE NEW RECORD"
+                  defaultValue="SAVE EDITS"
                   className="btnGreen"
-                  onClick={handleSave}
                 ></input>
-                <button className="btnCancel" onClick={handleCancel}>
+                <button className="btnCancel" type='button' onClick={handleCancel}>
                   CANCEL
                 </button>
               </div>

@@ -1,8 +1,12 @@
 import "../styles/tableTemp.css";
 import "../styles/transtable.css";
+import "../styles/loading.css";
 import { useState } from "react";
 import UsableDialog from "./usableDialog";
-import dummyData from "../assets/dummyData.js";
+// import dummyData from "../assets/dummyData.js";
+import { useAuth } from "../context/AuthContext";
+import { GetRecords } from "../hooks/GetRecords";
+import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 
 function recordTable() {
 
@@ -10,6 +14,10 @@ function recordTable() {
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);
     const [onRecords, setOnRecords] = useState(false);
+    const { user } = useAuth();
+    const [searchInput, setSearchInput ] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const { records, loading, error } = GetRecords(searchQuery);
 
     const openDialog = (item, delBtn) => {
       setDialogData(item);
@@ -22,13 +30,36 @@ function recordTable() {
       setIsDialogOpen(false);
       setIsDeleteButton(false);
     };
+
+    const handleSearch = (e) =>{
+      
+      e.preventDefault();
+      setSearchQuery(searchInput);
+    }
+
+     const handleSearchChange = (e) => {
+       setSearchInput(e.target.value);
+
+       if (e.target.value === "") {
+         setSearchQuery("");
+       }
+     };
+
+    if (loading) return <p>Loading</p>;
+    if (error) return <p>{error}</p>
     
     return (
       <>
         <div className="searcherSorter">
-          <form action="" method="get">
+          <form onSubmit={handleSearch}>
             <label htmlFor="searchBar">Search For a Record</label>
-            <input type="search" name="searchBar" id="searchBar" />
+            <input
+              type="search"
+              name="searchBar"
+              id="searchBar"
+              value={searchInput}
+              onChange={handleSearchChange}
+            />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
         </div>
@@ -69,28 +100,40 @@ function recordTable() {
               </tr>
             </thead>
             <tbody>
-              {dummyData.length === 0 ? (
+              {loading ? (
+                // Skeleton stays inside the table - no layout shift
+                <TableSkeleton rowCount={5} colCount={9} />
+              ) : error ? (
+                <tr>
+                  <td colSpan={8}>
+                    <ErrorMessage message={error} onRetry={refetch} />
+                  </td>
+                </tr>
+              ) : records.length === 0 ? (
                 <tr>
                   <td colSpan={9} style={{ textAlign: "center" }}>
-                    <h1>No Data Available</h1>
+                    <h1>
+                      {searchInput ? "No Record of Found" : "No Data Available"}
+                    </h1>
                   </td>
                 </tr>
               ) : (
-                dummyData.slice(0, 10).map((data) => (
-                  <tr key={data.id}>
+                records.slice(0, 10).map((data) => (
+                  <tr key={data.record_id} className="fade-in">
                     <td>{data.record_id}</td>
-                    {user.usr_role === "RECEIVER" || user.usr_role === "ADMIN" ? (
+                    {user.usr_role === "RECEIVER" ||
+                    user.usr_role === "ADMIN" ? (
                       <td>{data.office_dept}</td>
                     ) : (
                       ""
                     )}
-                    <td>{data.record_titles}</td>
+                    <td>{data.records_title}</td>
                     <td>{data.rec_description}</td>
                     <td>{data.rec_code}</td>
                     <td>{data.retention_period}</td>
                     <td>{data.remarks}</td>
-                    <td>{data.creDate}</td>
-                    <td>{data.modDate}</td>
+                    <td>{data.created_at}</td>
+                    <td>{data.modified_at}</td>
                     <td>
                       <>
                         <button

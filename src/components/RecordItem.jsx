@@ -1,13 +1,47 @@
 import '../styles/recordItem.css'
+import { GetChecklistItems } from "../hooks/GetChecklistItems";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigationData } from "../components/NavigationDataContext";
+import { FaEdit } from "react-icons/fa";
 
-function RecordItem({ recordData, delItm }){
+function RecordItem({ recordData, delItm, transId }){
+  const { checkItems, instantFetchChecklist } = GetChecklistItems();
+  const { navData, clearRouteData, setRouteData } = useNavigationData();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const handleEditRecord = async (e) => {
+    e.preventDefault();
+    let chkData;
+    // if(!recordData?.record_id){
+    //   return
+    // }
+    // else{
+      chkData = await instantFetchChecklist(recordData?.record_id);
+    // }
+    const sendData = {
+      mode: "edit",
+      data: recordData,
+      recordId: recordData.record_id,
+      trans_id: transId,
+      checklistData: chkData,
+      fromTransEdit: 1,
+      returnTo: location,
+    };
+    console.log("TRIGGERED");
+    setRouteData(sendData);
+    navigate("/dashboard/home/edit/record");
+  };
     return (
       <>
         <div className="includedRecord">
           <div className="recordData">
             <span className="num1">{recordData.itemNum} </span>
             <span className="id">{recordData.record_id} </span>
-            <span className="title">{recordData.record_titles}</span>
+            <span className="title">{recordData.records_title}</span>
+
+            <button className="editItemButton" onClick={handleEditRecord}>
+              <FaEdit />
+            </button>
 
             <button
               className="delItemBtn"
@@ -17,7 +51,7 @@ function RecordItem({ recordData, delItm }){
                 className="delItemBtnImg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="red"
+                stroke="white"
               >
                 <path
                   strokeLinecap="round"

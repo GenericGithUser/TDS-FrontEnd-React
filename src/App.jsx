@@ -28,7 +28,9 @@ function App() {
     <>
       {isMobile ? (
         <>
-          <h1 style={{margin: "auto"}}>Mobile Is Not Allowed to Use this tool</h1>
+          <h1 style={{ margin: "auto" }}>
+            Mobile Is Not Allowed to Use this tool
+          </h1>
         </>
       ) : (
         <Routes>
@@ -54,13 +56,15 @@ function App() {
             <Route path="records" element={<Records />} />
             <Route path="records/create" element={<CreateEditRecord />} />
             <Route path="records/edit" element={<CreateEditRecord />} />
-            <Route path="home/edit" element={<CreateEditRecord />} />
+            <Route path="home/edit" element={<CreateEditTrans />} />
+            <Route path="home/edit/record" element={<CreateEditRecord />} />
             <Route path="transmissions/edit" element={<CreateEditTrans />} />
+            <Route path="transmissions/edit/record" element={<CreateEditRecord />} /> 
             <Route path="transmissions/create" element={<CreateEditTrans />} />
             <Route path="users" element={<Users />} />
             <Route path="users/create" element={<CreateEditUser />} />
             <Route path="users/edit" element={<CreateEditUser />} />
-            <Route path='tickets' element={<ProbTickets/>}/>
+            <Route path="tickets" element={<ProbTickets />} />
           </Route>
         </Routes>
       )}

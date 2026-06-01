@@ -1,83 +1,142 @@
 import "../styles/records.css";
 import "../styles/createEdit.css";
-import { useEffect, useState } from "react";
-import dummyData from "../assets/dummyData.js";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import IncRecordList from "../components/IncRecordList.jsx";
 import RecordInput from "../components/RecordInput.jsx";
 import { Helmet } from "react-helmet-async";
+import { GetDivisions } from "../hooks/GetDivisions.jsx";
+import { GetRecords } from "../hooks/GetRecords.jsx";
+import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
+import { useAuth } from "../context/AuthContext";
 
-// Derive unique division list from data
-const ALL_DIVISIONS = [...new Set(dummyData.map((r) => r.division))].sort();
 
 function CreateEditTrans() {
   const { navData, clearRouteData } = useNavigationData();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
+  const { divisions } = GetDivisions();
+  const { records } = GetRecords();
+
+  // ── All API calls now come from the hook, no direct api imports needed ──────
+  const {
+    getTransmissionById,
+    createTransmission,
+    updateTransmission,
+    addRecord,
+    removeRecord,
+  } = GetTransmissions();
+  
+
+  const ALL_DIVISIONS = divisions.map((div) => div.division);
+
+  // ── Form state ──────────────────────────────────────────────────────────────
   const [includedRecords, setIncludedRecords] = useState([]);
-  const [selectedDivisions, setSelectedDivisions] = useState([]);
+  
+  // Store both id and name since DB needs division_id (int), UI shows name
+  const [selectedDivision, setSelectedDivision] = useState({
+    id: null,
+    name: "",
+  });
   const [divisionInput, setDivisionInput] = useState("");
 
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
   const isEdit = navData?.mode === "edit";
-  const titlePrefix =
-    navData?.mode === "edit"
-      ? "Edit"
-      : navData?.mode === "create"
-        ? "Create"
-        : "No Nav Data";
+  const titlePrefix = isEdit
+    ? "Edit"
+    : navData?.mode === "create"
+      ? "Create"
+      : "No Nav Data";
   const pageTitle = `${titlePrefix} Transmission`.trim();
 
-  // On edit mode: pre-populate records and divisions from transId
+  // ── Pre-populate on edit ────────────────────────────────────────────────────
+  const loadTransmissionForEdit = useCallback(
+    async (transId) => {
+      try {
+        setIsFetching(true);
+        setFetchError(null);
+
+        // Uses hook method instead of direct api call
+        const result = await getTransmissionById(transId);
+
+        if (!result.success) {
+          setFetchError(result.error);
+          return;
+        }
+
+        const trans = result.data;
+        if (!trans) return;
+
+        // Match division_id to get both id and name
+        const match = divisions.find(
+          (d) => d.division_id === trans.division_id,
+        );
+        if (match) {
+          setSelectedDivision({ id: match.division_id, name: match.division });
+          setDivisionInput(match.division);
+        }
+
+        // Pre-populate included records
+        if (trans.records && trans.records.length > 0) {
+          setIncludedRecords(
+            trans.records.map((r, index) => ({
+              ...r,
+              itemNum: index + 1,
+            })),
+          );
+        }
+      } catch (err) {
+        setFetchError(err.message || "Failed to load transmission data");
+      } finally {
+        setIsFetching(false);
+      }
+    },
+    [divisions, getTransmissionById],
+  );
+  // divisions in deps so division matching works after they load
+
   useEffect(() => {
-    console.log("navData:", navData);
-    console.log("useEffect fired", isEdit, navData?.trans_id);
-    if (isEdit && navData?.trans_id) {
-      const matchingRecords = dummyData
-        .filter((r) => r.trans_id === navData.trans_id)
-        .map((r, index) => ({
-          recordId: r.record_id,
-          title: r.record_titles,
-          division: r.division,
-          itemNum: index + 1,
-        }));
-      console.log("matchingRecords:", matchingRecords);
-      setIncludedRecords(matchingRecords);
-
-      // Pre-populate divisions from the matched records
-      const divisions = [...new Set(matchingRecords.map((r) => r.division))];
-      setSelectedDivisions(divisions);
+    if (isEdit && navData?.transId) {
+      loadTransmissionForEdit(navData.transId);
     }
-  }, [isEdit, navData?.trans_id]);
+  }, [isEdit, navData?.transId, loadTransmissionForEdit]);
 
-  if (!navData) {
-    return <h1>No NavData</h1>;
-  }
+  if (!navData) return <h1>No NavData</h1>;
+  if (isFetching) return <p>Loading transmission data...</p>;
+  if (fetchError) return <p>Error: {fetchError}</p>;
 
-  // --- Division tag handlers ---
-  const addDivision = (div) => {
-    if (!div || selectedDivisions.includes(div)) return;
-    setSelectedDivisions((prev) => [...prev, div]);
-    setDivisionInput("");
-  };
-
-  const removeDivision = (div) => {
-    setSelectedDivisions((prev) => prev.filter((d) => d !== div));
+  // ── Division handlers ───────────────────────────────────────────────────────
+  const handleDivisionSelect = (divisionName) => {
+    const match = divisions.find((d) => d.division === divisionName);
+    if (match) {
+      setSelectedDivision({ id: match.division_id, name: match.division });
+      setDivisionInput(match.division);
+    }
   };
 
   const handleDivisionKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      addDivision(divisionInput.trim());
+      handleDivisionSelect(divisionInput.trim());
     }
   };
 
-  // --- Record handlers ---
+  const clearDivision = () => {
+    setSelectedDivision({ id: null, name: "" });
+    setDivisionInput("");
+  };
+
+  // ── Record handlers ─────────────────────────────────────────────────────────
   const addIncludedRecords = (recordsArray) => {
     if (!recordsArray?.length) return;
     setIncludedRecords((prev) => {
-      const existings = new Set(prev.map((r) => r.record_id));
-      const newUnique = recordsArray.filter((r) => !existings.has(r.record_id));
+      const existing = new Set(prev.map((r) => r.record_id));
+      const newUnique = recordsArray.filter((r) => !existing.has(r.record_id));
       const combined = [...prev, ...newUnique];
       return combined.map((record, index) => ({
         ...record,
@@ -87,27 +146,87 @@ function CreateEditTrans() {
   };
 
   const delItm = (id) => {
-    const items = includedRecords.filter((record) => record.record_id !== id);
-    setIncludedRecords(
-      items.map((record, index) => ({
+    setIncludedRecords((prev) => {
+      const filtered = prev.filter((record) => record.record_id !== id);
+      return filtered.map((record, index) => ({
         ...record,
         itemNum: index + 1,
-      })),
-    );
+      }));
+    });
   };
 
-  // Filter recordList by selected divisions (show all if none selected)
-  const filteredRecordList =
-    selectedDivisions.length > 0
-      ? dummyData.filter((r) => selectedDivisions.includes(r.division))
-      : dummyData;
-
-  // --- Form actions ---
-  const handleSave = (e) => {
+  // ── Form submission ─────────────────────────────────────────────────────────
+  const handleSave = async (e) => {
     e.preventDefault();
-    const destination = navData.returnTo;
-    clearRouteData();
-    navigate(destination);
+
+    if (!selectedDivision.id) {
+      alert("Please select a valid division.");
+      return;
+    }
+
+    if (includedRecords.length === 0) {
+      alert("Please add at least one record.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      if (isEdit) {
+        // 1. Update division on the transmission
+        const updateResult = await updateTransmission(navData.transId, {
+          division_id: selectedDivision.id,
+        });
+
+        if (!updateResult.success) {
+          alert(`Failed to update: ${updateResult.error}`);
+          return;
+        }
+
+        // Single call replaces ALL records atomically
+        // No need to manually delete then re-add one by one
+        const replaceResult = await replaceRecords(
+          navData.transId,
+          includedRecords.map((r) => ({
+            record_id: r.record_id,
+            item_no: r.itemNum,
+          })),
+        );
+
+        if (!replaceResult.success) {
+          alert(`Failed to update records: ${replaceResult.error}`);
+          return;
+        }
+      } else {
+        // 1. Create the transmission
+        const createResult = await createTransmission({
+          sent_date: new Date().toISOString().split("T")[0],
+          sd_branch_id: user.branch_id,
+          division_id: selectedDivision.id, // send ID not name
+          p_employee_id: user.employee_id,
+        });
+
+        if (!createResult.success) {
+          alert(`Failed to create: ${createResult.error}`);
+          return;
+        }
+
+        const newTransId = createResult.data.trans_id;
+
+        // 2. Add all included records
+        for (const record of includedRecords) {
+          await addRecord(newTransId, record.record_id, record.itemNum);
+        }
+      }
+
+      const destination = navData.returnTo;
+      clearRouteData();
+      navigate(destination);
+    } catch (err) {
+      alert(`Failed to save: ${err.message}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -116,16 +235,16 @@ function CreateEditTrans() {
     navigate(destination);
   };
 
-  // Shared form JSX (used for both create and edit)
+  
+
+  // ── Form JSX ────────────────────────────────────────────────────────────────
   const formContent = (
     <div className="createBox">
       <form id="createForm" method="post">
-        {/* Division multi-select */}
+        {/* Division - single select */}
         <div className="r2">
           <div className="item">
-            <label className="transLabel">Division(s):</label>
-
-            {/* Dropdown + text input combo */}
+            <label className="transLabel">Division:</label>
             <div className="divisionInputRow">
               <input
                 type="text"
@@ -138,53 +257,41 @@ function CreateEditTrans() {
                 id="divisionInput"
               />
               <datalist id="divisionOptions">
-                {ALL_DIVISIONS.filter(
-                  (d) => !selectedDivisions.includes(d),
-                ).map((d) => (
+                {ALL_DIVISIONS.map((d) => (
                   <option key={d} value={d} />
                 ))}
               </datalist>
               <button
                 type="button"
                 className="btnCancel btnAddDiv"
-                onClick={() => addDivision(divisionInput.trim())}
+                onClick={() => handleDivisionSelect(divisionInput.trim())}
               >
-                Add
+                Set
               </button>
+              {selectedDivision.id && (
+                <button
+                  type="button"
+                  className="btnCancel"
+                  onClick={clearDivision}
+                >
+                  Clear
+                </button>
+              )}
             </div>
-          </div>
-        </div>
-        <div className="r2">
-          <div className="item">
-            {/* Tag chips */}
-            <div className="divisionTags">
-              {selectedDivisions.map((div) => (
-                <span key={div} className="divisionTag">
-                  {div}
-                  <button
-                    type="button"
-                    className="divisionTagRemove"
-                    onClick={() => removeDivision(div)}
-                    aria-label={`Remove ${div}`}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            {selectedDivisions.length > 0 && (
+
+            {selectedDivision.name && (
               <p className="divisionHint">
-                Showing records from:{" "}
-                <strong>{selectedDivisions.join(", ")}</strong>
+                Division: <strong>{selectedDivision.name}</strong>
               </p>
             )}
           </div>
         </div>
-        {/* Record picker — filtered by selected divisions */}
+
+        {/* Record picker */}
         <div className="r2">
           <div className="item">
             <RecordInput
-              recordList={filteredRecordList}
+              recordList={records}
               addIncludedRecords={addIncludedRecords}
             />
           </div>
@@ -192,20 +299,26 @@ function CreateEditTrans() {
 
         {/* Included records list */}
         <div className="r2">
-          <IncRecordList includedRecords={includedRecords} delItm={delItm} />
-        </div>
-
-        <div className="r2">
-          <div className="item"></div>
-          <div className="item"></div>
+          <IncRecordList
+            includedRecords={includedRecords}
+            delItm={delItm}
+            transId={navData?.transId}
+          />
         </div>
 
         <div className="buttonCont">
           <input
             type="submit"
-            defaultValue="Send For Approval"
+            value={
+              isSaving
+                ? "Saving..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Send For Approval"
+            }
             className="btnGreen"
             onClick={handleSave}
+            disabled={isSaving}
           />
           <button className="btnCancel" type="button" onClick={handleCancel}>
             CANCEL
@@ -220,7 +333,9 @@ function CreateEditTrans() {
       <Helmet>
         <title>{pageTitle}</title>
       </Helmet>
-      <h1 className="ceTitle">{navData.mode === "create" ? "Send" : "Edit"} Transmission</h1>
+      <h1 className="ceTitle">
+        {navData.mode === "create" ? "Send" : "Edit"} Transmission
+      </h1>
       {(navData.mode === "create" || navData.mode === "edit") && formContent}
     </>
   );

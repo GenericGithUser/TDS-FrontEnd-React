@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/client";
 
@@ -14,10 +14,15 @@ export function GetTransmissionStats() {
       setError(null);
 
       let result;
-      // Branch staff get their own branch stats
-      result = await api.get(
-        `/transmissions/branch/stats/${parseInt(user.branch_id)}`,
-      );
+      if (user.is_admin || user.is_head_office) {
+        result = await api.get("/transmissions/stats");
+      }
+      else{
+        result = await api.get(
+          `/transmissions/branch/stats/${parseInt(user.branch_id)}`,
+        );
+      }
+      
       setStats(result.data ?? []);
     } catch (err) {
       // FIXED: was 'error', referenced as 'err'

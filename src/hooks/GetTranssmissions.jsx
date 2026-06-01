@@ -1,0 +1,193 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/client";
+
+
+
+export function GetTransmissions(searchQuery = "") {
+  const { user } = useAuth();
+  const [transmissions, setTransmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchTransmissions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let result;
+      if (searchQuery) {
+        if (user.is_admin || user.is_head_office) {
+          result = await api.get(
+            `/transmissions/search?q=${encodeURIComponent(searchQuery)}`,
+          );
+        } else {
+          result = await api.get(
+            `/transmissions/search?q=${encodeURIComponent(searchQuery)}&branchId=${user.branch_id}`,
+          );
+        }
+      } else if (user.is_admin || user.is_head_office) {
+        // Admin and head office see all transmissions
+        result = await api.get("/transmissions");
+      } else {
+        // Branch staff only see their own branch
+        result = await api.get(`/transmissions/branch/${user.branch_id}`);
+      }
+
+      // client.js interceptor already unwraps res.data
+      // so result is { success, data } — not { data: { success, data } }
+      setTransmissions(result.data ?? []);
+    } catch (err) {
+      setError(err.message || "Failed to load transmissions");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery, user.branch_id, user.is_admin, user.is_head_office]);
+
+  useEffect(() => {
+    fetchTransmissions();
+  }, [fetchTransmissions]);
+
+  const createTransmission = useCallback(async (transmissionData) => {
+    try {
+      const result = await api.post("/transmissions", transmissionData);
+      if (result.success) {
+        setTransmissions((prev) => [result.data, ...prev]);
+        return { success: true, data: result.data };
+      }
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  // ── Get single transmission (for edit pre-population) ─────────────────────
+  const getTransmissionById = useCallback(async (transId) => {
+    try {
+      const result = await api.get(`/transmissions/${transId}`);
+      return { success: true, data: result.data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  // ── Update division (edit mode) ───────────────────────────────────────────
+  const updateTransmission = useCallback(async (transId, updateData) => {
+    try {
+      const result = await api.put(`/transmissions/${transId}`, updateData);
+      if (result.success) {
+        setTransmissions((prev) =>
+          prev.map((t) => (t.trans_id === transId ? result.data : t)),
+        );
+        return { success: true, data: result.data };
+      }
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  // ── Update status ─────────────────────────────────────────────────────────
+  const updateStatus = useCallback(
+    async (transId, status, receiverId = null) => {
+      try {
+        const result = await api.patch(`/transmissions/${transId}/status`, {
+          status,
+          r_employee_id: receiverId,
+        });
+        if (result.success) {
+          setTransmissions((prev) =>
+            prev.map((t) => (t.trans_id === transId ? result.data : t)),
+          );
+          return { success: true };
+        }
+      } catch (err) {
+        return { success: false, error: err.message };
+      }
+    },
+    [],
+  );
+
+  const updateStatusApprover = useCallback(
+    async (transId, status, approverId = null) => {
+      try {
+        const result = await api.patch(`/transmissions/approver/${transId}/`, {
+          status,
+          a_employee_id: approverId,
+        });
+        if (result.success) {
+          setTransmissions((prev) =>
+            prev.map((t) => (t.trans_id === transId ? result.data : t)),
+          );
+          return { success: true };
+        }
+      } catch (err) {
+        return { success: false, error: err.message };
+      }
+    },
+    [],
+  );
+
+  // ── Add record to transmission ────────────────────────────────────────────
+  const addRecord = useCallback(async (transId, recordId, itemNo) => {
+    try {
+      const result = await api.post(`/transmissions/${transId}/records`, {
+        recordId,
+        itemNo,
+      });
+      return { success: result.success };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+  
+  // GetTransmissions.jsx - add replaceRecords method
+  const replaceRecords = useCallback(async (transId, items) => {
+    try {
+      const result = await api.put(`/transmissions/${transId}/records`, {
+        items,
+      });
+      return { success: result.success };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  // ── Remove record from transmission ───────────────────────────────────────
+  const removeRecord = useCallback(async (transId, recordId) => {
+    try {
+      const result = await api.delete(
+        `/transmissions/${transId}/records/${recordId}`,
+      );
+      return { success: result.success };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  // ── Delete transmission ───────────────────────────────────────────────────
+  const deleteTransmission = useCallback(async (transId) => {
+    try {
+      const result = await api.delete(`/transmissions/${transId}`);
+      if (result.success) {
+        setTransmissions((prev) => prev.filter((t) => t.trans_id !== transId));
+        return { success: true };
+      }
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  return {
+    transmissions,
+    loading,
+    error,
+    refetch: fetchTransmissions,
+    getTransmissionById,
+    createTransmission,
+    updateTransmission,
+    updateStatus,
+    updateStatusApprover,
+    addRecord,
+    removeRecord,
+    deleteTransmission,
+  };
+}
