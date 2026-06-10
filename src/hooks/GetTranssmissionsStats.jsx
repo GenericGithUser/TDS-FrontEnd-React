@@ -9,6 +9,7 @@ export function GetTransmissionStats() {
   const [error, setError] = useState(null);
 
   const fetchStats = useCallback(async () => {
+    if (!user.branch_id && !user.is_admin) return;
     try {
       setLoading(true);
       setError(null);

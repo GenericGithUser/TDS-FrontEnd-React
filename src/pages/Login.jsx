@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Helmet } from 'react-helmet-async';
+import '../styles/loading.css'
+import toast from 'react-hot-toast';
 
 function Login(){
 
@@ -26,20 +28,27 @@ function Login(){
         }
         else{
             setError(result.error);
+            toast.error(error, {
+              position: "top-center",
+              background: "#f89d9d",
+              color: "#ff5757",
+            });
         }
 
          setIsLoading(false);
 
     }
+      
+    
 
     return (
       <>
         <Helmet>
           <title>MRM-TDS | Login</title>
         </Helmet>
-        <div className="content">
+        <div className="content fade-in">
           <div className="main">
-            <div className="loginForm">
+            <div className="loginForm fade-in">
               <img
                 src="./assets/Maynilad2024.svg"
                 alt="mayniladLogo"
@@ -47,7 +56,6 @@ function Login(){
               />
               <h2 className="txtLogo">RECORDS TRANSMISSION SYSTEM</h2>
               <form onSubmit={handleSubmit} className="innerForm">
-                {error && <p className="error">{error}</p>}
                 <label htmlFor="idInput" className="lblInput">
                   Employee ID
                 </label>

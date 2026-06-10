@@ -27,7 +27,6 @@ function RecordItem({ recordData, delItm, transId }){
       fromTransEdit: 1,
       returnTo: location,
     };
-    console.log("TRIGGERED");
     setRouteData(sendData);
     navigate("/dashboard/home/edit/record");
   };
@@ -36,7 +35,9 @@ function RecordItem({ recordData, delItm, transId }){
         <div className="includedRecord">
           <div className="recordData">
             <span className="num1">{recordData.itemNum} </span>
-            <span className="id">{recordData.record_id} </span>
+            <span className="id">
+              {`MEM-${String(recordData.record_id).padStart(4, "0")}`}
+            </span>
             <span className="title">{recordData.records_title}</span>
 
             <button className="editItemButton" onClick={handleEditRecord}>

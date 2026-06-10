@@ -3,21 +3,21 @@ import api from "../api/client";
 
 export function GetChecklistItems(){
     const [checkItems, setCheckItems] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [checkLoading, setCheckLoading] = useState(false);
+    const [checkError, setCheckError] = useState(null);
 
     const fetchChecklist = useCallback(
         async (recordId) => {
             try {
-                setLoading(true);
-                setError(null);
+                setCheckLoading(true);
+                setCheckError(null);
                 let result = await api.get(`/checklists/record/${recordId}`);
                 
                 setCheckItems(result.data ?? []);
             } catch (error) {
-                setError(error.message);
+                setCheckError(error.message);
             } finally{
-                setLoading(false);
+                setCheckLoading(false);
             }
             
         }, []
@@ -26,17 +26,17 @@ export function GetChecklistItems(){
      const instantFetchChecklist = useCallback(async (recordId) => {
        if (!recordId) return []; // guard against undefined
        try {
-         setLoading(true);
-         setError(null);
+         setCheckLoading(true);
+         setCheckError(null);
          const result = await api.get(`/checklists/record/${recordId}`);
          const data = result.data ?? [];
          setCheckItems(data);
          return data; // ← caller can use this directly
        } catch (err) {
-         setError(err.message);
+         setCheckError(err.message);
          return [];
        } finally {
-         setLoading(false);
+         setCheckLoading(false);
        }
      }, []);
 
@@ -65,6 +65,11 @@ export function GetChecklistItems(){
         return { success: false, error: err.message };
       }
     }, []);
-    return { checkItems, loading, error, fetchChecklist, createChecklist, updateChecklist, instantFetchChecklist}
+
+     const clearChecklist = useCallback(() => {
+       setCheckItems([]);
+       setCheckError(null);
+     }, []);
+    return { checkItems, checkLoading, checkError, fetchChecklist, createChecklist, updateChecklist, instantFetchChecklist, clearChecklist}
 
 }

@@ -52,6 +52,7 @@ body {
 
 .btnFin {
   background-color: var(--light-green) !important;
+  transition: all 0.2s ease-in-out;
 }
 
 .btnSen {
@@ -213,4 +214,7 @@ body {
 
 .btnGreen:active {
   background-color: var(--dark-blue);
+}
+.btnFin:hover{
+  background-color: var(--yellow) !important;
 }

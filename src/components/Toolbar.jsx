@@ -140,7 +140,7 @@ function Toolbar(){
                     </>
                   )}
                 </NavLink>
-                {/* <NavLink to={"branches"} className="aNavItem">
+                <NavLink to={"branches"} className="aNavItem">
                   {({ isActive }) => (
                     <>
                       <BsBuildingsFill
@@ -151,8 +151,8 @@ function Toolbar(){
                       <p>Branches</p>
                     </>
                   )}
-                </NavLink> */}
-                <NavLink to={"tickets"} className="aNavItem">
+                </NavLink>
+                {/* <NavLink to={"tickets"} className="aNavItem">
                   {({ isActive }) => (
                     <>
                       <LuTicketX
@@ -163,7 +163,7 @@ function Toolbar(){
                       <p>Tickets</p>
                     </>
                   )}
-                </NavLink>
+                </NavLink> */}
               </>
             )}
           </div>

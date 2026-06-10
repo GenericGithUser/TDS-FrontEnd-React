@@ -21,7 +21,7 @@ function summaryBoard(){
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (
-                    <StatsSkeleton />
+                    <StatsSkeleton count={1} />
                   ) : (
                     stats.Finished
                   )}
@@ -33,7 +33,7 @@ function summaryBoard(){
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (
-                    <StatsSkeleton />
+                    <StatsSkeleton count={1} />
                   ) : (
                     stats.Sent
                   )}
@@ -45,7 +45,7 @@ function summaryBoard(){
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (
-                    <StatsSkeleton />
+                    <StatsSkeleton count={1} />
                   ) : (
                     stats.Incomplete
                   )}
@@ -58,7 +58,7 @@ function summaryBoard(){
                     {error ? (
                       <p>{error}</p>
                     ) : loading ? (
-                      <StatsSkeleton />
+                      <StatsSkeleton count={1} />
                     ) : (
                       stats.Pending
                     )}

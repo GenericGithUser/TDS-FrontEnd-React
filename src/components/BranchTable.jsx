@@ -1,12 +1,13 @@
 import "../styles/tableTemp.css";
 import "../styles/transtable.css";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import UsableDialog from "./usableDialog";
 import DUMMY_USR from "../assets/dummyUserData";
 import { GetUsers } from "../hooks/GetUsers";
+import { GetBranch } from "../hooks/GetBranch";
 import { TableSkeleton, ErrorMessage } from "./Loading";
 
-function UserTable() {
+function BranchTable() {
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogData, setDialogData] = useState(null);
@@ -14,8 +15,8 @@ function UserTable() {
     const [onRecords, setOnRecords] = useState(false);
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [includeDeleted, setIncludeDeleted] = useState(false);
-    const {users, loading, error, refetch} = GetUsers(searchQuery, includeDeleted);
+    const {users, loading, error} = GetUsers();
+    const { branches, branchError, branchLoading  } = GetBranch(searchQuery);
 
     const openDialog = (item, delBtn) => {
       
@@ -43,7 +44,6 @@ function UserTable() {
       }
     };
 
-
     const [sortConfig, setSortConfig] = useState({
           key: null,
           direction: "asc",
@@ -66,8 +66,8 @@ function UserTable() {
         };
     
         // Sort the data before slicing it
-        const sortedUsers = useMemo(() => {
-          let sorted = [...users];
+        const sortedBranch = useMemo(() => {
+          let sorted = [...branches];
           if (sortConfig.key) {
             sorted.sort((a, b) => {
               let valA = a[sortConfig.key];
@@ -115,7 +115,7 @@ function UserTable() {
             });
           }
           return sorted;
-        }, [users, sortConfig]);
+        }, [branches, sortConfig]);
     
 
     
@@ -123,7 +123,7 @@ function UserTable() {
       <>
         <div className="searcherSorter">
           <form onSubmit={handleSearch}>
-            <label htmlFor="searchBar">Search For a User</label>
+            <label htmlFor="searchBar">Search For a Branch</label>
             <input
               type="search"
               name="searchBar"
@@ -132,9 +132,6 @@ function UserTable() {
               onChange={handleSearchChange}
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
-            <br />
-            <label htmlFor="incDisabled">Include Disabled?</label>
-            <input type="checkbox" name="incDisabled" id="incDisabled" value={includeDeleted} onChange={(e)=>{setIncludeDeleted(e.target.checked); refetch()}}/>
           </form>
         </div>
         <div className="transTable">
@@ -142,33 +139,34 @@ function UserTable() {
             <colgroup>
               <col style={{ width: "10vw" }} />
               <col style={{ width: "18vw" }} />
-              <col style={{ width: "10vw" }} />
+              <col style={{ width: "15vw" }} />
+              <col style={{ width: "15vw" }} />
             </colgroup>
             <thead className="transTableHead">
               <tr>
                 <th
                   style={{ cursor: "pointer" }}
-                  onClick={() => requestSort("user_id")}
+                  onClick={() => requestSort("branch_id")}
                 >
-                  Employee ID{getSortIndicator("user_id")}
-                </th>
-                <th
-                  style={{ cursor: "pointer" }}
-                  onClick={() => requestSort("emp_name")}
-                >
-                  Name{getSortIndicator("emp_name")}
-                </th>
-                <th
-                  style={{ cursor: "pointer" }}
-                  onClick={() => requestSort("usr_role")}
-                >
-                  Role{getSortIndicator("usr_role")}
+                  Branch ID{getSortIndicator("branch_id")}
                 </th>
                 <th
                   style={{ cursor: "pointer" }}
                   onClick={() => requestSort("office_dept")}
                 >
                   Office{getSortIndicator("office_dept")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("business_area")}
+                >
+                  Business Area{getSortIndicator("business_area")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("employee_count")}
+                >
+                  Number of Employees{getSortIndicator("employee_count")}
                 </th>
 
                 {/* <th>Employee ID</th>
@@ -179,28 +177,28 @@ function UserTable() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {branchLoading ? (
                 // Skeleton stays inside the table - no layout shift
                 <TableSkeleton rowCount={5} colCount={8} />
-              ) : error ? (
+              ) : branchError ? (
                 <tr>
                   <td colSpan={8}>
-                    <ErrorMessage message={error} />
+                    <ErrorMessage message={branchError} />
                   </td>
                 </tr>
-              ) : users.length === 0 ? (
+              ) : branches.length === 0 ? (
                 <tr>
                   <td colSpan={9} style={{ textAlign: "center" }}>
                     <h1>No Data Available</h1>
                   </td>
                 </tr>
               ) : (
-                sortedUsers.map((data) => (
-                  <tr key={data?.user_id} className="fade-in">
-                    <td>{`MEM-${String(data?.user_id).padStart(4, "0")}`}</td>
-                    <td>{data?.emp_name}</td>
-                    <td>{data?.usr_role}</td>
-                    <td>{data?.office_dept}</td>
+                sortedBranch.map((data) => (
+                  <tr key={data.branch_id} className="fade-in">
+                    <td>{`MB-${String(data.branch_id).padStart(4, "0")}`}</td>
+                    <td>{data.office_dept}</td>
+                    <td>{data.business_area}</td>
+                    <td>{data.employee_count}</td>
                     <td>
                       <>
                         <button
@@ -229,4 +227,4 @@ function UserTable() {
     );
 }
 
-export default UserTable;
+export default BranchTable;

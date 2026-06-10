@@ -7,6 +7,9 @@ import { useAuth } from '../context/AuthContext'
 import { Helmet } from 'react-helmet-async'
 import { GetRecords } from '../hooks/GetRecords'
 import { GetChecklistItems } from '../hooks/GetChecklistItems'
+import '../styles/loading.css'
+
+const CODE_MAP = ["BA-NMN", "BA-NSCO", "BA-NQC", "BA-WL1C", "BA-WL2C", "BA-SMNL", "BA-CAV", "BA-SQC", "BA-PPM", "BA-MVAL", "BA-MLP"];
 
 function CreateEditRecord() {
     const { navData, clearRouteData, setRouteData } = useNavigationData();
@@ -19,7 +22,8 @@ function CreateEditRecord() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { records, loading, error, createRecord, updateRecord} = GetRecords();
-    const { checkItems, createChecklist, updateChecklist } = GetChecklistItems();
+    
+
     
 
     const isEdit = navData?.mode === "edit";
@@ -126,6 +130,12 @@ function CreateEditRecord() {
         setRemarks(navData?.data?.remarks);
       }, [])
     }
+
+    if(navData.mode === "create"){
+      useEffect(()=>{
+        setCode(CODE_MAP[parseInt(user.branch_id)-1]);
+      },[])
+    }
     
     return (
       <>
@@ -137,8 +147,8 @@ function CreateEditRecord() {
           {navData.mode === "edit" && <>Edit</>} Record
         </h1>
         {navData.mode === "create" && (
-          <div className="createBox">
-            <form onSubmit={handleSave}>
+          <div className="fade-in createBox">
+            <form onSubmit={handleSave} className="fade-in">
               <div className="r1">
                 <div className="item">
                   <label htmlFor="recTitle" className="recLabel">
@@ -165,6 +175,7 @@ function CreateEditRecord() {
                     className="recInput"
                     onChange={(e) => setCode(e.target.value)}
                     value={code}
+                    placeholder={`${CODE_MAP[parseInt(user.branch_id)-1]}0000000000`}
                     required
                   />
                 </div>
@@ -263,7 +274,6 @@ function CreateEditRecord() {
                     className="recInput"
                     onChange={(e) => setTitle(e.target.value)}
                     value={title}
-                    
                   />
                 </div>
                 <div className="item">
@@ -291,7 +301,7 @@ function CreateEditRecord() {
                       name="desc"
                       id="recDesc"
                       className="recInput special"
-                      maxLength="300"                    
+                      maxLength="300"
                       onChange={(e) => setDescription(e.target.value)}
                       value={description}
                     ></textarea>
@@ -350,7 +360,11 @@ function CreateEditRecord() {
                   defaultValue="SAVE EDITS"
                   className="btnGreen"
                 ></input>
-                <button className="btnCancel" type='button' onClick={handleCancel}>
+                <button
+                  className="btnCancel"
+                  type="button"
+                  onClick={handleCancel}
+                >
                   CANCEL
                 </button>
               </div>

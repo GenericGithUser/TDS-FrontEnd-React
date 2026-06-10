@@ -1,6 +1,6 @@
 import "../styles/tableTemp.css";
 import '../styles/transtable.css';
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import UsableDialog from "./usableDialog";
 // import dummyData from "../assets/dummyData.js";
 import { useNavigate } from "react-router-dom";
@@ -69,10 +69,73 @@ function TransTable() {
       }
     }
 
-    // const ddummyData = user.usr_role != "RECEIVER" ? dummyData : dummyData.filter(data=> data.type != "pending");
-    //  if (loading) return <p>Loading transmissions...</p>;
-    //  if (error) return <p>Error: {error}</p>;
-    
+    const [sortConfig, setSortConfig] = useState({
+      key: null,
+      direction: "asc",
+    });
+
+    const requestSort = (key) => {
+      let direction = "asc";
+      // Toggle direction if the same column is clicked again
+      if (sortConfig.key === key && sortConfig.direction === "asc") {
+        direction = "desc";
+      }
+      setSortConfig({ key, direction });
+    };
+
+    const getSortIndicator = (key) => {
+      if (sortConfig.key === key) {
+        return sortConfig.direction === "asc" ? " ▲" : " ▼";
+      }
+      return " ⇅";
+    };
+
+    // Sort the data before slicing it
+    const sortedTransmissions = useMemo(() => {
+      let sorted = [...transmissions];
+      if (sortConfig.key) {
+        sorted.sort((a, b) => {
+          let valA = a[sortConfig.key];
+          let valB = b[sortConfig.key];
+
+          // Handle null/undefined values
+          if (valA == null) valA = "";
+          if (valB == null) valB = "";
+
+          // Special handling for dates to ensure chronological sorting
+          if (sortConfig.key === "sent_date") {
+            const dateA = new Date(valA).getTime();
+            const dateB = new Date(valB).getTime();
+            if (!isNaN(dateA) && !isNaN(dateB)) {
+              valA = dateA;
+              valB = dateB;
+            }
+          } else {
+            // Check if both are valid numbers to sort numerically
+            const isNumA = !isNaN(valA) && String(valA).trim() !== "";
+            const isNumB = !isNaN(valB) && String(valB).trim() !== "";
+
+            if (isNumA && isNumB) {
+              valA = Number(valA);
+              valB = Number(valB);
+            } else {
+              // Fallback to alphabetical string comparison
+              valA = String(valA).toLowerCase();
+              valB = String(valB).toLowerCase();
+            }
+          }
+
+          if (valA < valB) {
+            return sortConfig.direction === "asc" ? -1 : 1;
+          }
+          if (valA > valB) {
+            return sortConfig.direction === "asc" ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+      return sorted;
+    }, [transmissions, sortConfig]);
 
     return (
       <>
@@ -113,17 +176,68 @@ function TransTable() {
             </colgroup>
             <thead className="transTableHead">
               <tr>
-                <th>TransmissionsID</th>
-                <th>RecordID</th>
+                {/* Added onClick and cursor style to make headers clickable */}
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("trans_id")}
+                >
+                  TransmissionsID{getSortIndicator("trans_id")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("record_id")}
+                >
+                  RecordID{getSortIndicator("record_id")}
+                </th>
                 {(user.usr_role === "ADMIN" ||
-                  user.usr_role === "RECEIVER") && <th>Office</th>}
-                <th>Division</th>
-                <th>Item No.</th>
-                <th>Title</th>
-                <th>Date Sent</th>
+                  user.usr_role === "RECEIVER") && (
+                  <th
+                    style={{ cursor: "pointer" }}
+                    onClick={() => requestSort("office_dept")}
+                  >
+                    TransmissionsID{getSortIndicator("office_dept")}
+                  </th>
+                )}
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("division")}
+                >
+                  Division{getSortIndicator("division")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("item_no")}
+                >
+                  Item No.{getSortIndicator("item_no")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("record_titles")}
+                >
+                  Title{getSortIndicator("record_titles")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("sent_date")}
+                >
+                  Date Sent{getSortIndicator("sent_date")}
+                </th>
                 {(user.usr_role === "ADMIN" ||
-                  user.usr_role === "RECEIVER") && <th>Date Received</th>}
-                <th>Status</th>
+                  user.usr_role === "RECEIVER") && (
+                  <th
+                    style={{ cursor: "pointer" }}
+                    onClick={() => requestSort("date_time_received")}
+                  >
+                    Date Received{getSortIndicator("date_time_received")}
+                  </th>
+                )}
+
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("record_status")}
+                >
+                  Status{getSortIndicator("record_status")}
+                </th>
                 <th>⠀⠀⠀⠀⠀⠀⠀⠀⠀</th>
               </tr>
             </thead>
@@ -146,7 +260,7 @@ function TransTable() {
                   </td>
                 </tr>
               ) : (
-                transmissions.slice(0, 10).map((data) => (
+                sortedTransmissions.slice(0, 10).map((data) => (
                   <tr key={data.record_id} className="fade-in">
                     <td>{data.trans_id}</td>
                     <td>{data.record_id}</td>

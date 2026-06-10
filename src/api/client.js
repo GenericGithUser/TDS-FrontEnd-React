@@ -22,17 +22,28 @@ api.interceptors.request.use((config) => {
 // ── Response interceptor ──────────────────────────────────────────────────────
 // Unwraps res.data so result is already { success, data, message }
 api.interceptors.response.use(
-  (res) => res.data,
+  (res) => {
+    // ✅ Safely unwrap & ensure consistent shape
+    const data = res.data;
+    if (!data || typeof data !== 'object') {
+      return { success: true, data: null, message: 'Operation successful' };
+    }
+    return data;
+  },
   (err) => {
     const status = err.response?.status;
     const msg = err.response?.data?.message || 'Network error';
 
     if (status === 401) {
       // Token expired or invalid
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      navigateB('/login', { replace: true });
-      return Promise.reject({ success: false, message: 'Session expired' });
+       const isLoginRequest = err.config?.url?.includes('/auth/login');
+
+            if (!isLoginRequest) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                navigateB('/login', { replace: true });
+            }
+      return Promise.reject({ success: false, message: msg });
     }
 
     if (status === 403) {
@@ -43,5 +54,6 @@ api.interceptors.response.use(
     return Promise.reject(err.response?.data || { success: false, message: 'Unknown error' });
   }
 );
+
 
 export default api;

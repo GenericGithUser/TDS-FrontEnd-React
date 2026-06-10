@@ -1,11 +1,14 @@
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import { GetChecklistItems } from "../hooks/GetChecklistItems";
 import { GetRecords } from "../hooks/GetRecords";
+import { GetUsers } from "../hooks/GetUsers";
 import { GetTransmissions } from "../hooks/GetTranssmissions";
+import { Spinner } from "./Loading";
+import toast from "react-hot-toast";
 import '../styles/dialog.css'
 
 
@@ -17,21 +20,83 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
     const [isNestedSiblingDialogOpen, setIsNestedSiblingDialogOpen] = useState(false);
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
-    const [missingItems, setMissingItems] = useState([]);
     const { user } = useAuth(); 
     const location = useLocation();
-    const { checkItems, loading, error, fetchChecklist } = GetChecklistItems();
-    const { updateFeedback } = GetRecords();
-    const { updateStatusApprover, updateStatus } = GetTransmissions();
+    const { checkItems, checkLoading, checkError, fetchChecklist, clearChecklist} = GetChecklistItems();
+    const { updateFeedback, deleteRecord } = GetRecords();
+    const [fullTrans, setFullTrans] = useState(null); // full transmission with records[]
+    const [fetchError, setFetchError] = useState(null);
+    const [isFetching, setIsFetching] = useState(false);
+    const [currentIdx, setCurrentIdx] = useState(0); 
+    const [missingItemsMap, setMissingItemsMap] = useState({});
+    const { getTransmissionById, updateStatusApprover, updateStatus, cancelTransmission, loading, error } = GetTransmissions();
     const [feedback, setFeedback] = useState('');
+    const {softDeleteUser, restoreUser} = GetUsers();
 
 
+
+    const fetchTrans = () =>{
+      if (!data?.trans_id) return;
+
+      const load = async () => {
+        setIsFetching(true);
+        setFetchError(null);
+        setCurrentIdx(0); // reset to first record
+
+        const result = await getTransmissionById(data.trans_id);
+
+        if (result.success) {
+          setFullTrans(result.data);
+        } else {
+          setFetchError(result.error);
+        }
+        setIsFetching(false);
+      };
+
+      load();
+    }
+
+    const receiverFetchTrans = () => {
+       if (!data?.trans_id) return;
+
+       const load = async () => {
+         setIsFetching(true);
+         setFetchError(null);
+         setCurrentIdx(0);
+         setMissingItemsMap({}); // reset missing items on new transmission
+
+         const result = await getTransmissionById(data.trans_id);
+
+         if (result.success) {
+           setFullTrans(result.data);
+           // Auto-fetch checklist for first record
+           if (result.data?.records?.length > 0) {
+             fetchChecklist(result.data.records[0].record_id);
+             console.log(result.data.records[0].record_id);
+           }
+         } else {
+           setFetchError(result.error);
+         }
+
+         setIsFetching(false);
+       };
+
+       load();
+    }
+  
     
     useEffect(()=>{
         const dialog = dialogRef.current;
 
         if (!dialog) return;
         if(isOpen){
+            if (data.record_status == "sent" && isDeleteButton === false && onRecords === false &&  user.usr_role === "RECEIVER") {
+              receiverFetchTrans();
+            }
+            else{
+              fetchTrans();
+              
+            }
             dialog.showModal();
         }else{
             dialog.close();
@@ -91,38 +156,70 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
      };
 
      const handleFeedbackSubmit = () => {
-       updateFeedback(data.record_id, {
+       updateFeedback(currentRecord.record_id, {
         feedback: feedback
        });
        setFeedback("");
      };
 
-     const handleIncomplete = () => {
-        if (missingItems.length < 0) {
-            alert("No Missing Items");
-            return
-        }
-        const message = `Missing Items: ${missingItems.map((i) => i).join(",")}`;
-        updateStatus(data.trans_id, "incomplete", null);
-        updateFeedback(data.record_id, {feedback: message});
-        setFeedback("");
-        onClose();
-     }
+     const handleIncomplete = async () => {
+       if (Object.keys(missingItemsMap).length === 0) {
+         alert("No Missing Items");
+         return;
+       }
+
+       try {
+         // 1. Update transmission status to incomplete
+         await updateStatus(data.trans_id, "incomplete", null);
+
+         // 2. Update feedback for EACH record that has missing items
+         for (const [recordId, missingItems] of Object.entries(
+           missingItemsMap,
+         )) {
+           if (missingItems.length === 0) continue; // skip records with no missing items
+
+           const message = `Missing Items: ${missingItems.join(", ")}`;
+
+           await updateFeedback(Number(recordId), { feedback: message });
+         }
+
+         onClose();
+       } catch (err) {
+         alert(`Failed to mark incomplete: ${err.message}`);
+       }
+     };
 
      const handleComplete = () =>{
         updateStatus(data.trans_id, "received", user.employee_id);
         onClose();
      }
 
+       const onMarkIncomplete = () => {
+         handleIncomplete();
+       };
+
+       const onMarkComplete = () => {
+         handleComplete();
+       };
+
      const handleNestedDialogSubmit = (onFeedback) => {
        // Handle the submit logic here
        console.log("Request edits submitted");
        if (onFeedback == 1) {
         handleFeedbackSubmit();
+       }else if (onFeedback == 2){
+          cancelTransmission(data.trans_id, "pending");
        }
+       else if (onFeedback == 3){
+          softDeleteUser(data.user_id);
+       }
+       else if (onFeedback == 4){
+        restoreUser(data.user_id);
+       }
+
        closeNestedDialog();
        // Optionally close the main dialog too
-       // onClose();
+       onClose();
      };
      const handleNestedDialogResolve = (onFeedback) => {
        // Handle the submit logic here
@@ -133,26 +230,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        onClose();
      };
 
-     const handleReTransmit = () =>{
-
-     }
 
      const handleReApprove = () =>{
       updateStatus(data.trans_id, "pending", null);
       onClose();
      }
 
-    const addRemoveMissingItems = (item) => {
-        setMissingItems((prev) => {
-          if (!prev.includes(item)){
-            return [...prev, item];
-          }
-          else{
-            return prev.filter((itm)=> itm !== item);
-          }
-        })
-        
-    };
+     const handleDeletionRecord = (e) =>{
+        e.preventDefault();
+        deleteRecord(data.record_id);
+        onClose();
+     }
+
+   
 
     const checkListButtonOpening = (recordId, type) =>{
         fetchChecklist(recordId);
@@ -161,8 +251,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           
           openNestedDialog();
         } 
-        else if(type === "special") return;
-        else{
+        else if(type === "special") 
+        {
           openSiblingNestedDialog();
         }
     }
@@ -179,6 +269,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       };
       setRouteData(sendData);
       navigate("edit");
+      onClose();
     };
 
     const handleEditUser = (data) => {
@@ -190,6 +281,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       };
       setRouteData(sendData);
       navigate("edit");
+      onClose();
     };
 
     const handleApproval = () => {
@@ -197,6 +289,48 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         console.log("Success?");
         onClose();
     }
+      const records = fullTrans?.records ?? [];
+      const totalRecords = records.length;
+      const currentRecord = records[currentIdx] ?? null;
+
+      const currentMissing = missingItemsMap[currentRecord?.record_id] ?? [];
+
+      // All missing items across ALL records (used for final submit)
+      const allMissingItems = Object.values(missingItemsMap).flat();
+      const hasAnyMissing = allMissingItems.length > 0;
+
+      const goNext = () =>
+        setCurrentIdx((i) => Math.min(i + 1, totalRecords - 1));
+      const goPrev = () => setCurrentIdx((i) => Math.max(i - 1, 0));
+
+      const goNextReceiver = async () => {
+        const nextIdx = Math.min(currentIdx + 1, totalRecords - 1);
+        setCurrentIdx(nextIdx);
+        clearChecklist();
+        await fetchChecklist(records[nextIdx].record_id);
+      };
+
+      const goPrevReceiver = async () => {
+        const prevIdx = Math.max(currentIdx - 1, 0);
+        setCurrentIdx(prevIdx);
+        clearChecklist();
+        await fetchChecklist(records[prevIdx].record_id);
+      };
+
+      // ── Missing item toggle per record ────────────────────────────────────────
+   const addRemoveMissingItems = (itemName) => {
+     const recordId = currentRecord?.record_id;
+     if (!recordId) return;
+
+     setMissingItemsMap((prev) => {
+       const existing = prev[recordId] ?? [];
+       const updated = existing.includes(itemName)
+         ? existing.filter((i) => i !== itemName)
+         : [...existing, itemName];
+       return { ...prev, [recordId]: updated };
+     });
+   };
+
 
     
 
@@ -207,99 +341,136 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           <>
             <dialog className="diagBox" ref={dialogRef}>
               <h1 className="diagTitle">View Transmission</h1>
-              <div className="contents">
-                <table className="contentList">
-                  <tbody>
-                    <tr>
-                      <td className="titleD">TransmissionID: </td>
-                      <td id="transIDData" className="data">
-                        {data.trans_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">RecordID: </td>
-                      <td id="recordIdData" className="data">
-                        {data.record_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Division: </td>
-                      <td id="divData" className="data">
-                        {data.division}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Item No.: </td>
-                      <td id="itemData" className="data">
-                        {data.item_no}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Title: </td>
-                      <td id="titleIDData" className="data">
-                        {data.record_titles}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Description: </td>
-                      <td id="descData" className="data">
-                        {data.rec_description}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Checklist Items: </td>
-                      <td id="checklistData" className="data">
-                        <div
-                          className="btnFin btnCancel restrictSizeBtn"
-                          onClick={() =>
-                            checkListButtonOpening(data.record_id, "received")
-                          }
-                        >
-                          See Checklist Items
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Code </td>
-                      <td id="codeData" className="data">
-                        {data.rec_code}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Retention Period: </td>
-                      <td id="retentionData" className="data">
-                        {data.retention_period}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Prepared By: </td>
-                      <td id="prepData" className="data">
-                        {data.preparer_name}
-                      </td>
-                      <td className="titleD">Approved By: </td>
-                      <td id="apprData" className="data">
-                        {data.approver_name}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Received By: </td>
-                      <td id="receivrData" className="data">
-                        {data.receiver_name}
-                      </td>
-                      <td className="titleD">Received On: </td>
-                      <td id="recDateData" className="data">
-                        {data.recDate}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Sent On: </td>
-                      <td id="sent_date" className="data">
-                        {data.sent_date}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+
+              {isFetching ? (
+                <Spinner text="Loading transmission..." />
+              ) : fetchError ? (
+                <p style={{ color: "red", padding: "20px" }}>{fetchError}</p>
+              ) : (
+                <div className="contents">
+                  <table className="contentList">
+                    <tbody>
+                      {/* ── Transmission-level info (same for all records) ── */}
+                      <tr>
+                        <td className="titleD">Transmission ID:</td>
+                        <td className="data">{fullTrans?.trans_id}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Division:</td>
+                        <td className="data">{fullTrans?.division}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Sent On:</td>
+                        <td className="data">{fullTrans?.sent_date}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Prepared By:</td>
+                        <td className="data">{fullTrans?.preparer_name}</td>
+                        <td className="titleD">Approved By:</td>
+                        <td className="data">{fullTrans?.approver_name}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Received By:</td>
+                        <td className="data">
+                          {fullTrans?.receiver_name ?? "—"}
+                        </td>
+                        <td className="titleD">Received On:</td>
+                        <td className="data">
+                          {fullTrans?.date_time_received ?? "—"}
+                        </td>
+                      </tr>
+
+                      {/* ── Divider ── */}
+                      <tr>
+                        <td colSpan={4}>
+                          <hr style={{ margin: "10px 0", opacity: 0.2 }} />
+                        </td>
+                      </tr>
+
+                      {/* ── Record navigation header ── */}
+                      {totalRecords > 0 && (
+                        <tr>
+                          <td colSpan={4}>
+                            <div className="recordNav">
+                              <button
+                                className="btnCancel"
+                                onClick={goPrev}
+                                disabled={currentIdx === 0}
+                              >
+                                ‹ Prev
+                              </button>
+                              <span className="recordNavLabel">
+                                Record {currentIdx + 1} of {totalRecords}
+                              </span>
+                              <button
+                                className="btnCancel"
+                                onClick={goNext}
+                                disabled={currentIdx === totalRecords - 1}
+                              >
+                                Next ›
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* ── Record-level info (changes with navigation) ── */}
+                      {currentRecord ? (
+                        <>
+                          <tr>
+                            <td className="titleD">Item No.:</td>
+                            <td className="data">{currentRecord.item_no}</td>
+                            <td className="titleD">Record ID:</td>
+                            <td className="data">{currentRecord.record_id}</td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Title:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.records_title}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Description:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.rec_description}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Code:</td>
+                            <td className="data">{currentRecord.rec_code}</td>
+                            <td className="titleD">Retention:</td>
+                            <td className="data">
+                              {currentRecord.retention_period}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Checklist Items:</td>
+                            <td className="data spec" colSpan={3}>
+                              <div
+                                className="btnFin btnCancel restrictSizeBtn"
+                                onClick={() =>
+                                  checkListButtonOpening(currentRecord.record_id, "received")
+                                }
+                              >
+                                See Checklist Items
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            style={{ textAlign: "center", padding: "20px" }}
+                          >
+                            No records attached to this transmission
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
               <button className="btnCancel" onClick={onClose}>
                 OK
               </button>
@@ -309,7 +480,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               {error ? (
                 <p>{error}</p>
               ) : loading ? (
-                <p>Loading</p>
+                <Spinner text="Loading Items..." />
               ) : (
                 checkItems.map((item) => (
                   <div className="chkItem">{item.checklist_item}</div>
@@ -328,107 +499,152 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         return (
           <>
             <dialog className="diagBox" ref={dialogRef}>
-              <h1 className="diagTitle">Check Transmission</h1>
-              <div className="contents">
-                <table className="contentList">
-                  <tbody>
-                    <tr>
-                      <td className="titleD">TransmissionID: </td>
-                      <td id="transIDData" className="data">
-                        {data.trans_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">RecordID: </td>
-                      <td id="recordIdData" className="data">
-                        {data.record_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Division: </td>
-                      <td id="divData" className="data">
-                        {data.division}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Title: </td>
-                      <td id="titleIDData" className="data">
-                        {data.record_titles}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Description: </td>
-                      <td id="descData" className="data">
-                        {data.rec_description}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Checklist Items: </td>
-                      <td id="checklistData" className="data">
-                        <div
-                          className="btnFin btnCancel restrictSizeBtn"
-                          onClick={() =>
-                            checkListButtonOpening(data.record_id, "")
-                          }
-                        >
-                          See Checklist Items
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Code </td>
-                      <td id="codeData" className="data">
-                        {data.rec_code}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Retention Period: </td>
-                      <td id="retentionData" className="data">
-                        {data.retention_period}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Prepared By: </td>
-                      <td id="prepData" className="data">
-                        {data.preparer_name}
-                      </td>
-                      <td className="titleD">Approved By: </td>
-                      <td id="apprData" className="data">
-                        {data.approver_name}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Received By: </td>
-                      <td id="receiverData" className="data">
-                        {data.receiver_name}
-                      </td>
-                      <td className="titleD">Received On: </td>
-                      <td id="recDateData" className="data">
-                        {data.date_time_received}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Sent On: </td>
-                      <td id="sent_date" className="data">
-                        {data.sent_date}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <h1 className="diagTitle">View Transmission</h1>
+
+              {isFetching ? (
+                <Spinner text="Loading transmission..." />
+              ) : fetchError ? (
+                <p style={{ color: "red", padding: "20px" }}>{fetchError}</p>
+              ) : (
+                <div className="contents">
+                  <table className="contentList">
+                    <tbody>
+                      {/* ── Transmission-level info (same for all records) ── */}
+                      <tr>
+                        <td className="titleD">Transmission ID:</td>
+                        <td className="data">{fullTrans?.trans_id}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Division:</td>
+                        <td className="data">{fullTrans?.division}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Sent On:</td>
+                        <td className="data">{fullTrans?.sent_date}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Prepared By:</td>
+                        <td className="data">{fullTrans?.preparer_name}</td>
+                        <td className="titleD">Approved By:</td>
+                        <td className="data">{fullTrans?.approver_name}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Received By:</td>
+                        <td className="data">
+                          {fullTrans?.receiver_name ?? "—"}
+                        </td>
+                        <td className="titleD">Received On:</td>
+                        <td className="data">
+                          {fullTrans?.date_time_received ?? "—"}
+                        </td>
+                      </tr>
+
+                      {/* ── Divider ── */}
+                      <tr>
+                        <td colSpan={4}>
+                          <hr style={{ margin: "10px 0", opacity: 0.2 }} />
+                        </td>
+                      </tr>
+
+                      {/* ── Record navigation header ── */}
+                      {totalRecords > 0 && (
+                        <tr>
+                          <td colSpan={4}>
+                            <div className="recordNav">
+                              <button
+                                className="btnCancel"
+                                onClick={goPrev}
+                                disabled={currentIdx === 0}
+                              >
+                                ‹ Prev
+                              </button>
+                              <span className="recordNavLabel">
+                                Record {currentIdx + 1} of {totalRecords}
+                              </span>
+                              <button
+                                className="btnCancel"
+                                onClick={goNext}
+                                disabled={currentIdx === totalRecords - 1}
+                              >
+                                Next ›
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* ── Record-level info (changes with navigation) ── */}
+                      {currentRecord ? (
+                        <>
+                          <tr>
+                            <td className="titleD">Item No.:</td>
+                            <td className="data">{currentRecord.item_no}</td>
+                            <td className="titleD">Record ID:</td>
+                            <td className="data">{currentRecord.record_id}</td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Title:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.records_title}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Description:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.rec_description}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Code:</td>
+                            <td className="data">{currentRecord.rec_code}</td>
+                            <td className="titleD">Retention:</td>
+                            <td className="data">
+                              {currentRecord.retention_period}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Checklist Items:</td>
+                            <td className="data spec" colSpan={3}>
+                              <div
+                                className="btnFin btnCancel restrictSizeBtn"
+                                onClick={() =>
+                                  checkListButtonOpening(
+                                    currentRecord.record_id,
+                                    "special",
+                                  )
+                                }
+                              >
+                                See Checklist Items
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            style={{ textAlign: "center", padding: "20px" }}
+                          >
+                            No records attached to this transmission
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
               <div className="buttons">
                 <button onClick={onClose} className="btnCancel ">
                   OK
                 </button>
-                <button
-                  className="btnFin btnCancel"
-                  onClick={() => handleEditTrans(data)}
-                >
-                  EDIT
-                </button>
-                <button className="btnRed btnCancel" onClick={openNestedDialog}>
-                  CANCEL
-                </button>
+                {user.usr_role === "APPROVER" && (
+                  <button
+                    className="btnRed btnCancel"
+                    onClick={openNestedDialog}
+                  >
+                    CANCEL
+                  </button>
+                )}
               </div>
             </dialog>
             <dialog className="delPrompt" ref={nestedDialogRef}>
@@ -466,7 +682,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   Go Back
                 </button>
                 <button
-                  onClick={handleNestedDialogSubmit}
+                  onClick={() => handleNestedDialogSubmit(2)}
                   className="btnRed btnCancel"
                 >
                   CANCEL TRANSMISSION
@@ -478,7 +694,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               {error ? (
                 <p>{error}</p>
               ) : loading ? (
-                <p>Loading</p>
+                <Spinner text="Loading Items..." />
               ) : (
                 checkItems.map((item) => (
                   <div className="chkItem">{item.checklist_item}</div>
@@ -501,118 +717,237 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           <>
             <dialog className="diagBox" ref={dialogRef}>
               <h1 className="diagTitle">Review Transmission</h1>
-              <div className="contents">
-                <table className="contentList">
-                  <tbody>
-                    <tr>
-                      <td className="titleD">TransmissionID: </td>
-                      <td id="transIDData" className="data">
-                        {data.trans_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">RecordID: </td>
-                      <td id="recordIdData" className="data">
-                        {data.record_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Office: </td>
-                      <td id="recordIdData" className="data">
-                        {data.office_dept}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Division: </td>
-                      <td id="divData" className="data">
-                        {data.division}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Title: </td>
-                      <td id="titleIDData" className="data">
-                        {data.record_titles}
-                      </td>
-                      <td colSpan={2}>
-                        <div className="checkCont">
-                          <span className="titleD">Checklist Items: </span>
-                          {}
-                          {checkItems.map((item) => (
-                            <div className="items" key={item.checklist_id}>
-                              <h4>{item.checklist_item}</h4>
+
+              {isFetching ? (
+                <Spinner text="Loading transmission..." />
+              ) : fetchError ? (
+                <p style={{ color: "red", padding: "20px" }}>{fetchError}</p>
+              ) : (
+                <div className="contents">
+                  <table className="contentList">
+                    <tbody>
+                      {/* ── Transmission-level info ── */}
+                      <tr>
+                        <td className="titleD">Transmission ID:</td>
+                        <td className="data">{fullTrans?.trans_id}</td>
+                        <td className="titleD">Office:</td>
+                        <td className="data">{fullTrans?.office_dept}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Division:</td>
+                        <td className="data">{fullTrans?.division}</td>
+                        <td className="titleD">Sent On:</td>
+                        <td className="data">{fullTrans?.sent_date}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Prepared By:</td>
+                        <td className="data">{fullTrans?.preparer_name}</td>
+                        <td className="titleD">Approved By:</td>
+                        <td className="data">{fullTrans?.approver_name}</td>
+                      </tr>
+
+                      {/* ── Divider + record navigation ── */}
+                      <tr>
+                        <td colSpan={4}>
+                          <hr style={{ margin: "10px 0", opacity: 0.2 }} />
+                        </td>
+                      </tr>
+
+                      {totalRecords > 0 && (
+                        <tr>
+                          <td colSpan={4}>
+                            <div className="recordNav">
                               <button
-                                className={
-                                  missingItems.includes(item.checklist_item)
-                                    ? "limHeight btnEdit"
-                                    : "limHeight delBtn"
-                                }
-                                onClick={() => addRemoveMissingItems(item.checklist_item)}
+                                className="btnCancel"
+                                onClick={goPrevReceiver}
+                                disabled={currentIdx === 0}
                               >
-                                Missing
+                                ‹ Prev
+                              </button>
+                              <span className="recordNavLabel">
+                                Record {currentIdx + 1} of {totalRecords}
+                                {/* Show missing indicator per record */}
+                                {currentMissing.length > 0 && (
+                                  <span className="missingBadge">
+                                    {currentMissing.length} missing
+                                  </span>
+                                )}
+                              </span>
+                              <button
+                                className="btnCancel"
+                                onClick={goNextReceiver}
+                                disabled={currentIdx === totalRecords - 1}
+                              >
+                                Next ›
                               </button>
                             </div>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Description: </td>
-                      <td id="descData" className="data">
-                        {data.rec_description}
-                      </td>
-                      {missingItems.length > 0 && (
-                        <td colSpan={2}>
-                          <div className="checkCont">
-                            <span className="titleD">Missing Message: </span>
-                            <br />
-                            <p className="messageBox">
-                              Missing Items:
-                              {missingItems.map((item) => (
-                                <span key={item}> {item}, </span>
-                              ))}
-                            </p>
-                          </div>
-                        </td>
+                          </td>
+                        </tr>
                       )}
-                    </tr>
-                    <tr>
-                      <td className="titleD">Code </td>
-                      <td id="codeData" className="data">
-                        {data.rec_code}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Retention Period: </td>
-                      <td id="retentionData" className="data">
-                        {data.retention_period}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Prepared By: </td>
-                      <td id="prepData" className="data">
-                        {data.preparer_name}
-                      </td>
-                      <td className="titleD">Approved By: </td>
-                      <td id="apprData" className="data">
-                        {data.approver_name}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Sent On: </td>
-                      <td id="sent_date" className="data">
-                        {data.sent_date}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+
+                      {/* ── Record-level info ── */}
+                      {currentRecord ? (
+                        <>
+                          <tr>
+                            <td className="titleD">Item No.:</td>
+                            <td className="data">{currentRecord.item_no}</td>
+                            <td className="titleD">Code:</td>
+                            <td className="data">{currentRecord.rec_code}</td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Title:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.records_title}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Description:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.rec_description}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Retention:</td>
+                            <td className="data">
+                              {currentRecord.retention_period}
+                            </td>
+                          </tr>
+
+                          {/* ── Checklist + missing items side by side ── */}
+                          <tr>
+                            <td colSpan={4}>
+                              <div className="checklistRow">
+                                {/* Left - checklist items to check */}
+                                <div className="checkCont">
+                                  <span className="titleD">
+                                    Checklist Items:
+                                  </span>
+                                  {checkLoading ? (
+                                    <Spinner text="Loading checklist..." />
+                                  ) : checkError ? (
+                                    <p style={{ color: "red" }}>
+                                      {checkError}
+                                    </p>
+                                  ) : checkItems.length === 0 ? (
+                                    <p
+                                      style={{
+                                        color: "#888",
+                                        fontSize: "13px",
+                                      }}
+                                    >
+                                      No checklist items
+                                    </p>
+                                  ) : (
+                                    checkItems.map((item) => (
+                                      <div
+                                        className="items"
+                                        key={item.checklist_id}
+                                      >
+                                        <h4>{item.checklist_item}</h4>
+                                        <button
+                                          className={
+                                            currentMissing.includes(
+                                              item.checklist_item,
+                                            )
+                                              ? "limHeight btnEdit" // active = marked missing
+                                              : "limHeight delBtn" // inactive = present
+                                          }
+                                          onClick={() =>
+                                            addRemoveMissingItems(
+                                              item.checklist_item,
+                                            )
+                                          }
+                                        >
+                                          {currentMissing.includes(
+                                            item.checklist_item,
+                                          )
+                                            ? "✓ Missing"
+                                            : "Missing"}
+                                        </button>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+
+                                {/* Right - missing items summary for this record */}
+                                {currentMissing.length > 0 && (
+                                  <div className="checkCont">
+                                    <span className="titleD">
+                                      Missing for this record:
+                                    </span>
+                                    <p className="messageBox">
+                                      {currentMissing.map((item) => (
+                                        <span key={item}>
+                                          • {item}
+                                          <br />
+                                        </span>
+                                      ))}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            style={{ textAlign: "center", padding: "20px" }}
+                          >
+                            No records attached to this transmission
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* ── All missing items summary (shows across all records) ── */}
+                      {hasAnyMissing && (
+                        <tr>
+                          <td colSpan={4}>
+                            <hr style={{ margin: "10px 0", opacity: 0.2 }} />
+                            <div className="checkCont">
+                              <span className="titleD">All Missing Items:</span>
+                              <p className="messageBox">
+                                {Object.entries(missingItemsMap).map(
+                                  ([recordId, items]) =>
+                                    items.length > 0 ? (
+                                      <span key={recordId}>
+                                        <strong>
+                                          Record{" "}
+                                          {records.find(
+                                            (r) =>
+                                              r.record_id === Number(recordId),
+                                          )?.records_title ?? recordId}
+                                          :
+                                        </strong>
+                                        {items.map((item) => (
+                                          <span key={item}> {item},</span>
+                                        ))}
+                                        <br />
+                                      </span>
+                                    ) : null,
+                                )}
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* ── Action buttons ── */}
               <div className="buttons">
-                {missingItems.length > 0 ? (
-                  <button onClick={handleIncomplete} className="btnInc btnCancel ">
+                {hasAnyMissing ? (
+                  <button
+                    onClick={onMarkIncomplete}
+                    className="btnInc btnCancel"
+                  >
                     Mark As Incomplete
                   </button>
                 ) : (
-                  <button onClick={handleComplete} className="btnFin btnCancel ">
+                  <button onClick={onMarkComplete} className="btnFin btnCancel">
                     Mark As Finished
                   </button>
                 )}
@@ -628,116 +963,164 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         return (
           <>
             <dialog className="diagBox" ref={dialogRef}>
-              <h1 className="diagTitle">Review Transmission</h1>
-              <div className="contents">
-                <table className="contentList">
-                  <tbody>
-                    <tr>
-                      <td className="titleD">TransmissionID: </td>
-                      <td id="transIDData" className="data">
-                        {data.trans_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">RecordID: </td>
-                      <td id="recordIdData" className="data">
-                        {data.record_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Division: </td>
-                      <td id="divData" className="data">
-                        {data.division}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Title: </td>
-                      <td id="titleIDData" className="data">
-                        {data.record_titles}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Description: </td>
-                      <td id="descData" className="data">
-                        {data.rec_description}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Checklist Items: </td>
-                      <td id="checklistData" className="data">
-                        <div
-                          className="btnFin btnCancel restrictSizeBtn"
-                          onClick={openSiblingNestedDialog}
-                        >
-                          See Checklist Items
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Code </td>
-                      <td id="codeData" className="data">
-                        {data.rec_code}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Retention Period: </td>
-                      <td id="retentionData" className="data">
-                        {data.retention_period}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Prepared By: </td>
-                      <td id="prepData" className="data">
-                        {data.preparer_name}
-                      </td>
-                      <td className="titleD">Approved By: </td>
-                      <td id="apprData" className="data">
-                        {data.approver_name}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Received By: </td>
-                      <td id="receivrData" className="data">
-                        {data.receiver_name}
-                      </td>
-                      <td className="titleD">Received On: </td>
-                      <td id="recDateData" className="data">
-                        {data.recDate}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="titleD">Sent On: </td>
-                      <td id="sent_date" className="data">
-                        {data.sent_date}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="feedback">
-                  {user.usr_role === "PREPARER" && (
-                    <>
-                      <p className="feedbackText">
-                        <span className="blau">FeedBack: </span>
-                        {data.feedback === null
-                          ? "Waiting for Approval"
-                          : data.feedback}
-                      </p>
-                    </>
-                  )}
-                  {user.usr_role === "APPROVER" ? (
-                    <>
-                      <p className="feedbackText">
-                        <span className="blau">FeedBack: </span>
-                        {data.feedback === null
-                          ? "All Good"
-                          : `Waiting for Response on: ${data.feedback}`}
-                      </p>
-                    </>
-                  ) : (
-                    ""
-                  )}
+              <h1 className="diagTitle">View Transmission</h1>
+
+              {isFetching ? (
+                <Spinner text="Loading transmission..." />
+              ) : fetchError ? (
+                <p style={{ color: "red", padding: "20px" }}>{fetchError}</p>
+              ) : (
+                <div className="contents">
+                  <table className="contentList">
+                    <tbody>
+                      {/* ── Transmission-level info (same for all records) ── */}
+                      <tr>
+                        <td className="titleD">Transmission ID:</td>
+                        <td className="data">{fullTrans?.trans_id}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Division:</td>
+                        <td className="data">{fullTrans?.division}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Sent On:</td>
+                        <td className="data">{fullTrans?.sent_date}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Prepared By:</td>
+                        <td className="data">{fullTrans?.preparer_name}</td>
+                        <td className="titleD">Approved By:</td>
+                        <td className="data">{fullTrans?.approver_name}</td>
+                      </tr>
+                      <tr>
+                        <td className="titleD">Received By:</td>
+                        <td className="data">
+                          {fullTrans?.receiver_name ?? "—"}
+                        </td>
+                        <td className="titleD">Received On:</td>
+                        <td className="data">
+                          {fullTrans?.date_time_received ?? "—"}
+                        </td>
+                      </tr>
+
+                      {/* ── Divider ── */}
+                      <tr>
+                        <td colSpan={4}>
+                          <hr style={{ margin: "10px 0", opacity: 0.2 }} />
+                        </td>
+                      </tr>
+
+                      {/* ── Record navigation header ── */}
+                      {totalRecords > 0 && (
+                        <tr>
+                          <td colSpan={4}>
+                            <div className="recordNav">
+                              <button
+                                className="btnCancel"
+                                onClick={goPrev}
+                                disabled={currentIdx === 0}
+                              >
+                                ‹ Prev
+                              </button>
+                              <span className="recordNavLabel">
+                                Record {currentIdx + 1} of {totalRecords}
+                              </span>
+                              <button
+                                className="btnCancel"
+                                onClick={goNext}
+                                disabled={currentIdx === totalRecords - 1}
+                              >
+                                Next ›
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* ── Record-level info (changes with navigation) ── */}
+                      {currentRecord ? (
+                        <>
+                          <tr>
+                            <td className="titleD">Item No.:</td>
+                            <td className="data">{currentRecord.item_no}</td>
+                            <td className="titleD">Record ID:</td>
+                            <td className="data">{currentRecord.record_id}</td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Title:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.records_title}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Description:</td>
+                            <td className="data" colSpan={3}>
+                              {currentRecord.rec_description}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Code:</td>
+                            <td className="data">{currentRecord.rec_code}</td>
+                            <td className="titleD">Retention:</td>
+                            <td className="data">
+                              {currentRecord.retention_period}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="titleD">Checklist Items:</td>
+                            <td className="data spec" colSpan={3}>
+                              <div
+                                className="btnFin btnCancel restrictSizeBtn"
+                                onClick={() =>
+                                  checkListButtonOpening(
+                                    currentRecord.record_id,
+                                    "special",
+                                  )
+                                }
+                              >
+                                See Checklist Items
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            style={{ textAlign: "center", padding: "20px" }}
+                          >
+                            No records attached to this transmission
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  <div className="feedback">
+                    {user.usr_role === "PREPARER" && (
+                      <>
+                        <p className="feedbackText">
+                          <span className="blau">FeedBack: </span>
+                          {currentRecord?.feedback === null
+                            ? "Waiting for Approval"
+                            : currentRecord?.feedback}
+                        </p>
+                      </>
+                    )}
+                    {user.usr_role === "APPROVER" ? (
+                      <>
+                        <p className="feedbackText">
+                          <span className="blau">FeedBack: </span>
+                          {currentRecord?.feedback === null
+                            ? "All Good"
+                            : `Waiting for Response on: ${currentRecord?.feedback}`}
+                        </p>
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
               {user.usr_role === "PREPARER" && (
                 <div className="buttons">
                   <button onClick={onClose} className="btnCancel">
@@ -771,6 +1154,11 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             </dialog>
             <dialog className="diagEdit" ref={nestedDialogRef}>
               <h1 className="diagTitle">Request Edits</h1>
+              <h2>
+                For Record: {`SR-${String(currentRecord?.record_id).padStart(4, "0")}`}
+              </h2>
+              <h2>Record Title: {currentRecord?.records_title}</h2>
+              <h2></h2>
               <form action="" method="post" className="changes">
                 <label htmlFor="changeForm">Enter Edits to be made:</label>
                 <textarea
@@ -797,7 +1185,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               {error ? (
                 <p>{error}</p>
               ) : loading ? (
-                <p>Loading</p>
+                <Spinner text="Loading Items..." />
               ) : (
                 checkItems.map((item) => (
                   <div className="chkItem">{item.checklist_item}</div>
@@ -820,39 +1208,78 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         <>
           <dialog className="diagEdit" ref={dialogRef}>
             <h1 className="diagTitle">Resolve Transmission</h1>
-            <div className="contents">
-              <table className="contentList">
-                <tbody>
-                  <tr>
-                    <td className="titleD">TransmissionID: </td>
-                    <td id="transIDData" className="data">
-                      {data.trans_id}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="titleD">RecordID: </td>
-                    <td id="recordIdData" className="data">
-                      {data.record_id}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="titleD">Feedback: </td>
-                    <td id="feedbackData" className="data">
-                      {data.feedback}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="buttons">
-                <button className="btnFin btnCancel" onClick={handleReApprove}>
-                  Submit for Re-Approval
-                </button>
-                <button className="btnInc btnCancel" onClick={()=> handleEditTrans(data)}>Edit Transmission</button>
-                <button onClick={onClose} className="btnCancel">
-                  Cancel
-                </button>
+            {isFetching ? (
+              <Spinner text="Loading transmission..." />
+            ) : fetchError ? (
+              <p style={{ color: "red", padding: "20px" }}>{fetchError}</p>
+            ) : (
+              <div className="contents">
+                <table className="contentList">
+                  <tbody>
+                    <tr>
+                      <td className="titleD">TransmissionID: </td>
+                      <td id="transIDData" className="data">
+                        {fullTrans?.trans_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">RecordID: </td>
+                      <td id="recordIdData" className="data">
+                        {currentRecord?.record_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">Feedback: </td>
+                      <td id="feedbackData" className="data">
+                        {currentRecord?.feedback}
+                      </td>
+                    </tr>
+                    {totalRecords > 0 && (
+                      <tr>
+                        <td colSpan={4}>
+                          <div className="recordNav">
+                            <button
+                              className="btnCancel"
+                              onClick={goPrev}
+                              disabled={currentIdx === 0}
+                            >
+                              ‹ Prev
+                            </button>
+                            <span className="recordNavLabel">
+                              Record {currentIdx + 1} of {totalRecords}
+                            </span>
+                            <button
+                              className="btnCancel"
+                              onClick={goNext}
+                              disabled={currentIdx === totalRecords - 1}
+                            >
+                              Next ›
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <div className="buttons">
+                  <button
+                    className="btnFin btnCancel"
+                    onClick={handleReApprove}
+                  >
+                    Submit for Re-Approval
+                  </button>
+                  <button
+                    className="btnInc btnCancel"
+                    onClick={() => handleEditTrans(data)}
+                  >
+                    Edit Transmission
+                  </button>
+                  <button onClick={onClose} className="btnCancel">
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </dialog>
         </>
       );
@@ -863,39 +1290,78 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         <>
           <dialog className="diagEdit" ref={dialogRef}>
             <h1 className="diagTitle">Resolve Transmission</h1>
-            <div className="contents">
-              <table className="contentList">
-                <tbody>
-                  <tr>
-                    <td className="titleD">TransmissionID: </td>
-                    <td id="transIDData" className="data">
-                      {data.trans_id}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="titleD">RecordID: </td>
-                    <td id="recordIdData" className="data">
-                      {data.record_id}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="titleD">Feedback: </td>
-                    <td id="feedbackData" className="data">
-                      {data.feedback}
-                      <p>Waiting for {user.usr_role == "RECEIVER" ? <>Branch</> : <>Preparer</>} Response...</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="buttons">
-                <button className="btnFin btnCancel" onClick={onClose}>
-                  OK
-                </button>
-                <button onClick={onClose} className="btnCancel">
-                  Cancel
-                </button>
+            {isFetching ? (
+              <Spinner text="Loading transmission..." />
+            ) : fetchError ? (
+              <p style={{ color: "red", padding: "20px" }}>{fetchError}</p>
+            ) : (
+              <div className="contents">
+                <table className="contentList">
+                  <tbody>
+                    <tr>
+                      <td className="titleD">TransmissionID: </td>
+                      <td id="transIDData" className="data">
+                        {fullTrans?.trans_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">RecordID: </td>
+                      <td id="recordIdData" className="data">
+                        {currentRecord?.record_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">Feedback: </td>
+                      <td id="feedbackData" className="data">
+                        {currentRecord?.feedback}
+                        <p>
+                          Waiting for{" "}
+                          {user.usr_role == "RECEIVER" ? (
+                            <>Branch</>
+                          ) : (
+                            <>Preparer</>
+                          )}{" "}
+                          Response...
+                        </p>
+                      </td>
+                    </tr>
+                    {totalRecords > 0 && (
+                      <tr>
+                        <td colSpan={4}>
+                          <div className="recordNav">
+                            <button
+                              className="btnCancel"
+                              onClick={goPrev}
+                              disabled={currentIdx === 0}
+                            >
+                              ‹ Prev
+                            </button>
+                            <span className="recordNavLabel">
+                              Record {currentIdx + 1} of {totalRecords}
+                            </span>
+                            <button
+                              className="btnCancel"
+                              onClick={goNext}
+                              disabled={currentIdx === totalRecords - 1}
+                            >
+                              Next ›
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <div className="buttons">
+                  <button className="btnFin btnCancel" onClick={onClose}>
+                    OK
+                  </button>
+                  <button onClick={onClose} className="btnCancel">
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </dialog>
         </>
       );
@@ -985,7 +1451,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Title: </td>
                     <td id="titleIDData" className="data">
-                      {data.record_titles}
+                      {data.records_title}
                     </td>
                   </tr>
                 </tbody>
@@ -995,7 +1461,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               <button className="btnCancel" onClick={onClose}>
                 Cancel
               </button>
-              <button onClick={onClose} className="btnRed btnCancel">
+              <button type="button" onClick={handleDeletionRecord} className="btnRed btnCancel">
                 DELETE TRANSMISSION
               </button>
             </div>
@@ -1021,7 +1487,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Title: </td>
                     <td id="titleIDData" className="data">
-                      {data.record_titles}
+                      {data.records_title}
                     </td>
                   </tr>
                   <tr>
@@ -1030,9 +1496,9 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                       {data.rec_description}
                     </td>
                   </tr>
-                  <tr>
+                  <tr className="minHeight">
                     <td className="titleD">Checklist Items: </td>
-                    <td id="checklistData" className="data">
+                    <td id="checklistData" className="data spec">
                       <div
                         className="btnFin btnCancel restrictSizeBtn"
                         onClick={openNestedDialog}
@@ -1083,7 +1549,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             {error ? (
               <p>{error}</p>
             ) : loading ? (
-              <p>Loading</p>
+              <Spinner text="Loading Items..." />
             ) : (
               checkItems.map((item) => (
                 <div className="chkItem">{item.checklist_item}</div>
@@ -1099,7 +1565,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       );
     }
     
-    if (user.usr_role === "ADMIN" && /MEM/.test(data.id)) {
+    if (user.usr_role === "ADMIN" && data.userTableViewing) {
       return (
         <>
           <dialog className="diagEdit" ref={dialogRef}>
@@ -1110,7 +1576,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Employee ID: </td>
                     <td id="transIDData" className="data">
-                      {data.id}
+                      {`MEM-${String(data.user_id).padStart(4, "0")}`}
                     </td>
                   </tr>
                   <tr>
@@ -1146,17 +1612,36 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 >
                   Edit
                 </button>
-                <button className="btnRed btnCancel" onClick={openNestedDialog}>
-                  DELETE
-                </button>
+                {data.is_deleted === "true" ? (
+                  <button
+                    className="btnInc btnCancel"
+                    onClick={openNestedDialog}
+                  >
+                    Re-Enable
+                  </button>
+                ) : (
+                  <button
+                    className="btnRed btnCancel"
+                    onClick={openNestedDialog}
+                  >
+                    DISABLE
+                  </button>
+                )}
               </div>
             </div>
           </dialog>
           <dialog className="delPrompt" ref={nestedDialogRef}>
-            <h1 className="diagTitle">Confirm Deletion</h1>
-            <img src="/assets/warning.png" alt="warning"  />
+            <h1 className="diagTitle">
+              Confirm {data.is_deleted === "true" ? "Re-Enabling" : "Disabling"}
+            </h1>
+            {data.is_deleted === "true" ? (
+              ""
+            ) : (
+              <img src="/assets/warning.png" alt="warning" />
+            )}
             <h3 className="confirmMesg">
-              Are you sure you want to Delete this User??
+              Are you sure you want to{" "}
+              {data.is_deleted === "true" ? "Re-Enable" : "Disable"} this User??
             </h3>
             <div className="contents">
               <table className="contentList">
@@ -1164,7 +1649,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <tr>
                     <td className="titleD">Employee ID: </td>
                     <td id="transIDData" className="data">
-                      {data.id}
+                      {`MEM-${String(data.user_id).padStart(4, "0")}`}
                     </td>
                   </tr>
                   <tr>
@@ -1192,12 +1677,21 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               <button className="btnCancel" onClick={closeNestedDialog}>
                 Go Back
               </button>
-              <button
-                onClick={handleNestedDialogSubmit}
-                className="btnRed btnCancel"
-              >
-                DELETE
-              </button>
+              {data.is_deleted === "true" ? (
+                <button
+                  onClick={() => handleNestedDialogSubmit(4)}
+                  className="btnInc btnCancel"
+                >
+                  RE-ENABLE
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleNestedDialogSubmit(3)}
+                  className="btnRed btnCancel"
+                >
+                  DISABLE
+                </button>
+              )}
             </div>
           </dialog>
         </>

@@ -11,7 +11,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Users from './pages/Users'
 import CreateEditUser from './pages/CreateEditUser'
 import ProbTickets from './pages/ProbTickets'
+import Branches from './pages/Branches'
 import { useAuth } from './context/AuthContext'
+import { Toaster } from 'react-hot-toast'
 import './App.css'
 
 function App() {
@@ -26,6 +28,23 @@ function App() {
 
   return (
     <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          success: {
+            duration: 3000,
+            style: { background: "#a6eaa3", color: "#fff", fontWeight: "bold" },
+          },
+          error: {
+            duration: 4000,
+            style: {
+              background: "#ddeaa3",
+              color: "#ff5757",
+              fontWeight: "bold",
+            },
+          },
+        }}
+      />
       {isMobile ? (
         <>
           <h1 style={{ margin: "auto" }}>
@@ -59,11 +78,15 @@ function App() {
             <Route path="home/edit" element={<CreateEditTrans />} />
             <Route path="home/edit/record" element={<CreateEditRecord />} />
             <Route path="transmissions/edit" element={<CreateEditTrans />} />
-            <Route path="transmissions/edit/record" element={<CreateEditRecord />} /> 
+            <Route
+              path="transmissions/edit/record"
+              element={<CreateEditRecord />}
+            />
             <Route path="transmissions/create" element={<CreateEditTrans />} />
             <Route path="users" element={<Users />} />
             <Route path="users/create" element={<CreateEditUser />} />
             <Route path="users/edit" element={<CreateEditUser />} />
+            <Route path='branches' element={<Branches/>}/>
             <Route path="tickets" element={<ProbTickets />} />
           </Route>
         </Routes>

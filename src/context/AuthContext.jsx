@@ -53,9 +53,16 @@ export const AuthProvider = ( { children } ) => {
             } else {
                 return { success: false, error: result.message };
             }
-        } catch {
-            return { success: false, error: "Cannot connect to server." };
-        }
+        } catch (err) {
+          const isNetworkError = !err.message || err instanceof TypeError;
+
+          return {
+              success: false,
+              error: isNetworkError
+                  ? "Cannot connect to server."
+                  : err.message   // ← "In
+            } 
+          }
     };
 
     const logout = () =>{

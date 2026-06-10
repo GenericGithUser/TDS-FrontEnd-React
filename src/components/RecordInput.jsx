@@ -1,117 +1,158 @@
-import '../styles/recordItem.css'
+import "../styles/recordItem.css";
 import "../styles/tableTemp.css";
 import "../styles/transtable.css";
 
-import { useState, useRef, useEffect } from 'react';
-function RecordInput({ recordList, addIncludedRecords }){
-    const [diagOpen, setDiagOpen] = useState(false);
-    const [selectedRecords, setSelectedRecords] = useState([])
-    const diagRef = useRef(null);
+import { useState, useRef, useEffect } from "react";
 
-    useEffect(()=>{
-        const dialogNode = diagRef.current; 
-        if (!dialogNode) return;
+function RecordInput({
+  recordList,
+  addIncludedRecords,
+  includedRecords = [],
+  isEdit = false,
+}) {
+  const [diagOpen, setDiagOpen] = useState(false);
+  const [selectedRecords, setSelectedRecords] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const diagRef = useRef(null);
 
-        if(diagOpen){
-            dialogNode.showModal();
-        }
-        else{
-            dialogNode.close();
-        }
-    }, [diagOpen])
+  useEffect(() => {
+    const dialogNode = diagRef.current;
+    if (!dialogNode) return;
+    if (diagOpen) dialogNode.showModal();
+    else dialogNode.close();
+  }, [diagOpen]);
 
-    const handleOpens = () =>{
-        setDiagOpen(true)
-    }
+  const handleOpens = () => {
+    setSelectedRecords({}); // clear previous selections on open
+    setSearchTerm(""); // clear search on open
+    setDiagOpen(true);
+  };
 
-    const handleCloses = () => {
-        setDiagOpen(false)
-        
-    }
+  const handleCloses = () => {
+    setDiagOpen(false);
+  };
 
-    const handleCheckbox = (item) => {
-      setSelectedRecords(prev => {
-        const newState = { ...prev };
+  const handleCheckbox = (item) => {
+    setSelectedRecords((prev) => {
+      const newState = { ...prev };
+      if (newState[item.record_id]) {
+        delete newState[item.record_id];
+      } else {
+        newState[item.record_id] = item;
+      }
+      return newState;
+    });
+  };
 
-        if (newState[item.record_id]) {
-          delete newState[item.record_id];
-        } else {
-          newState[item.record_id] = item;
-        }
-        return newState;
-      });
-      
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const selected = Object.values(selectedRecords);
+    if (selected.length === 0) return;
+    addIncludedRecords(selected);
+    handleCloses();
+  };
 
-    const selected = [...new Map(Object.values(selectedRecords).map(item=> [item.record_id, item])).values()];
+  // Filter out records already in the included list
+  const existingIds = new Set(includedRecords.map((r) => r.record_id));
+  const availableRecords = recordList.filter(
+    (r) => !existingIds.has(r.record_id),
+  );
 
+  // Apply search on top of the already-filtered list
+  const displayedRecords = searchTerm.trim()
+    ? availableRecords.filter(
+        (r) =>
+          r.records_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          r.rec_code?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : availableRecords;
 
-    const handleSubmit = (e) =>{
-        e.preventDefault();
-        addIncludedRecords(selected);
-        handleCloses();
-        
-    };
-    
-    
+  const selectedCount = Object.keys(selectedRecords).length;
 
-    return (
-      <>
-        <div className="btnInc btnCancel" onClick={handleOpens}>
-          Add Records
-        </div>
-        <dialog className="inputDiag" ref={diagRef}>
-          <h1 style={{ textAlign: "center" }}>Add Existing Record</h1>
-          <div className="records">
-            <div className="searcherSorter">
-                <label htmlFor="searchBar">Search For a Record</label>
-                <input type="search" name="searchBar" id="searchBar" />
-                <input type="submit" value="🔎Search" className="searchBtn" onClick={(e)=> e.preventDefault()}/>
-            </div>    
-              <div className="transTable">
-          <table className="actTransTable">
-            <colgroup>
-              <col style={{ width: "10px" }} />
-              <col style={{ width: "16vw" }} />
-              <col style={{ width: "1vw" }} />
-            </colgroup>
-            <thead className="transTableHead">
-              <tr>
-                <th>RecordID</th>
-                <th>Title</th>
-                <th>⠀⠀⠀⠀⠀⠀⠀⠀⠀</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recordList.length === 0 ? (
+  return (
+    <>
+      <div className="btnInc btnCancel" onClick={handleOpens}>
+        Add Records
+      </div>
+
+      <dialog className="inputDiag" ref={diagRef}>
+        <h1 style={{ textAlign: "center" }}>Add Existing Record</h1>
+
+        <div className="records">
+          <div className="searcherSorter">
+            <label htmlFor="searchBar">Search For a Record</label>
+            <input
+              type="search"
+              name="searchBar"
+              id="searchBar"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by title or code..."
+            />
+          </div>
+
+          <div className="transTable">
+            <table className="actTransTable">
+              <colgroup>
+                <col style={{ width: "10px" }} />
+                <col style={{ width: "16vw" }} />
+                <col style={{ width: "1vw" }} />
+              </colgroup>
+              <thead className="transTableHead">
                 <tr>
-                  <td colSpan={3} style={{ textAlign: "center" }}>
-                    <h1>No Data Available</h1>
-                  </td>
+                  <th>RecordID</th>
+                  <th>Title</th>
+                  <th>⠀⠀⠀⠀⠀⠀⠀⠀⠀</th>
                 </tr>
-              ) : (
-                recordList.slice(0, 10).map((records) => (
-                  <tr key={records.record_id}>
-                    <td>{records.record_id}</td>
-                    <td>{records.records_title}</td>
-                    <td><input type="checkbox" checked={!!selectedRecords[records.record_id]} onChange={()=> handleCheckbox(records)} /></td>
+              </thead>
+              <tbody>
+                {displayedRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} style={{ textAlign: "center" }}>
+                      <h1>
+                        {searchTerm
+                          ? `No records found for "${searchTerm}"`
+                          : availableRecords.length === 0
+                            ? "All records have been added"
+                            : "No Data Available"}
+                      </h1>
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  displayedRecords.slice(0, 10).map((record) => (
+                    <tr key={record.record_id}>
+                      <td>{`MEM-${String(record.record_id).padStart(4, "0")}`}</td>
+                      <td>{record.records_title}</td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={!!selectedRecords[record.record_id]}
+                          onChange={() => handleCheckbox(record)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-          <div className="btnFrame">
-            <input type="submit" value="SUBMIT" className='btnGreen' onClick={handleSubmit} />
-            <button className="btnCancel" type='button' onClick={handleCloses}>
-              Cancel
-            </button>
-          </div>
-        </dialog>
-      </>
-    );
 
+        <div className="btnFrame">
+          <input
+            type="submit"
+            value={selectedCount > 0 ? `SUBMIT (${selectedCount})` : "SUBMIT"}
+            className="btnGreen"
+            onClick={handleSubmit}
+            disabled={selectedCount === 0}
+          />
+          <button className="btnCancel" type="button" onClick={handleCloses}>
+            Cancel
+          </button>
+        </div>
+      </dialog>
+    </>
+  );
 }
 
 export default RecordInput;

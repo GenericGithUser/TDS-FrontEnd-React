@@ -11,7 +11,7 @@
 .summaries>.data>.dataBox2 {
     display: grid;
     border-radius: 10px;
-    border-radius: 10px;
+    
     grid-template-columns: repeat(3, 1fr);
     overflow: hidden;
     gap: 10px;
@@ -39,20 +39,26 @@
 #incNum,
 #penNum {
     text-align: end !important;
+    /* -webkit-text-stroke: 2px rgb(255, 255, 255); */
+    
+    
+}
+#sentNum{
+    margin-left: 4vw;
 }
 
 .summaries>.buttonGrid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     border-bottom: 2px solid gray;
-    height: 6vh;
+    height: 7vh;
 }
 
 .summaries>.buttonGrid2 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     border-bottom: 2px solid gray;
-    height: 6vh;
+    height: 7vh;
 }
 
 .viewButton {

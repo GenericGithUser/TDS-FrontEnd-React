@@ -1,8 +1,12 @@
 import '../styles/summary.css'
+import "../styles/loading.css";
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { GetTransmissionStats } from "../hooks/GetTranssmissionsStats";
+import { StatsSkeleton } from "../components/Loading";
 function summaryBoardAdmin(){
     const { user } = useAuth();
+    const { stats, loading, error } = GetTransmissionStats();
 
     return (
       <>
@@ -12,25 +16,49 @@ function summaryBoardAdmin(){
               <div className="dBox">
                 <h2 className="boxDesc fin">Total Transmissions</h2>
                 <h1 className="finNum num" id="finNum">
-                  20
+                  {error ? (
+                    <p>{error}</p>
+                  ) : loading ? (
+                    <StatsSkeleton count={1} />
+                  ) : (
+                    stats.total_transmissions
+                  )}
                 </h1>
               </div>
               <div className="dBox">
                 <h2 className="boxDesc sen">Total Records</h2>
                 <h1 className="finNum num" id="sentNum">
-                  21
+                  {error ? (
+                    <p>{error}</p>
+                  ) : loading ? (
+                    <StatsSkeleton count={1} />
+                  ) : (
+                    stats.total_records_in_db
+                  )}
                 </h1>
               </div>
               <div className="dBox">
-                <h2 className="boxDesc inc">Password Resets</h2>
+                <h2 className="boxDesc inc">Number of Employees</h2>
                 <h1 className="finNum num" id="incNum">
-                  0
+                  {error ? (
+                    <p>{error}</p>
+                  ) : loading ? (
+                    <StatsSkeleton count={1} />
+                  ) : (
+                    stats.total_empCount
+                  )}
                 </h1>
               </div>
               <div className="dBox ">
-                <h2 className="boxDesc pen">Problem Tickets</h2>
+                <h2 className="boxDesc pen">Number of Branches</h2>
                 <h1 className="finNum num" id="penNum">
-                  15
+                  {error ? (
+                    <p>{error}</p>
+                  ) : loading ? (
+                    <StatsSkeleton count={1} />
+                  ) : (
+                    stats.total_branches
+                  )}
                 </h1>
               </div>
             </div>
@@ -51,14 +79,16 @@ function summaryBoardAdmin(){
               </Link>
             </div>
             <div className="viewButton">
+              <Link to={"/dashboard/users"}>
               <button type="submit" className="btnInc btn">
-                View Latest
+                View Employees
               </button>
+              </Link>
             </div>
             <div className="viewButton">
-              <Link to={"/dashboard/tickets"}>
+              <Link to={"/dashboard/branches"}>
                 <button type="submit" className="btnPen btn">
-                  View Tickets
+                  View Branches
                 </button>
               </Link>
             </div>

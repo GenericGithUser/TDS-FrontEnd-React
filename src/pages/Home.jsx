@@ -2,6 +2,7 @@ import SummaryBoard from "../components/SummaryBoard";
 import SummaryBoardAdmin from "../components/SummaryBoardAdmin";
 import MostRecent from "../components/MostRecent";
 import MostRecentReceiver from "../components/MostRecentReceiver";
+import MostRecentAdmin from "../components/MostRecentAdmin";
 import { useAuth } from "../context/AuthContext";
 import { Helmet } from "react-helmet-async";
 import { GetTransmissionStats } from "../hooks/GetTranssmissionsStats";
@@ -26,9 +27,11 @@ function Home(){
           </h2>
           {user.usr_role === "RECEIVER" ? (
             <MostRecentReceiver />
-          ) : (
+          ) : user.usr_role === "ADMIN" ? (
+            <MostRecentAdmin />
+          ) :
             <MostRecent />
-          )}
+          }
           <h1 className="total">
             Total Transmissions:{" "}
             <span className="fin" id="totalNum">

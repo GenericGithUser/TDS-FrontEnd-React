@@ -1,5 +1,5 @@
 .transTable {
-    width: 95%;
+    width: 97%;
     border: 2px solid black;
     margin-left: auto;
     margin-right: auto;
@@ -29,11 +29,16 @@
 
 .transTable>.actTransTable>.transTableHead>tr>th {
     padding: 6px;
+    user-select: none;
 }
 
 .transTable>.actTransTable>tbody>tr {
     font-size: 1.4ch;
     text-align: center;
+}
+
+.transTable>.actTransTable>tbody>tr:nth-child(even){
+    background-color: rgb(184, 205, 218);
 }
 
 .transTable>.actTransTable>tbody>tr>td {

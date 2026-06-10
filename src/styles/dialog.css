@@ -1,3 +1,53 @@
+/* 1. Default (Closed / Exit) State */
+dialog {
+ 
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+
+    /* Transition settings */
+    transition:
+        opacity 0.51s ease,
+        transform 0.2s ease,
+        display 0.2s ease allow-discrete,
+        overlay 0.2s ease allow-discrete;
+}
+
+/* 2. Open State */
+dialog[open] {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+/* 3. Entry (Just Opened) Starting State */
+@starting-style {
+    dialog[open] {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+}
+
+/* 4. Backdrop Fade Animation */
+dialog::backdrop {
+    background-color: rgb(0 0 0 / 0);
+    transition:
+        background-color 0.3s ease,
+        display 0.2s ease allow-discrete,
+        overlay 0.2s ease allow-discrete;
+}
+
+dialog[open]::backdrop {
+    background-color: rgb(0 0 0 / 0.5);
+}
+
+@starting-style {
+    dialog[open]::backdrop {
+        background-color: rgb(0 0 0 / 0);
+    }
+}
+
+
+
+
 .diagBox {
     background-color: var(--blue-white);
     margin: auto;
@@ -164,7 +214,8 @@
     padding: 2px;
 }
 .limHeight{
-    height: 20px;
+    height: 30px;
+    width: 10vw;
     
 }
 
@@ -181,8 +232,18 @@
 }
 
 .restrictSizeBtn{
-    margin: auto;
     font-size: 1.5ch;
+    width: 18vw;
+}
+
+.spec{
+    display: flex !important;
+    margin-bottom: 20px !important;
+    border-bottom: 0 !important;
+    
+}
+.minHeight{
+    height: 2vh !important;
 }
 .feedback{
     text-align: center;
@@ -195,4 +256,45 @@
 }
 .blau{
     color: var(--dark-blue);
+}
+
+.recordNav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.recordNavLabel {
+    font-size: 14px;
+    color: #666;
+    min-width: 100px;
+    text-align: center;
+}
+
+.recordNav button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.checklistRow {
+    display: flex;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.checklistRow .checkCont {
+    flex: 1;
+}
+
+.missingBadge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
 }

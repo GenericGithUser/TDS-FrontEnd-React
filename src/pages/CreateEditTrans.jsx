@@ -10,6 +10,8 @@ import { GetDivisions } from "../hooks/GetDivisions.jsx";
 import { GetRecords } from "../hooks/GetRecords.jsx";
 import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { useAuth } from "../context/AuthContext";
+import { Spinner } from "../components/Loading.jsx";
+import "../styles/loading.css";
 
 
 function CreateEditTrans() {
@@ -18,7 +20,8 @@ function CreateEditTrans() {
   const { user } = useAuth();
 
   const { divisions } = GetDivisions();
-  const { records } = GetRecords();
+  const { records, fetchUnassignedRecords } = GetRecords();
+  const [unassignedRecords, setUnassignedRecords] = useState([]);
 
   // ── All API calls now come from the hook, no direct api imports needed ──────
   const {
@@ -27,14 +30,14 @@ function CreateEditTrans() {
     updateTransmission,
     addRecord,
     removeRecord,
+    replaceRecords,
   } = GetTransmissions();
-  
 
   const ALL_DIVISIONS = divisions.map((div) => div.division);
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [includedRecords, setIncludedRecords] = useState([]);
-  
+
   // Store both id and name since DB needs division_id (int), UI shows name
   const [selectedDivision, setSelectedDivision] = useState({
     id: null,
@@ -106,8 +109,34 @@ function CreateEditTrans() {
     }
   }, [isEdit, navData?.transId, loadTransmissionForEdit]);
 
+  // Fetch unassigned records on mount
+  useEffect(() => {
+    const load = async () => {
+      const result = await fetchUnassignedRecords();
+      if (!result.success) return;
+
+      if (isEdit && navData?.transId) {
+        // Get the current transmission's records to add back to the available list
+        const transResult = await getTransmissionById(navData.transId);
+        const currentRecords = transResult.data?.records ?? [];
+
+        // Combine unassigned + records already in THIS transmission
+        const combined = [...result.data, ...currentRecords];
+
+        // Deduplicate by record_id
+        const unique = [
+          ...new Map(combined.map((r) => [r.record_id, r])).values(),
+        ];
+        setUnassignedRecords(unique);
+      } else {
+        setUnassignedRecords(result.data);
+      }
+    };
+    load();
+  }, [fetchUnassignedRecords, isEdit, navData?.transId]);
+
   if (!navData) return <h1>No NavData</h1>;
-  if (isFetching) return <p>Loading transmission data...</p>;
+  if (isFetching) return <Spinner text="Fetching Records..." />;
   if (fetchError) return <p>Error: {fetchError}</p>;
 
   // ── Division handlers ───────────────────────────────────────────────────────
@@ -235,11 +264,9 @@ function CreateEditTrans() {
     navigate(destination);
   };
 
-  
-
   // ── Form JSX ────────────────────────────────────────────────────────────────
   const formContent = (
-    <div className="createBox">
+    <div className="createBox fade-in">
       <form id="createForm" method="post">
         {/* Division - single select */}
         <div className="r2">
@@ -271,28 +298,30 @@ function CreateEditTrans() {
               {selectedDivision.id && (
                 <button
                   type="button"
-                  className="btnCancel"
+                  className="btnCancel btnAddDiv red"
                   onClick={clearDivision}
                 >
                   Clear
                 </button>
               )}
             </div>
-
-            {selectedDivision.name && (
+          </div>
+          {selectedDivision.name && (
+            <>
               <p className="divisionHint">
                 Division: <strong>{selectedDivision.name}</strong>
               </p>
-            )}
-          </div>
+            </>
+          )}
         </div>
 
         {/* Record picker */}
         <div className="r2">
           <div className="item">
             <RecordInput
-              recordList={records}
+              recordList={unassignedRecords}
               addIncludedRecords={addIncludedRecords}
+              isEdit={isEdit}
             />
           </div>
         </div>

@@ -158,8 +158,9 @@
 /* Hint text below input */
 .divisionHint {
     margin: 6px 0 0;
-    font-size: 0.78rem;
+    font-size: 1.5ch;
     color: #555;
+    
 }
 
 .lblSpecial{
