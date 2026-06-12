@@ -30,7 +30,7 @@ function Branches(){
     }
 
     const handleCreateUser = () => {
-        const sendData = { mode: 'create', returnTo: "/dashboard/users", callback: ()=> console.log('Success') }
+        const sendData = { mode: 'create', returnTo: "/dashboard/branches", callback: ()=> console.log('Success') }
         setRouteData(sendData);
         navigate("create");
 

@@ -12,6 +12,7 @@ import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { useAuth } from "../context/AuthContext";
 import { Spinner } from "../components/Loading.jsx";
 import "../styles/loading.css";
+import api from "../api/client.js";
 
 
 function CreateEditTrans() {
@@ -140,12 +141,45 @@ function CreateEditTrans() {
   if (fetchError) return <p>Error: {fetchError}</p>;
 
   // ── Division handlers ───────────────────────────────────────────────────────
-  const handleDivisionSelect = (divisionName) => {
-    const match = divisions.find((d) => d.division === divisionName);
-    if (match) {
-      setSelectedDivision({ id: match.division_id, name: match.division });
-      setDivisionInput(match.division);
-    }
+  const handleDivisionSelect = async (divisionName) => {
+     if (!divisionName.trim()) return;
+
+     // Check if it exists in the already-loaded divisions list first
+     const existing = divisions.find(
+       (d) => d.division.toLowerCase() === divisionName.toLowerCase(),
+     );
+
+     if (existing) {
+       // Already exists locally - just set it
+       setSelectedDivision({
+         id: existing.division_id,
+         name: existing.division,
+       });
+       setDivisionInput(existing.division);
+       return;
+     }
+
+     // Doesn't exist locally - call find-or-create
+     try {
+       const result = await api.post("/divisions/find-or-create", {
+         division: divisionName.trim(),
+       });
+
+       if (result.success) {
+         setSelectedDivision({
+           id: result.data.division_id,
+           name: result.data.division,
+         });
+         setDivisionInput(result.data.division);
+
+         // Optionally show feedback to user
+         if (!existing) {
+           console.log(`New division created: ${result.data.division}`);
+         }
+       }
+     } catch (err) {
+       alert(`Failed to set division: ${err.message}`);
+     }
   };
 
   const handleDivisionKeyDown = (e) => {

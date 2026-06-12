@@ -17,7 +17,7 @@ function mostRecent(){
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth(); 
-    const { transmissions, loading, error } = GetTransmissions();
+    const { transmissions, loading, error, refetch } = GetTransmissions();
 
     const handleEditTrans = async (data) => {
         // let chkData; 
@@ -281,6 +281,7 @@ function mostRecent(){
             data={dialogData}
             isDeleteButton={isDeleteButton}
             onRecords={onRecords}
+            onRefetch={refetch}
           />
         </div>
       </>

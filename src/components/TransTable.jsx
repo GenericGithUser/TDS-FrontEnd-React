@@ -22,9 +22,7 @@ function TransTable() {
     const { user } = useAuth();
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const { transmissions, loading, error } = GetTransmissions(searchQuery);
-
-
+    const { transmissions, loading, error, refetch } = GetTransmissions(searchQuery);
 
    const recStatus = (user.usr_role === "ADMIN" || user.usr_role === "RECEIVER") ? "FINISHED" : "RECEIVED";
    const sentStatus = (user.usr_role === "RECEIVER") ? "INCOMING" : "SENT";
@@ -102,6 +100,12 @@ function TransTable() {
           if (valA == null) valA = "";
           if (valB == null) valB = "";
 
+          if (sortConfig.key === "trans_id") {
+            // Sort by the raw underlying number instead of the "MEM-XXXX" string
+            valA = Number(a.trans_id) || 0;
+            valB = Number(b.trans_id) || 0;
+          }
+
           // Special handling for dates to ensure chronological sorting
           if (sortConfig.key === "sent_date") {
             const dateA = new Date(valA).getTime();
@@ -157,7 +161,7 @@ function TransTable() {
             <colgroup>
               {user.usr_role === "ADMIN" || user.usr_role === "RECEIVER" ? (
                 <>
-                  <col style={{ width: "10px" }} />
+                  <col style={{ width: "5px" }} />
                   <col style={{ width: "10px" }} />
                   <col style={{ width: "10vw" }} />
                   <col style={{ width: "10vw" }} />
@@ -195,7 +199,7 @@ function TransTable() {
                     style={{ cursor: "pointer" }}
                     onClick={() => requestSort("office_dept")}
                   >
-                    TransmissionsID{getSortIndicator("office_dept")}
+                    Office{getSortIndicator("office_dept")}
                   </th>
                 )}
                 <th
@@ -260,9 +264,9 @@ function TransTable() {
                   </td>
                 </tr>
               ) : (
-                sortedTransmissions.slice(0, 10).map((data) => (
-                  <tr key={data.record_id} className="fade-in">
-                    <td>{data.trans_id}</td>
+                sortedTransmissions.slice(0, 50).map((data) => (
+                  <tr key={data.trans_id} className="fade-in">
+                    <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                     <td>{data.record_id}</td>
                     {user.usr_role === "ADMIN" ||
                     user.usr_role === "RECEIVER" ? (
@@ -381,6 +385,7 @@ function TransTable() {
             data={dialogData}
             isDeleteButton={isDeleteButton}
             onRecords={onRecords}
+            onRefetch={refetch}
           />
         </div>
       </>

@@ -16,7 +16,7 @@ function mostRecentReceiver(){
     const [onRecords, setOnRecords] = useState(false);
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData(); 
-    const { transmissions, loading, error } = GetTransmissions();
+    const { transmissions, loading, error, refetch } = GetTransmissions();
 
     // const handleEditTrans = (data) => {
     //     const sendData = { mode: 'edit', data: data, returnTo: "/dashboard/home",callback: ()=> console.log('Success') }
@@ -259,6 +259,7 @@ function mostRecentReceiver(){
             data={dialogData}
             isDeleteButton={isDeleteButton}
             onRecords={onRecords}
+            onRefetch={refetch}
           />
         </div>
       </>

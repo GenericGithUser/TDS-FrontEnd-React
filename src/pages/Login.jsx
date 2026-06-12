@@ -19,12 +19,28 @@ function Login(){
         e.preventDefault();
         setError('');
 
+        if (!id.toUpperCase().startsWith("MEM-")) {
+          setError("Invalid ID");
+          toast.error(error, {
+            position: "top-center",
+            background: "#f89d9d",
+            color: "#ff5757",
+          });
+          
+          return;
+        }
+
         const parsedId = parseInt(id.replace(/^\D+/, ""), 10);
 
         const result = await login(parsedId, password);
 
         if (result.success) {
-            navigate('/dashboard');
+          console.log(result);
+            if (result.mustChangePassword) {
+              navigate("/change-password"); // ← special route
+            } else {
+              navigate("/dashboard");
+            }
         }
         else{
             setError(result.error);

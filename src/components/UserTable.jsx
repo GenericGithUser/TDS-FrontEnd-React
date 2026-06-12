@@ -15,11 +15,14 @@ function UserTable() {
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [includeDeleted, setIncludeDeleted] = useState(false);
-    const {users, loading, error, refetch} = GetUsers(searchQuery, includeDeleted);
+    const [onlyDeleted, setOnlyDeleted] = useState(false);
+    const {users, loading, error, refetch, fetchDisabledUsers} = GetUsers(searchQuery, includeDeleted);
 
     const openDialog = (item, delBtn) => {
+      console.log("Triggered");
       
       setDialogData(item);
+      console.log(dialogData);
       setIsDialogOpen(true);
       setIsDeleteButton(delBtn);
       setOnRecords(false);
@@ -43,7 +46,21 @@ function UserTable() {
       }
     };
 
-
+    const handleFetchDisabled = async (e) => {
+      const checked = e.target.checked;
+      setOnlyDeleted(checked);
+      if (checked) {
+        setIncludeDeleted(false); // ← uncheck "include disabled" when "only disabled" is checked
+      }
+    };
+    
+    useEffect(()=>{
+      if (onlyDeleted === true) {
+        fetchDisabledUsers();
+      }else{
+        refetch();
+      }
+    }, [onlyDeleted])
     const [sortConfig, setSortConfig] = useState({
           key: null,
           direction: "asc",
@@ -133,9 +150,37 @@ function UserTable() {
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
             <br />
-            <label htmlFor="incDisabled">Include Disabled?</label>
-            <input type="checkbox" name="incDisabled" id="incDisabled" value={includeDeleted} onChange={(e)=>{setIncludeDeleted(e.target.checked); refetch()}}/>
+            <label htmlFor="incDisabled" className="lblDis">
+              Include Disabled?
+            </label>
+            <input
+              type="checkbox"
+              name="incDisabled"
+              id="incDisabled"
+              checked={includeDeleted}
+              onChange={(e) => {
+                setIncludeDeleted(e.target.checked);
+                if (e.target.checked) {
+                  setOnlyDeleted(false); // ← uncheck "only disabled" when "include disabled" is checked
+                }
+                refetch();
+              }}
+            />
           </form>
+          <div className="opts">
+            <label htmlFor="onlyDisabled" className="lblDis">
+              Show Only Disabled?
+            </label>
+            <input
+              type="checkbox"
+              name="onlyDisabled"
+              id="onlyDisabled"
+              checked={onlyDeleted}
+              onChange={(e) => {
+                handleFetchDisabled(e);
+              }}
+            />
+          </div>
         </div>
         <div className="transTable">
           <table className="actTransTable">
@@ -217,14 +262,15 @@ function UserTable() {
               )}
             </tbody>
           </table>
-          <UsableDialog
-            isOpen={isDialogOpen}
-            onClose={closeDialog}
-            data={dialogData}
-            isDeleteButton={isDeleteButton}
-            onRecords={onRecords}
-          />
         </div>
+        <UsableDialog
+          isOpen={isDialogOpen}
+          onClose={closeDialog}
+          data={dialogData}
+          isDeleteButton={isDeleteButton}
+          onRecords={onRecords}
+          onRefetch={refetch}
+        />
       </>
     );
 }

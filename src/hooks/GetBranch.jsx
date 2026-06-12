@@ -37,6 +37,35 @@ export function GetBranch(searchQuery = ''){
         fetchBranches();
     }, [fetchBranches]);
 
-    return { branches, branchLoading, branchError, refetch: fetchBranches};
+    const createBranch =  useCallback(async (branchData) => {
+        try {
+            const result = await api.post("/branches/", branchData);
+            if (result.success) {
+                toast.success(result.message || "Branch Successfully Created!");
+                setBranches((prev)=> [result.data, ...prev]);
+                return {success: true};
+            }
+        } catch (error) {
+            toast.error(error.message || "Failed to Create Branch!");
+            return {success: false, error: error.message};
+        }
+        
+    }, []);
+
+    const updateBranch = useCallback(async (branchId, branchData) => {
+        try {
+            const result = await api.put(`/branches/${branchId}`, branchData);
+            if (result.success) {
+                toast.success(result.message || "Branch Successfully Updated!");
+                setBranches((prev)=> prev.map((r)=>(r.branch_id === branchId ? result.data : r)),);
+                return {success: true};
+            }
+        } catch (error) {
+           toast.error(error.message || "Failed to Update Branch!");
+           return { success: false, error: error.message}; 
+        }
+    }, []);
+
+    return { branches, branchLoading, branchError, refetch: fetchBranches, createBranch, updateBranch};
 
 }

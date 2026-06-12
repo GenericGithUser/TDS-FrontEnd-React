@@ -83,6 +83,19 @@ export function GetUsers(searchQuery = '', includeDeleted = false){
        }
      }, []);
 
+     const getEmployeesByBranch = useCallback(async (branchId) => {
+        try {
+          const result = await api.get(`/users/branch/${branchId}`);
+          if (result.success){
+            toast.success(result.success || "Employees Fetched");
+            return{ success: true, data: result.data};
+          }
+        } catch (error) {
+          toast.error(error.message || "Failed to Fetch Employees");
+          return { success: false, error: err.message };
+        }
+     }, []);
+
      // ── Soft delete (sets is_deleted = true, deleted_at = NOW()) ─────────────
      const softDeleteUser = useCallback(async (employeeId) => {
        try {
@@ -126,13 +139,46 @@ export function GetUsers(searchQuery = '', includeDeleted = false){
          const result = await api.patch(`/users/${userId}/password`, {
            newPassword,
          });
+         toast.success(result.message || "Password Updated Successfully!");
          return { success: result.success };
        } catch (err) {
+        toast.error(err.message || "Failed to Update Password");
          return { success: false, error: err.message };
        }
      }, []);
 
 
+     const checkPassword = useCallback(async (userId, oldPassword)=>{
 
-    return { users, loading, error, refetch: fetchUsers, createUser, updateUser, softDeleteUser, restoreUser};
+        try {
+          const result = await api.post(`/users/password`, {userId, oldPassword});
+
+          if (result.success) {
+            toast.success(result.message || "Password Matches!");
+            return {success:result.message, data: result.data}
+          }
+        } catch (error) {
+          toast.error(error.message || "Old Password does not Match!");
+          return { success: false, error: error}
+        }
+
+     }, [])
+
+     const fetchDisabledUsers = useCallback(async () => {
+       try {
+         setLoading(true);
+         setError(null);
+         const result = await api.get("/users/disabled");
+         setUsers(result.data ?? []);
+       } catch (err) {
+         toast.error(err.message || "Failed to Fetch Users");
+         setError(err.message || "Failed to load disabled users");
+       } finally {
+         setLoading(false);
+       }
+     }, []);
+
+
+
+    return { users, loading, error, refetch: fetchUsers, createUser, updateUser, softDeleteUser, restoreUser, updatePassword, fetchDisabledUsers, getEmployeesByBranch, checkPassword};
 }

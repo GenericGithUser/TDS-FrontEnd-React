@@ -1,7 +1,7 @@
 import "../styles/tableTemp.css";
 import "../styles/transtable.css";
 import "../styles/loading.css";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import UsableDialog from "./usableDialog";
 // import dummyData from "../assets/dummyData.js";
 import { useAuth } from "../context/AuthContext";
@@ -17,7 +17,8 @@ function recordTable() {
     const { user } = useAuth();
     const [searchInput, setSearchInput ] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const { records, loading, error } = GetRecords(searchQuery);
+    const [unassigned, setUnassigned] = useState(new Set());
+    const { records, loading, error, fetchUnassignedRecords, refetch } = GetRecords(searchQuery);
 
     const openDialog = (item, delBtn) => {
       setDialogData(item);
@@ -78,6 +79,12 @@ function recordTable() {
           if (valA == null) valA = "";
           if (valB == null) valB = "";
 
+          if (sortConfig.key === "record_id") {
+            // Sort by the raw underlying number instead of the "MEM-XXXX" string
+            valA = Number(a.record_id) || 0;
+            valB = Number(b.record_id) || 0;
+          }
+
           // Special handling for dates to ensure chronological sorting
           if (sortConfig.key === "sent_date") {
             const dateA = new Date(valA).getTime();
@@ -112,6 +119,20 @@ function recordTable() {
       }
       return sorted;
     }, [records, sortConfig]); 
+    
+    
+    useEffect(() => {
+      const load = async () => {
+        const result = await fetchUnassignedRecords();
+        if (result.success) {
+          // Store just the IDs in a Set for O(1) lookup
+          setUnassigned(new Set(result.data.map((r) => r.record_id)));
+        }
+      };
+      load();
+    }, [user.usr_role]);
+
+    const isUnassigned = (id) => unassigned.has(id);
     
     return (
       <>
@@ -230,9 +251,9 @@ function recordTable() {
                   </td>
                 </tr>
               ) : (
-                sortedRecords.slice(0, 10).map((data) => (
+                sortedRecords.slice(0, 50).map((data) => (
                   <tr key={data.record_id} className="fade-in">
-                    <td>{data.record_id}</td>
+                    <td>{`SR-${String(data?.record_id).padStart(4, "0")}`}</td>
                     {user.usr_role === "RECEIVER" ||
                     user.usr_role === "ADMIN" ? (
                       <td>{data.office_dept}</td>
@@ -255,13 +276,18 @@ function recordTable() {
                         >
                           View
                         </button>
-                        <button
-                          type="button"
-                          className="delBtn"
-                          onClick={() => openDialog(data, true)}
-                        >
-                          Delete
-                        </button>
+                        {(user.is_admin || user.usr_role === "PREPARER") &&
+                        isUnassigned(data.record_id) ? (
+                          <button
+                            type="button"
+                            className="delBtn"
+                            onClick={() => openDialog(data, true)}
+                          >
+                            Delete
+                          </button>
+                        ) : (
+                          ""
+                        )}
                       </>
                     </td>
                   </tr>
@@ -275,6 +301,7 @@ function recordTable() {
             data={dialogData}
             isDeleteButton={isDeleteButton}
             onRecords={onRecords}
+            onRefetch={refetch}
           />
         </div>
       </>

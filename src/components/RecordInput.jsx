@@ -75,23 +75,25 @@ function RecordInput({
         Add Records
       </div>
 
-      <dialog className="inputDiag" ref={diagRef}>
+      <dialog className="inputDiag shrinker" ref={diagRef}>
         <h1 style={{ textAlign: "center" }}>Add Existing Record</h1>
 
         <div className="records">
           <div className="searcherSorter">
-            <label htmlFor="searchBar">Search For a Record</label>
-            <input
-              type="search"
-              name="searchBar"
-              id="searchBar"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by title or code..."
-            />
+            <div className="searchForm">
+              <label htmlFor="searchBar">Search For a Record</label>
+              <input
+                type="search"
+                name="searchBar"
+                id="searchBar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by title or code..."
+              />
+            </div>
           </div>
 
-          <div className="transTable">
+          <div className="transTable shrinker">
             <table className="actTransTable">
               <colgroup>
                 <col style={{ width: "10px" }} />

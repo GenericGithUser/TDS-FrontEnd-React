@@ -8,6 +8,7 @@ const api = axios.create({
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' }
 });
+let isRedirecting = false;  // ← flag outside the interceptor
 
 // ── Request interceptor ───────────────────────────────────────────────────────
 // Attaches JWT token to every outgoing request
@@ -33,15 +34,18 @@ api.interceptors.response.use(
   (err) => {
     const status = err.response?.status;
     const msg = err.response?.data?.message || 'Network error';
+    const isLoginRequest = err.config?.url?.includes('/auth/login');
 
-    if (status === 401) {
+    if (status === 401 && !isLoginRequest) {
       // Token expired or invalid
-       const isLoginRequest = err.config?.url?.includes('/auth/login');
-
-            if (!isLoginRequest) {
+             if (!isRedirecting) {
+                isRedirecting = true;
                 localStorage.removeItem('user');
                 localStorage.removeItem('token');
                 navigateB('/login', { replace: true });
+
+                // Reset flag after navigation settles
+                setTimeout(() => { isRedirecting = false; }, 3000);
             }
       return Promise.reject({ success: false, message: msg });
     }

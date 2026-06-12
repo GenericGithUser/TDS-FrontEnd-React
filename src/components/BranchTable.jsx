@@ -2,9 +2,9 @@ import "../styles/tableTemp.css";
 import "../styles/transtable.css";
 import { useState, useMemo } from "react";
 import UsableDialog from "./usableDialog";
-import DUMMY_USR from "../assets/dummyUserData";
-import { GetUsers } from "../hooks/GetUsers";
 import { GetBranch } from "../hooks/GetBranch";
+import { useNavigate } from "react-router-dom";
+import { useNavigationData } from "../components/NavigationDataContext";
 import { TableSkeleton, ErrorMessage } from "./Loading";
 
 function BranchTable() {
@@ -15,13 +15,16 @@ function BranchTable() {
     const [onRecords, setOnRecords] = useState(false);
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const {users, loading, error} = GetUsers();
-    const { branches, branchError, branchLoading  } = GetBranch(searchQuery);
+    const navigate = useNavigate();
+    const { setRouteData } = useNavigationData();
+    const { branches, branchError, branchLoading, refetch  } = GetBranch(searchQuery);
 
     const openDialog = (item, delBtn) => {
-      
+      console.log("FIRED")
       setDialogData(item);
+      console.log(item);
       setIsDialogOpen(true);
+      console.log(isDialogOpen);
       setIsDeleteButton(delBtn);
       setOnRecords(false);
     };
@@ -43,6 +46,17 @@ function BranchTable() {
         setSearchQuery("");
       }
     };
+
+    const handleEditBranch = (data) =>{
+      const sendData = {
+        mode: "edit",
+        data: data,
+        returnTo: "/dashboard/branches",
+        callback: () => console.log("Success"),
+      };
+      setRouteData(sendData);
+      navigate("edit");
+    }
 
     const [sortConfig, setSortConfig] = useState({
           key: null,
@@ -137,9 +151,9 @@ function BranchTable() {
         <div className="transTable">
           <table className="actTransTable">
             <colgroup>
-              <col style={{ width: "10vw" }} />
-              <col style={{ width: "18vw" }} />
-              <col style={{ width: "15vw" }} />
+              <col style={{ width: "12vw" }} />
+              <col style={{ width: "20vw" }} />
+              <col style={{ width: "20vw" }} />
               <col style={{ width: "15vw" }} />
             </colgroup>
             <thead className="transTableHead">
@@ -200,7 +214,6 @@ function BranchTable() {
                     <td>{data.business_area}</td>
                     <td>{data.employee_count}</td>
                     <td>
-                      <>
                         <button
                           type="button"
                           className="btnView"
@@ -208,7 +221,13 @@ function BranchTable() {
                         >
                           Details
                         </button>
-                      </>
+                        <button
+                          type="button"
+                          className="btnEdit"
+                          onClick={() => handleEditBranch(data)}
+                        >
+                          Edit
+                        </button>
                     </td>
                   </tr>
                 ))
@@ -221,6 +240,7 @@ function BranchTable() {
             data={dialogData}
             isDeleteButton={isDeleteButton}
             onRecords={onRecords}
+            onRefetch={refetch}
           />
         </div>
       </>

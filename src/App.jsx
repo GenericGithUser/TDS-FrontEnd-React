@@ -12,6 +12,9 @@ import Users from './pages/Users'
 import CreateEditUser from './pages/CreateEditUser'
 import ProbTickets from './pages/ProbTickets'
 import Branches from './pages/Branches'
+import CreateEditBranches from './pages/CreateEditBranches'
+import ChangePassword from './pages/ChangePassword'
+import ResetPassword from './pages/ResetPassword'
 import { useAuth } from './context/AuthContext'
 import { Toaster } from 'react-hot-toast'
 import './App.css'
@@ -86,9 +89,13 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="users/create" element={<CreateEditUser />} />
             <Route path="users/edit" element={<CreateEditUser />} />
-            <Route path='branches' element={<Branches/>}/>
+            <Route path="branches" element={<Branches />} />
+            <Route path="branches/create" element={<CreateEditBranches />} />
+            <Route path="branches/edit" element={<CreateEditBranches />} />
+            <Route path='passwordchange' element={<ChangePassword/>}/>
             <Route path="tickets" element={<ProbTickets />} />
           </Route>
+          <Route path='/change-password' element={<ResetPassword/>}/>
         </Routes>
       )}
     </>

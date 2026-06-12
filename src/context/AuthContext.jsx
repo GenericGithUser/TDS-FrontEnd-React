@@ -49,6 +49,10 @@ export const AuthProvider = ( { children } ) => {
                 setUser(result.user);
                 localStorage.setItem("user", JSON.stringify(result.user));
                 localStorage.setItem("token", result.token);
+
+                if (result.user.must_change_password === true) {
+                  return { success: true, mustChangePassword: true };
+                }
                 return { success: true };
             } else {
                 return { success: false, error: result.message };

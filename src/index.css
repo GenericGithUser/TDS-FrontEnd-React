@@ -218,3 +218,19 @@ body {
 .btnFin:hover{
   background-color: var(--yellow) !important;
 }
+
+.btnOrange {
+  background-color: orangered !important;
+}
+.errorPage{
+  width: 50vw;
+  height: 50vh;
+  border: 5px solid green;
+  padding: 10px;
+  margin: auto;
+  background-color: azure;
+
+}
+.red{
+  color: #ff5757;
+}

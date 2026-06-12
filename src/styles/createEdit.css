@@ -173,3 +173,38 @@
     height: 2vw;
     margin-left: 20px;
 }
+
+.expander{
+    width: 15vw !important;
+}
+
+.itemSpec{
+    justify-content: center;
+    margin-top: 10px;
+    
+}
+
+.btnSpecial{
+    margin-top: 0 !important;
+}
+
+.warningPass{
+    background-color: rgba(238, 101, 101, 0.685);
+    color: var(--red);
+}
+.goodPass{
+    background-color: rgba(101, 238, 124, 0.568);
+    color: var(--dark-green);
+}
+
+.customCont{
+    background-color: var(--light-green);
+    display: flex;
+    width: 50vw;
+    justify-content: center;
+    align-items: center;
+    margin: 10vw;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 10px;
+}

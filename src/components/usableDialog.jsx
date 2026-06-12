@@ -9,15 +9,18 @@ import { GetUsers } from "../hooks/GetUsers";
 import { GetTransmissions } from "../hooks/GetTranssmissions";
 import { Spinner } from "./Loading";
 import toast from "react-hot-toast";
+import api from "../api/client.js";
 import '../styles/dialog.css'
 
 
-function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
+function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefetch } ){
     const dialogRef = useRef(null);
     const nestedDialogRef = useRef(null);
     const nestedSiblingDialogRef = useRef(null);
+    const nnDialogRef = useRef(null);
     const [isNestedDialogOpen, setIsNestedDialogOpen] = useState(false);
     const [isNestedSiblingDialogOpen, setIsNestedSiblingDialogOpen] = useState(false);
+    const [nnOpenDialog, setOpenNNDialog] =useState(false);
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth(); 
@@ -29,9 +32,10 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
     const [isFetching, setIsFetching] = useState(false);
     const [currentIdx, setCurrentIdx] = useState(0); 
     const [missingItemsMap, setMissingItemsMap] = useState({});
-    const { getTransmissionById, updateStatusApprover, updateStatus, cancelTransmission, loading, error } = GetTransmissions();
+    const { getTransmissionById, updateStatusApprover, updateStatus, cancelTransmission, loading, error, deleteTransmission } = GetTransmissions();
     const [feedback, setFeedback] = useState('');
-    const {softDeleteUser, restoreUser} = GetUsers();
+    const {softDeleteUser, restoreUser, getEmployeesByBranch} = GetUsers();
+    const [users, setUsers] = useState([]);
 
 
 
@@ -83,7 +87,49 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
 
        load();
     }
-  
+
+    const fetchEmployees = () => {
+        if (!data?.branch_id) {
+          return;
+        }
+        const fetcher = async () =>{
+            const dataUser = await getEmployeesByBranch(data?.branch_id);
+            console.log(dataUser.data);
+            setUsers(dataUser.data);
+            console.log(users);
+        }
+
+
+        fetcher();
+    }
+    
+    const handleResetPassword = async (employeeId) => {
+      try {
+        const result = await api.post(`/users/${employeeId}/reset-password`);
+
+        if (result.success) {
+          // Show admin the temp password in a clear way
+          toast(
+            `Password reset successfully!\n\n` +
+              `Employee: ${result.data.emp_name}\n` +
+              `Temporary Password: ${result.data.temp_password}\n\n` +
+              `Please share this with the employee securely.\n` +
+              `They will be prompted to change it on next login.`,
+            {
+              style: {
+                backgroundColor: "#96d9ad",
+
+              },
+              duration : 10000,
+            },
+          );
+        }
+        onClose();
+      } catch (err) {
+        toast.error(`Failed to reset password: ${err.message}`);
+      }
+    };
+
     
     useEffect(()=>{
         const dialog = dialogRef.current;
@@ -97,11 +143,14 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
               fetchTrans();
               
             }
+            if (user.usr_role === "ADMIN" && data.branchTableViewing) {
+              fetchEmployees();
+            }
             dialog.showModal();
         }else{
             dialog.close();
         }
-    }, [isOpen]);
+    }, [isOpen, data]);
 
 
      useEffect(() => {
@@ -126,6 +175,17 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
       }
      }, [isNestedSiblingDialogOpen]);
 
+     useEffect(()=>{
+      const nnDialog = nnDialogRef.current;
+      if (!nnDialog) return;
+
+      if (nnOpenDialog) {
+        nnDialog.showModal();
+      }else{
+        nnDialog.close();
+      }
+     }, [nnOpenDialog]);
+
      
 
      useEffect(() => {
@@ -134,7 +194,10 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
           fetchChecklist(data.record_id);
             
      },[data?.record_id]);
-     if (!data) return;
+    // Ensure the component still renders when `isOpen` is true so the
+    // `dialogRef` can attach and `showModal()` can be called even if the
+    // `data` prop arrives slightly after `isOpen` (state updates are async).
+    if (!data && !isOpen) return null;
     
        
         
@@ -155,11 +218,20 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        setIsNestedSiblingDialogOpen(false);
      };
 
+     const openNNDialog = ()=>{
+      setOpenNNDialog(true);
+     }
+
+     const closeNNDialog = () =>{
+      setOpenNNDialog(false);
+     }
+
      const handleFeedbackSubmit = () => {
        updateFeedback(currentRecord.record_id, {
         feedback: feedback
        });
        setFeedback("");
+       onRefetch();
      };
 
      const handleIncomplete = async () => {
@@ -184,6 +256,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
          }
 
          onClose();
+         onRefetch()
        } catch (err) {
          alert(`Failed to mark incomplete: ${err.message}`);
        }
@@ -192,6 +265,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
      const handleComplete = () =>{
         updateStatus(data.trans_id, "received", user.employee_id);
         onClose();
+        onRefetch();
      }
 
        const onMarkIncomplete = () => {
@@ -201,6 +275,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        const onMarkComplete = () => {
          handleComplete();
        };
+
+      const handleDeleteTrans = () =>{
+        deleteTransmission(data.trans_id);
+        closeNNDialog();
+        onClose();
+      } 
 
      const handleNestedDialogSubmit = (onFeedback) => {
        // Handle the submit logic here
@@ -220,6 +300,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
        closeNestedDialog();
        // Optionally close the main dialog too
        onClose();
+       onRefetch();
      };
      const handleNestedDialogResolve = (onFeedback) => {
        // Handle the submit logic here
@@ -234,12 +315,14 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
      const handleReApprove = () =>{
       updateStatus(data.trans_id, "pending", null);
       onClose();
+      onRefetch();
      }
 
      const handleDeletionRecord = (e) =>{
         e.preventDefault();
         deleteRecord(data.record_id);
         onClose();
+        onRefetch();
      }
 
    
@@ -288,6 +371,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         updateStatusApprover(data.trans_id, "sent", user.employee_id);
         console.log("Success?");
         onClose();
+        onRefetch();
     }
       const records = fullTrans?.records ?? [];
       const totalRecords = records.length;
@@ -637,12 +721,19 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 <button onClick={onClose} className="btnCancel ">
                   OK
                 </button>
-                {user.usr_role === "APPROVER" && (
+                {user.usr_role === "APPROVER" || user.is_admin ? (
                   <button
                     className="btnRed btnCancel"
                     onClick={openNestedDialog}
                   >
                     CANCEL
+                  </button>
+                ) : (
+                  ""
+                )}
+                {user.is_admin && (
+                  <button onClick={openNNDialog} className="btnOrange btnCancel">
+                    DELETE TRANSMISSION
                   </button>
                 )}
               </div>
@@ -706,6 +797,48 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   className="btnCancel"
                 >
                   OK
+                </button>
+              </div>
+            </dialog>
+            <dialog className="delPrompt" ref={nnDialogRef}>
+              <h1 className="diagTitle">Confirm Deletion</h1>
+              <img src="/assets/warning.png" alt="warning" />
+              <h3 className="confirmMesg">
+                Are you sure you want to Delete this transmission?
+              </h3>
+              <div className="contents">
+                <table className="contentList">
+                  <tbody>
+                    <tr>
+                      <td className="titleD">TransmissionID: </td>
+                      <td id="transIDData" className="data">
+                        {data.trans_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">RecordID: </td>
+                      <td id="recordIdData" className="data">
+                        {data.record_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">Title: </td>
+                      <td id="titleIDData" className="data">
+                        {data.record_titles}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="buttons">
+                <button className="btnCancel" onClick={closeNNDialog}>
+                  Go Back
+                </button>
+                <button
+                  onClick={() => handleDeleteTrans()}
+                  className="btnRed btnCancel"
+                >
+                  CANCEL TRANSMISSION
                 </button>
               </div>
             </dialog>
@@ -1126,6 +1259,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   <button onClick={onClose} className="btnCancel">
                     OK
                   </button>
+                  <button
+                    onClick={openNNDialog}
+                    className="btnRed btnCancel"
+                  >
+                    CANCEL TRANSMISSION
+                  </button>
                 </div>
               )}
               {user.usr_role === "ADMIN" && (
@@ -1155,7 +1294,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
             <dialog className="diagEdit" ref={nestedDialogRef}>
               <h1 className="diagTitle">Request Edits</h1>
               <h2>
-                For Record: {`SR-${String(currentRecord?.record_id).padStart(4, "0")}`}
+                For Record:{" "}
+                {`SR-${String(currentRecord?.record_id).padStart(4, "0")}`}
               </h2>
               <h2>Record Title: {currentRecord?.records_title}</h2>
               <h2></h2>
@@ -1197,6 +1337,48 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                   className="btnCancel"
                 >
                   OK
+                </button>
+              </div>
+            </dialog>
+            <dialog className="delPrompt" ref={nnDialogRef}>
+              <h1 className="diagTitle">Confirm Cancellation</h1>
+              <img src="/assets/warning.png" alt="warning" />
+              <h3 className="confirmMesg">
+                Are you sure you want to Cancel this transmission?
+              </h3>
+              <div className="contents">
+                <table className="contentList">
+                  <tbody>
+                    <tr>
+                      <td className="titleD">TransmissionID: </td>
+                      <td id="transIDData" className="data">
+                        {data.trans_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">RecordID: </td>
+                      <td id="recordIdData" className="data">
+                        {data.record_id}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="titleD">Title: </td>
+                      <td id="titleIDData" className="data">
+                        {data.record_titles}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="buttons">
+                <button className="btnCancel" onClick={closeNNDialog}>
+                  Go Back
+                </button>
+                <button
+                  onClick={() => handleDeleteTrans()}
+                  className="btnRed btnCancel"
+                >
+                  CANCEL TRANSMISSION
                 </button>
               </div>
             </dialog>
@@ -1462,7 +1644,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 Cancel
               </button>
               <button type="button" onClick={handleDeletionRecord} className="btnRed btnCancel">
-                DELETE TRANSMISSION
+                DELETE RECORD
               </button>
             </div>
           </dialog>
@@ -1603,7 +1785,10 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
                 <button className="btnCancel" onClick={onClose}>
                   OK
                 </button>
-                <button className="btnInc btnCancel" onClick={onClose}>
+                <button
+                  className="btnInc btnCancel"
+                  onClick={() => handleResetPassword(data.employee_id)}
+                >
                   Reset Password
                 </button>
                 <button
@@ -1697,91 +1882,54 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords } ){
         </>
       );
     }
-
-    if (user.usr_role === "ADMIN" && /#PT/.test(data.id) ) {
+    if (user.is_admin && data.branchTableViewing) {
       return (
         <>
-          <dialog className="diagEdit extender" ref={dialogRef}>
-            <h1 className="diagTitle">
-              {data.record_status === "Open" ? "Resolve" : "View"} Ticket
-            </h1>
+          <dialog className="diagEdit" ref={dialogRef}>
+            <h1 className="diagTitle">Branch Details</h1>
             <div className="contents">
               <table className="contentList">
                 <tbody>
                   <tr>
-                    <td className="titleD">TicketID: </td>
-                    <td id="transIDData" className="data dataOverride">
-                      {data.id}
+                    <td className="titleD">Branch ID: </td>
+                    <td id="transIDData" className="data">
+                      {`MB-${String(data.branch_id).padStart(4, "0")}`}
                     </td>
                   </tr>
                   <tr>
-                    <td className="titleD">Title: </td>
-                    <td id="recordIdData" className="data dataOverride">
-                      {data.record_titles}
+                    <td className="titleD">Office Name: </td>
+                    <td id="recordIdData" className="data">
+                      {data.office_dept}
                     </td>
                   </tr>
                   <tr>
-                    <td className="titleD">Urgency: </td>
-                    <td id="recordIdData" className="data dataOverride">
-                      {data.urgency}
+                    <td className="titleD">Business Area: </td>
+                    <td id="feedbackData" className="data">
+                      {data.business_area}
                     </td>
                   </tr>
                   <tr>
-                    <td className="titleD">Date Sent: </td>
-                    <td id="recordIdData" className="data dataOverride">
-                      {data.date_sent}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="titleD">Message: </td>
-                    <td id="feedbackData" className="data dataOverride">
-                      {data.message}
+                    <td className="titleD">Employees: </td>
+                    <td id="feedbackData" className="data">
+                      {users.map((u) => (
+                        <div className="empItem">{`MEM-${String(u.employee_id).padStart(4, "0")} | ${u.emp_name} | ${u.position}`}</div>
+                      ))}
                     </td>
                   </tr>
                 </tbody>
               </table>
               <div className="buttons">
-                {data.record_status === "Open" ? (
-                  <>
-                    <button
-                      className="btnFin btnCancel"
-                      onClick={openNestedDialog}
-                    >
-                      Resolve
-                    </button>
-                    <button onClick={onClose} className="btnCancel">
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button onClick={onClose} className="btnCancel">
-                    OK
-                  </button>
-                )}
+                <button className="btnCancel" onClick={onClose}>
+                  OK
+                </button>
               </div>
-            </div>
-          </dialog>
-          <dialog className="diagEdit" ref={nestedDialogRef}>
-            <h1 className="diagTitle">Resolved Message</h1>
-            <form action="" method="post" className="changes">
-              <label htmlFor="changeForm">Enter Resolve Message:</label>
-              <textarea name="changeForm" id="changeForm"></textarea>
-            </form>
-            <div className="buttons">
-              <button
-                className="btnInc btnCancel"
-                onClick={handleNestedDialogResolve}
-              >
-                Send Resolve Message and Close
-              </button>
-              <button onClick={closeNestedDialog} className="btnCancel">
-                Cancel
-              </button>
             </div>
           </dialog>
         </>
       );
     }
+
+    
 }
 
 export default UsableDialog

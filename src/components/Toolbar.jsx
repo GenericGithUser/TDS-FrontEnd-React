@@ -1,10 +1,9 @@
 import { useAuth } from '../context/AuthContext';
 import '../styles/toolbar.css'
 import { NavLink } from 'react-router-dom';
-import { SlLogout } from "react-icons/sl";
 import { FaCircleUser } from "react-icons/fa6";
 import { BsBuildingsFill } from "react-icons/bs";
-import { LuTicketX } from "react-icons/lu";
+import Settings from './Settings.jsx';
 
 
 
@@ -168,8 +167,9 @@ function Toolbar(){
             )}
           </div>
           <div className="logDiv">
-            <SlLogout className="logout" onClick={logout} />
-            <p className="logoutlbl">Log-out</p>
+            {/* <SlLogout className="logout" onClick={logout} />
+            <p className="logoutlbl">Log-out</p> */}
+            <Settings/>
           </div>
         </div>
       </>
