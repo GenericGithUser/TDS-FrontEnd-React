@@ -11,6 +11,7 @@ import { GetRecords } from "../hooks/GetRecords.jsx";
 import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { useAuth } from "../context/AuthContext";
 import { Spinner } from "../components/Loading.jsx";
+import CreatableSelect from "react-select/creatable";
 import "../styles/loading.css";
 import api from "../api/client.js";
 
@@ -182,12 +183,12 @@ function CreateEditTrans() {
      }
   };
 
-  const handleDivisionKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleDivisionSelect(divisionInput.trim());
-    }
-  };
+  // const handleDivisionKeyDown = (e) => {
+  //   if (e.key === "Enter") {
+  //     e.preventDefault();
+  //     handleDivisionSelect(divisionInput.trim());
+  //   }
+  // };
 
   const clearDivision = () => {
     setSelectedDivision({ id: null, name: "" });
@@ -307,7 +308,7 @@ function CreateEditTrans() {
           <div className="item">
             <label className="transLabel">Division:</label>
             <div className="divisionInputRow">
-              <input
+              {/* <input
                 type="text"
                 className="recInput"
                 placeholder="Type or select a division..."
@@ -328,11 +329,75 @@ function CreateEditTrans() {
                 onClick={() => handleDivisionSelect(divisionInput.trim())}
               >
                 Set
-              </button>
+              </button> */}
+              <CreatableSelect
+                isClearable
+                placeholder="Type or select a division..."
+                // Convert divisions array to react-select format { value, label }
+                options={divisions.map((d) => ({
+                  value: d.division_id,
+                  label: d.division,
+                }))}
+                // Show current selection
+                value={
+                  selectedDivision.id
+                    ? {
+                        value: selectedDivision.id,
+                        label: selectedDivision.name,
+                      }
+                    : null
+                }
+                onChange={(selected) => {
+                  if (!selected) {
+                    // Cleared
+                    clearDivision();
+                    return;
+                  }
+                  // selected.value is division_id for existing, selected.label for new
+                  if (selected.__isNew__) {
+                    // User typed a new division - call find-or-create
+                    handleDivisionSelect(selected.label);
+                  } else {
+                    // Existing division selected from dropdown
+                    setSelectedDivision({
+                      id: selected.value,
+                      name: selected.label,
+                    });
+                    setDivisionInput(selected.label);
+                  }
+                }}
+                // Allow creating new options
+                onCreateOption={(inputValue) => {
+                  handleDivisionSelect(inputValue.trim());
+                }}
+                formatCreateLabel={(inputValue) =>
+                  `Add new division: "${inputValue}"`
+                }
+                // Style to match your existing UI
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    minHeight: "40px",
+                    borderColor: "#ddd",
+                    width: "30vw",
+                    "&:hover": { borderColor: "#667eea" },
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? "#667eea"
+                      : state.isFocused
+                        ? "#f0f4ff"
+                        : "white",
+                    color: state.isSelected ? "white" : "#333",
+                  }),
+                }}
+              />
               {selectedDivision.id && (
                 <button
                   type="button"
-                  className="btnCancel btnAddDiv red"
+                  className="btnCancel btnAddDiv redBtn"
                   onClick={clearDivision}
                 >
                   Clear

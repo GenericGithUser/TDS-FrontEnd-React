@@ -178,6 +178,12 @@ function BranchTable() {
                 </th>
                 <th
                   style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("branch_code")}
+                >
+                  Branch Code{getSortIndicator("branch_code")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
                   onClick={() => requestSort("employee_count")}
                 >
                   Number of Employees{getSortIndicator("employee_count")}
@@ -212,22 +218,23 @@ function BranchTable() {
                     <td>{`MB-${String(data.branch_id).padStart(4, "0")}`}</td>
                     <td>{data.office_dept}</td>
                     <td>{data.business_area}</td>
+                    <td>{data.branch_code}</td>
                     <td>{data.employee_count}</td>
                     <td>
-                        <button
-                          type="button"
-                          className="btnView"
-                          onClick={() => openDialog(data, false)}
-                        >
-                          Details
-                        </button>
-                        <button
-                          type="button"
-                          className="btnEdit"
-                          onClick={() => handleEditBranch(data)}
-                        >
-                          Edit
-                        </button>
+                      <button
+                        type="button"
+                        className="btnView"
+                        onClick={() => openDialog(data, false)}
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        className="btnEdit"
+                        onClick={() => handleEditBranch(data)}
+                      >
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 ))

@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 
-function mostRecent(){
+function mostRecent({filter}){
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);  
@@ -184,14 +184,14 @@ function mostRecent(){
                     <ErrorMessage message={error} onRetry={refetch} />
                   </td>
                 </tr>
-              ) : transmissions.length === 0 ? (
+              ) : transmissions.filter(filter ? (data)=> data.record_status === filter : (data)=>data ).length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center" }}>
                     <h1>No Data Available</h1>
                   </td>
                 </tr>
               ) : (
-                sortedTransmissions.slice(0, 4).map((data) => (
+                sortedTransmissions.filter(filter ? (data)=> data.record_status === filter : (data)=>data ).slice(0, 4).map((data) => (
                   <tr key={data.record_id} className="fade-in">
                     <td>{data.trans_id}</td>
                     <td>{data.record_id}</td>

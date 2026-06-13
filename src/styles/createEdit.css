@@ -197,14 +197,18 @@
     color: var(--dark-green);
 }
 
+.bgBlue{
+    background-color: var(--bg);
+}
+
 .customCont{
-    background-color: var(--light-green);
+    background-color: var(--blue-white);
     display: flex;
-    width: 50vw;
-    justify-content: center;
+    width: 60vw;
+    height: 50vh;
     align-items: center;
-    margin: 10vw;
     flex-direction: column;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 15px;
+    box-shadow: 0px 3px 4px 4px #31a9199c;
 }

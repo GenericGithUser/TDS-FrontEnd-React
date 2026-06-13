@@ -15,6 +15,7 @@ import Branches from './pages/Branches'
 import CreateEditBranches from './pages/CreateEditBranches'
 import ChangePassword from './pages/ChangePassword'
 import ResetPassword from './pages/ResetPassword'
+import ForgotPassword from './pages/ForgotPassword'
 import { useAuth } from './context/AuthContext'
 import { Toaster } from 'react-hot-toast'
 import './App.css'
@@ -58,11 +59,31 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={user ? <Navigate to="/dashboard" /> : <Login />}
+            element={
+              user ? (
+                user.must_change_password ? (
+                  <Navigate to="/change-password" replace />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              ) : (
+                <Login />
+              )
+            }
           />
           <Route
             path="/login"
-            element={user ? <Navigate to="/dashboard" /> : <Login />}
+            element={
+              user ? (
+                user.must_change_password ? (
+                  <Navigate to="/change-password" replace />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              ) : (
+                <Login />
+              )
+            }
           />
           <Route
             path="/dashboard"
@@ -92,10 +113,11 @@ function App() {
             <Route path="branches" element={<Branches />} />
             <Route path="branches/create" element={<CreateEditBranches />} />
             <Route path="branches/edit" element={<CreateEditBranches />} />
-            <Route path='passwordchange' element={<ChangePassword/>}/>
+            <Route path="passwordchange" element={<ChangePassword />} />
             <Route path="tickets" element={<ProbTickets />} />
           </Route>
-          <Route path='/change-password' element={<ResetPassword/>}/>
+          <Route path="/change-password" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       )}
     </>

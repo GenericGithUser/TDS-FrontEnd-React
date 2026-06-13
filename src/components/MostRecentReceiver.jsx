@@ -9,7 +9,7 @@ import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 
 
-function mostRecentReceiver(){
+function mostRecentReceiver({filter}){
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);  
@@ -193,7 +193,12 @@ function mostRecentReceiver(){
                 </tr>
               ) : (
                 sortedTransmissions
-                  .filter((data) => data.type != "pending")
+                  .filter(
+                    filter
+                      ? (data) =>
+                          data.record_status === filter 
+                      : (data) => data.record_status != "pending",
+                  )
                   .slice(0, 4)
                   .map((data) => (
                     <tr key={data.record_id} className="fade-in">

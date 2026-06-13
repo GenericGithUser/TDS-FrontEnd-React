@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import '../styles/loading.css'
 import toast from 'react-hot-toast';
 
@@ -26,20 +27,20 @@ function Login(){
             background: "#f89d9d",
             color: "#ff5757",
           });
-          
+          setIsLoading(false);
           return;
         }
 
         const parsedId = parseInt(id.replace(/^\D+/, ""), 10);
 
         const result = await login(parsedId, password);
-
+        console.log("result from AuthContext login:", result);
+        console.log("mustChangePassword:", result.mustChangePassword);
         if (result.success) {
-          console.log(result);
             if (result.mustChangePassword) {
               navigate("/change-password"); // ← special route
             } else {
-              navigate("/dashboard");
+              // navigate("/dashboard");
             }
         }
         else{
@@ -51,11 +52,9 @@ function Login(){
             });
         }
 
-         setIsLoading(false);
+        setIsLoading(false);
 
     }
-      
-    
 
     return (
       <>
@@ -99,14 +98,7 @@ function Login(){
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <a
-                  href="#"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="forgotPass"
-                >
-                  Forgot Password?
-                </a>
+                <Link className="forgotPass" to={"/forgot-password"}>Forgot Password?</Link>
                 <input
                   type="submit"
                   value={isLoading ? "LOGGING IN..." : "LOG-IN"}

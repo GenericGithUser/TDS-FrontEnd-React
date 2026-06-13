@@ -1,51 +1,53 @@
 import '../styles/records.css'
 import '../styles/createEdit.css'
+import '../styles/loading.css'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useNavigationData } from '../components/NavigationDataContext'
 import { Helmet } from 'react-helmet-async'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
+import toast from 'react-hot-toast'
 
-function ResetPassword() {
-    const [newPassword, setNewPassword] = useState("");
-    const [newRePassword, setReNewPassword] = useState("");
+function ForgotPassword() {
+    const [empId, setEmpId] = useState("");
+    const [email, setEmail] = useState("");
     const [matched, setMatched] = useState(false);
     const navigate = useNavigate();
     const { user } = useAuth(); 
 
-
-    if (!user) {
-      return(
-        <>
-          <h1 style={{textAlign:"center"}}>You do not have access to this page!</h1>
-        </>
-      );
-    }
-
     const handleSave = async (e) => {
       e.preventDefault();
-      const result = await api.patch(`/users/${user.user_id}/password`, {
-        newPassword
+      const parsedId = parseInt(empId.replace(/^\D+/, ""), 10);
+      const result = await api.post(`/reset/password/email`, {
+        userId: parsedId,
+        email,
       });
 
       if (result.success) {
-        // Update local user object to clear the flag
-        const updatedUser = { ...user, must_change_password: false, mustChangePassword: false };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        navigate('/');
-    }
+        const sendReq = await api.patch(`/reset/password/request`, {userId: parsedId});
+        if (sendReq.success) {
+          toast.success("Your Request Has been Sent!");
+          navigate("/login")
+        }else{
+          toast.error(sendReq.message);
+        }
+      }
+      else{
+        toast.error("No Users with that Credentials Found!")
+      }
+
+      
     };
     
     return (
       <>
         <Helmet>
-          <title>Reset Password</title>
+          <title>Forgot Password</title>
         </Helmet>
         <div className="content">
           <div className="main">
-            <div className="customCont">
-              <h1 className="ceTitle">Reset Password</h1>
+            <div className="customCont fade-in">
+              <h1 className="ceTitle">Forgot Password</h1>
               <div className="createBox">
                 <form onSubmit={handleSave}>
                   <div className="r2">
@@ -54,15 +56,15 @@ function ResetPassword() {
                         htmlFor="newPasswordInput"
                         className="recLabel expander"
                       >
-                        New Password:
+                        Enter Employee ID:
                       </label>
                       <input
-                        type="password"
+                        type="text"
                         name="newPasswordInput"
                         id="newPasswordInput"
                         className="recInput"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        value={empId}
+                        onChange={(e) => setEmpId(e.target.value)}
                         required
                       />
                     </div>
@@ -73,32 +75,19 @@ function ResetPassword() {
                         htmlFor="newRePasswordInput"
                         className="recLabel expander"
                       >
-                        Retype New Password:
+                        Enter Employee Email:
                       </label>
                       <input
-                        type="password"
+                        type="email"
                         name="newRePasswordInput"
                         id="newRePasswordInput"
                         className="recInput"
-                        value={newRePassword}
-                        onChange={(e) => setReNewPassword(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
                   </div>
-                  {newPassword.length > 0 &&
-                    newRePassword.length > 0 &&
-                    (newPassword !== newRePassword ? (
-                      <div className="r2">
-                        <p className="warningPass">
-                          ⚠ Password does not Match!
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="r2 bgBlue">
-                        <p className="goodPass">✅ Password Matches!</p>
-                      </div>
-                    ))}
                   <div className="r1">
                     <div className="item"></div>
                     <div className="item"></div>
@@ -106,10 +95,12 @@ function ResetPassword() {
                   <div className="buttonCont">
                     <input
                       type="submit"
-                      value="SAVE New Password"
-                      className="btnCancel"
-                      disabled={newPassword !== newRePassword}
+                      value="Request Resetting"
+                      className="btnFin btnCancel"
                     ></input>
+                    <button type="button" formNoValidate onClick={()=>navigate('/login')} className='btnCancel'>
+                        Cancel
+                    </button>
                   </div>
                 </form>
               </div>
@@ -120,4 +111,4 @@ function ResetPassword() {
     );
 }
 
-export default ResetPassword;
+export default ForgotPassword;

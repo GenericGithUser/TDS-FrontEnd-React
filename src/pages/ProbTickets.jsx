@@ -34,7 +34,7 @@ function ProbTickets() {
 
     });
 
-    if(user.usr_role !== "ADMIN"){
+    if(user.usr_role !== "ADMINER"){
       const redirect = () => {
         navigate("/dashboard/home");
       }

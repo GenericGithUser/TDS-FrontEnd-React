@@ -12,6 +12,7 @@ function CreateEditBranches() {
     const navigate = useNavigate();
     const [name, setName] = useState("");
     const [businessArea, setBusinessArea] = useState("");
+    const [branchCode, setBranchCode] = useState("");
     const { user } = useAuth();
     const {branchError, branchLoading, branches, createBranch, updateBranch} = GetBranch();
     
@@ -38,7 +39,8 @@ function CreateEditBranches() {
       
       const branchData = {
         business_area: businessArea,
-        office_dept: name
+        office_dept: name,
+        branch_code: branchCode
       };
 
       return branchData;
@@ -58,13 +60,17 @@ function CreateEditBranches() {
 
       let editData = {
         business_area: null,
-        office_dept: null
+        office_dept: null,
+        branch_code: null
       };
       if (navData?.data?.business_area.trim() !== businessArea.trim() && businessArea !== "") {
         editData.business_area = businessArea;
       }
       if (navData?.data?.office_dept.trim() !== name.trim() && name !== "") {
         editData.office_dept = name;
+      }
+      if (navData?.data?.branch_code.trim() !== branchCode.trim() && branchCode !== "") {
+        editData.office_dept = branchCode;
       }
 
       const destination = navData.returnTo;
@@ -84,6 +90,7 @@ function CreateEditBranches() {
       useEffect(()=>{
         setName(navData?.data?.office_dept);
         setBusinessArea(navData?.data?.business_area);
+        setBranchCode(navData?.data?.branch_code);
       },[]);
     }
     
@@ -127,6 +134,23 @@ function CreateEditBranches() {
                     className="recInput"
                     value={businessArea}
                     onChange={(e) => setBusinessArea(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="r2">
+                <div className="item">
+                  <label htmlFor="businessArea" className="recLabel expander">
+                    Branch Code:
+                  </label>
+                  <input
+                    type="text"
+                    className="recInput"
+                    placeholder="Branch Code (e.g. BA-XYZ)"
+                    value={branchCode}
+                    onChange={(e) =>
+                      setBranchCode(e.target.value.toUpperCase())
+                    }
                     required
                   />
                 </div>
@@ -179,6 +203,23 @@ function CreateEditBranches() {
                     className="recInput"
                     value={businessArea}
                     onChange={(e) => setBusinessArea(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="r2">
+                <div className="item">
+                  <label htmlFor="businessArea" className="recLabel expander">
+                    Branch Code:
+                  </label>
+                  <input
+                    type="text"
+                    className="recInput"
+                    placeholder="Branch Code (e.g. BA-XYZ)"
+                    value={branchCode}
+                    onChange={(e) =>
+                      setBranchCode(e.target.value.toUpperCase())
+                    }
                     required
                   />
                 </div>

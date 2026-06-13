@@ -6,10 +6,7 @@ import { useNavigationData } from '../components/NavigationDataContext'
 import { useAuth } from '../context/AuthContext'
 import { Helmet } from 'react-helmet-async'
 import { GetRecords } from '../hooks/GetRecords'
-import { GetChecklistItems } from '../hooks/GetChecklistItems'
 import '../styles/loading.css'
-
-const CODE_MAP = ["BA-NMN", "BA-NSCO", "BA-NQC", "BA-WL1C", "BA-WL2C", "BA-SMNL", "BA-CAV", "BA-SQC", "BA-PPM", "BA-MVAL", "BA-MLP"];
 
 function CreateEditRecord() {
     const { navData, clearRouteData, setRouteData } = useNavigationData();
@@ -22,8 +19,7 @@ function CreateEditRecord() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { records, loading, error, createRecord, updateRecord} = GetRecords();
-    
-
+    const branchCode = user.branch_code;
     
 
     const isEdit = navData?.mode === "edit";
@@ -133,7 +129,7 @@ function CreateEditRecord() {
 
     if(navData.mode === "create"){
       useEffect(()=>{
-        setCode(CODE_MAP[parseInt(user.branch_id)-1]);
+        setCode(branchCode);
       },[])
     }
     
@@ -175,7 +171,7 @@ function CreateEditRecord() {
                     className="recInput"
                     onChange={(e) => setCode(e.target.value)}
                     value={code}
-                    placeholder={`${CODE_MAP[parseInt(user.branch_id)-1]}0000000000`}
+                    placeholder={`${code}0000000000`}
                     required
                   />
                 </div>

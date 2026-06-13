@@ -20,8 +20,9 @@
     align-items: center;
     background-color: var(--light-blue);
     transition: all 0.2s ease-in-out;
-    padding: 2px;
+    padding: 5px;
     width: 20vw;
+    gap: 10px;
     border-radius: 10px;
     &[data-starting-style],
         &[data-ending-style] {

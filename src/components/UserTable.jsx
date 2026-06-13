@@ -186,7 +186,7 @@ function UserTable() {
           <table className="actTransTable">
             <colgroup>
               <col style={{ width: "10vw" }} />
-              <col style={{ width: "18vw" }} />
+              <col style={{ width: "15vw" }} />
               <col style={{ width: "10vw" }} />
             </colgroup>
             <thead className="transTableHead">
@@ -214,6 +214,12 @@ function UserTable() {
                   onClick={() => requestSort("office_dept")}
                 >
                   Office{getSortIndicator("office_dept")}
+                </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("request_reset")}
+                >
+                  Needs Resetting{getSortIndicator("request_reset")}
                 </th>
 
                 {/* <th>Employee ID</th>
@@ -246,6 +252,7 @@ function UserTable() {
                     <td>{data?.emp_name}</td>
                     <td>{data?.usr_role}</td>
                     <td>{data?.office_dept}</td>
+                    <td>{data?.request_reset}</td>
                     <td>
                       <>
                         <button

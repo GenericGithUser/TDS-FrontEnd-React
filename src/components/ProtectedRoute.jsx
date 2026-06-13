@@ -1,15 +1,26 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Mosaic } from "react-loading-indicators";
 
 function ProtectedRoute( { children, allowedRoles } ){
     const { user, loading } = useAuth();
 
     if(loading){
-        return <>Loading</>
+        return (
+          <>
+            <div className="centered">
+              <Mosaic size="large" color="#31a919" />
+            </div>
+          </>
+        );
     }
 
     if (!user) {
         return <Navigate to="/login" replace/>;
+    }
+
+    if (user.must_change_password === true) {
+      return <Navigate to="/change-password" replace />;
     }
 
     if (

@@ -3,7 +3,7 @@ import '../styles/loading.css'
 import { useAuth } from '../context/AuthContext';
 import { GetTransmissionStats } from '../hooks/GetTranssmissionsStats';
 import { StatsSkeleton } from "../components/Loading";
-function summaryBoard(){
+function summaryBoard( { sendFilter }  ){
     const { user } = useAuth();
     const { stats, loading, error } = GetTransmissionStats();
 
@@ -73,23 +73,39 @@ function summaryBoard(){
             }
           >
             <div className="viewButton">
-              <button type="submit" className="btnFin btn">
+              <button
+                type="submit"
+                className="btnFin btn"
+                onClick={() => sendFilter("received")}
+              >
                 View Recent
               </button>
             </div>
             <div className="viewButton">
-              <button type="submit" className="btnSen btn">
+              <button
+                type="submit"
+                className="btnSen btn"
+                onClick={() => sendFilter("sent")}
+              >
                 View Recent
               </button>
             </div>
             <div className="viewButton">
-              <button type="submit" className="btnInc btn">
+              <button
+                type="submit"
+                className="btnInc btn"
+                onClick={() => sendFilter("incomplete")}
+              >
                 View Recent
               </button>
             </div>
             {user.usr_role !== "RECEIVER" && (
               <div className="viewButton">
-                <button type="submit" className="btnPen btn">
+                <button
+                  type="submit"
+                  className="btnPen btn"
+                  onClick={() => sendFilter("pending")}
+                >
                   View Recent
                 </button>
               </div>

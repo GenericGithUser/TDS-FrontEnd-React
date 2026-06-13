@@ -50,7 +50,15 @@ export const AuthProvider = ( { children } ) => {
                 localStorage.setItem("user", JSON.stringify(result.user));
                 localStorage.setItem("token", result.token);
 
-                if (result.user.must_change_password === true) {
+                console.log("login result from backend:", result);
+                console.log(
+                  "must_change_password value:",
+                  result.user?.must_change_password,
+                );
+                if (
+                  result.user.must_change_password === true ||
+                  result.user.must_change_password === "true"
+                ) {
                   return { success: true, mustChangePassword: true };
                 }
                 return { success: true };

@@ -5,13 +5,14 @@ import MostRecentReceiver from "../components/MostRecentReceiver";
 import MostRecentAdmin from "../components/MostRecentAdmin";
 import { useAuth } from "../context/AuthContext";
 import { Helmet } from "react-helmet-async";
+import { useState } from "react";
 import { GetTransmissionStats } from "../hooks/GetTranssmissionsStats";
 import '../styles/home.css'
 
 function Home(){
   const { user } = useAuth();
   const { stats, loading, error } = GetTransmissionStats();
-
+  const [filter, setFilter] = useState("");
     return (
       <>
         <Helmet>
@@ -21,16 +22,16 @@ function Home(){
           <h2 className="sTitle">
             {user.usr_role === "ADMIN" && <>ADMIN </>}SUMMARY DASHBOARD
           </h2>
-          {user.usr_role !== "ADMIN" ? <SummaryBoard /> : <SummaryBoardAdmin />}
+          {user.usr_role !== "ADMIN" ? <SummaryBoard sendFilter={setFilter} /> : <SummaryBoardAdmin />}
           <h2 className="sTitle">
             Most Recent {user.usr_role === "ADMIN" ? "Events" : "Transmissions"}
           </h2>
           {user.usr_role === "RECEIVER" ? (
-            <MostRecentReceiver />
+            <MostRecentReceiver filter={filter} />
           ) : user.usr_role === "ADMIN" ? (
             <MostRecentAdmin />
           ) :
-            <MostRecent />
+            <MostRecent filter={filter} />
           }
           <h1 className="total">
             Total Transmissions:{" "}

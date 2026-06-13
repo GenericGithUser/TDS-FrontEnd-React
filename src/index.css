@@ -234,3 +234,17 @@ body {
 .red{
   color: #ff5757;
 }
+.redBtn{
+  color: var(--blue-white);
+  background-color: var(--red);
+}
+
+.centered{
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  
+}
