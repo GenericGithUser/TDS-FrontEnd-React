@@ -12,6 +12,7 @@ import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { useAuth } from "../context/AuthContext";
 import { Spinner } from "../components/Loading.jsx";
 import CreatableSelect from "react-select/creatable";
+import toast from "react-hot-toast";
 import "../styles/loading.css";
 import api from "../api/client.js";
 
@@ -175,7 +176,7 @@ function CreateEditTrans() {
 
          // Optionally show feedback to user
          if (!existing) {
-           console.log(`New division created: ${result.data.division}`);
+           toast.success(`New division created: ${result.data.division}`);
          }
        }
      } catch (err) {
@@ -380,8 +381,13 @@ function CreateEditTrans() {
                     ...base,
                     minHeight: "40px",
                     borderColor: "#ddd",
+                    border: "1px solid",
+                    borderRadius: "10px",
                     width: "30vw",
-                    "&:hover": { borderColor: "#667eea" },
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      border: "2px solid #667eea"
+                    },
                   }),
                   option: (base, state) => ({
                     ...base,

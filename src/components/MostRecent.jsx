@@ -186,7 +186,7 @@ function mostRecent({filter}){
                 </tr>
               ) : transmissions.filter(filter ? (data)=> data.record_status === filter : (data)=>data ).length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center" }}>
+                  <td colSpan={8} style={{ textAlign: "center" }} className='fade-in'>
                     <h1>No Data Available</h1>
                   </td>
                 </tr>

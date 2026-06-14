@@ -29,7 +29,15 @@ export function GetUsers(searchQuery = '', includeDeleted = false){
           const endpoint = searchQuery ? "/users/search" : "/users";
           const query = params.toString() ? `?${params.toString()}` : "";
 
-          const result = await api.get(`${endpoint}${query}`);
+          let result = await api.get(`${endpoint}${query}`);
+          const actResult = result.data.map(item=>({
+            ...item,
+            userTableViewing: true
+          }));
+
+          result.data = actResult;
+          
+        
 
           setUsers(result.data ?? []);
         } catch (error) {

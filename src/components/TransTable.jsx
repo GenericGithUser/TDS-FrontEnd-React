@@ -141,6 +141,7 @@ function TransTable() {
       return sorted;
     }, [transmissions, sortConfig]);
 
+
     return (
       <>
         <div className="searcherSorter">

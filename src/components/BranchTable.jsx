@@ -20,11 +20,11 @@ function BranchTable() {
     const { branches, branchError, branchLoading, refetch  } = GetBranch(searchQuery);
 
     const openDialog = (item, delBtn) => {
-      console.log("FIRED")
+      
       setDialogData(item);
-      console.log(item);
+      
       setIsDialogOpen(true);
-      console.log(isDialogOpen);
+      
       setIsDeleteButton(delBtn);
       setOnRecords(false);
     };

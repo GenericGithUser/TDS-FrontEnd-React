@@ -21,6 +21,12 @@ export function GetBranch(searchQuery = ''){
             else{
                 result = await api.get(`/branches`);
             }
+            const actResult = result.data.map((item) => ({
+              ...item,
+              branchTableViewing: true,
+            }));
+            result.data = actResult;
+
 
             setBranches(result.data ?? []);
         } catch (error) {

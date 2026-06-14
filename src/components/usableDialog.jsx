@@ -76,7 +76,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
            // Auto-fetch checklist for first record
            if (result.data?.records?.length > 0) {
              fetchChecklist(result.data.records[0].record_id);
-             console.log(result.data.records[0].record_id);
+             
            }
          } else {
            setFetchError(result.error);
@@ -94,9 +94,9 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
         }
         const fetcher = async () =>{
             const dataUser = await getEmployeesByBranch(data?.branch_id);
-            console.log(dataUser.data);
+            
             setUsers(dataUser.data);
-            console.log(users);
+            
         }
 
 
@@ -109,18 +109,129 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
 
         if (result.success) {
           // Show admin the temp password in a clear way
-          toast(
-            `Password reset successfully!\n\n` +
-              `Employee: ${result.data.emp_name}\n` +
-              `Temporary Password: ${result.data.temp_password}\n\n` +
-              `Please share this with the employee securely.\n` +
-              `They will be prompted to change it on next login.`,
-            {
-              style: {
-                backgroundColor: "#96d9ad",
+          toast.custom(
+            (t) => (
+              <div
+                style={{
+                  backgroundColor: "#96d9ad",
+                  color: "#1a1a1a",
+                  padding: "16px",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  minWidth: "320px",
+                  maxWidth: "400px",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                }}
+              >
+                {/* Message Content */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <strong style={{ fontSize: "16px" }}>
+                    Password reset successfully!
+                  </strong>
+                  <span
+                    style={{ fontSize: "14px" }}
+                  >{`Employee: ${result.data.emp_name}`}</span>
 
-              },
-              duration : 10000,
+                  {/* Highlighted Password Block */}
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontFamily: "monospace",
+                      background: "rgba(255, 255, 255, 0.5)",
+                      padding: "6px 10px",
+                      borderRadius: "6px",
+                      display: "inline-block",
+                      width: "fit-content",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {`Temp Password: ${result.data.temp_password}`}
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      fontStyle: "italic",
+                      marginTop: "4px",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    Please share this with the employee securely. They will be
+                    prompted to change it on next login.
+                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                  <button
+                    onClick={() => {
+                      // Copies just the password. Change to `fullMessage` if you prefer to copy everything.
+                      navigator.clipboard.writeText(result.data.temp_password);
+                      toast.success("Password copied!", { duration: 2000 });
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      backgroundColor: "rgba(255, 255, 255, 0.6)",
+                      border: "1px solid rgba(0,0,0,0.1)",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        "rgba(255, 255, 255, 0.9)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        "rgba(255, 255, 255, 0.6)")
+                    }
+                  >
+                    📋 Copy Password
+                  </button>
+
+                  <button
+                    onClick={() => toast.dismiss(t.id)}
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      backgroundColor: "rgba(0, 0, 0, 0.1)",
+                      border: "1px solid rgba(0,0,0,0.1)",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        "rgba(0, 0, 0, 0.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        "rgba(0, 0, 0, 0.1)")
+                    }
+                  >
+                    ✕ Dismiss
+                  </button>
+                </div>
+              </div>
+            ),
+            {
+              duration: 7000, // Your original duration
             },
           );
         }
@@ -226,8 +337,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
       setOpenNNDialog(false);
      }
 
-     const handleFeedbackSubmit = () => {
-       updateFeedback(currentRecord.record_id, {
+     const handleFeedbackSubmit = async () => {
+       await updateFeedback(currentRecord.record_id, {
         feedback: feedback
        });
        setFeedback("");
@@ -262,8 +373,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
        }
      };
 
-     const handleComplete = () =>{
-        updateStatus(data.trans_id, "received", user.employee_id);
+     const handleComplete = async () =>{
+        await updateStatus(data.trans_id, "received", user.employee_id);
         onClose();
         onRefetch();
      }
@@ -276,25 +387,30 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
          handleComplete();
        };
 
-      const handleDeleteTrans = () =>{
-        deleteTransmission(data.trans_id);
+      const handleDeleteTrans = async () =>{
+        await deleteTransmission(data.trans_id);
         closeNNDialog();
         onClose();
+        onRefetch();
       } 
 
-     const handleNestedDialogSubmit = (onFeedback) => {
+     const handleNestedDialogSubmit = async (onFeedback) => {
        // Handle the submit logic here
        console.log("Request edits submitted");
        if (onFeedback == 1) {
-        handleFeedbackSubmit();
+        await handleFeedbackSubmit();
+        onRefetch();
        }else if (onFeedback == 2){
-          cancelTransmission(data.trans_id, "pending");
+         await cancelTransmission(data.trans_id, "pending");
+          onRefetch();
        }
        else if (onFeedback == 3){
-          softDeleteUser(data.user_id);
+         await softDeleteUser(data.user_id);
+         onRefetch();
        }
        else if (onFeedback == 4){
-        restoreUser(data.user_id);
+        await restoreUser(data.user_id);
+        onRefetch();
        }
 
        closeNestedDialog();
@@ -312,15 +428,15 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
      };
 
 
-     const handleReApprove = () =>{
-      updateStatus(data.trans_id, "pending", null);
+     const handleReApprove = async () =>{
+      await updateStatus(data.trans_id, "pending", null);
       onClose();
       onRefetch();
      }
 
-     const handleDeletionRecord = (e) =>{
+     const handleDeletionRecord = async (e) =>{
         e.preventDefault();
-        deleteRecord(data.record_id);
+        await deleteRecord(data.record_id);
         onClose();
         onRefetch();
      }
@@ -367,9 +483,8 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
       onClose();
     };
 
-    const handleApproval = () => {
-        updateStatusApprover(data.trans_id, "sent", user.employee_id);
-        console.log("Success?");
+    const handleApproval = async () => {
+        await updateStatusApprover(data.trans_id, "sent", user.employee_id);
         onClose();
         onRefetch();
     }

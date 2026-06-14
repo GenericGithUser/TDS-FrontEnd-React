@@ -77,12 +77,12 @@ function CreateEditRecord() {
       });
 
       
-     console.log("🎯 Calling updateRecord with:", {
-        recordData: { recordData /* ... */ },
-        checklistItems: updatedChecklist, // ← Your actual checklist state variable
-        checklistStateLength: updatedChecklist?.length,
-        firstItem: updatedChecklist?.[0],
-      });
+    //  console.log("🎯 Calling updateRecord with:", {
+    //     recordData: { recordData /* ... */ },
+    //     checklistItems: updatedChecklist, // ← Your actual checklist state variable
+    //     checklistStateLength: updatedChecklist?.length,
+    //     firstItem: updatedChecklist?.[0],
+    //   });
       updateRecord(navData.recordId, recordData, updatedChecklist);  
       if (navData.fromTransEdit) {
         const sendData = {

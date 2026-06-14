@@ -50,11 +50,7 @@ export const AuthProvider = ( { children } ) => {
                 localStorage.setItem("user", JSON.stringify(result.user));
                 localStorage.setItem("token", result.token);
 
-                console.log("login result from backend:", result);
-                console.log(
-                  "must_change_password value:",
-                  result.user?.must_change_password,
-                );
+                
                 if (
                   result.user.must_change_password === true ||
                   result.user.must_change_password === "true"
@@ -83,8 +79,14 @@ export const AuthProvider = ( { children } ) => {
           localStorage.removeItem("token");
     };
 
+    const updateUser = (updatedFields) => {
+      const updatedUser ={...user, ...updatedFields};
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser)); 
+    };
+
     return(
-        <AuthContext.Provider value={ { user, login, logout, loading } }>
+        <AuthContext.Provider value={ { user, login, logout, loading, updateUser } }>
             {children}
         </AuthContext.Provider>
     )

@@ -187,7 +187,11 @@ function mostRecentReceiver({filter}){
                 </tr>
               ) : transmissions.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center" }}>
+                  <td
+                    colSpan={8}
+                    style={{ textAlign: "center" }}
+                    className="fade-in"
+                  >
                     <h1>No Data Available</h1>
                   </td>
                 </tr>
@@ -195,8 +199,7 @@ function mostRecentReceiver({filter}){
                 sortedTransmissions
                   .filter(
                     filter
-                      ? (data) =>
-                          data.record_status === filter 
+                      ? (data) => data.record_status === filter
                       : (data) => data.record_status != "pending",
                   )
                   .slice(0, 4)

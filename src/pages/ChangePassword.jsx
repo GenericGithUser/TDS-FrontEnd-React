@@ -49,6 +49,11 @@ function ChangePassword() {
       }
 
     }
+    const handleOnKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+      }
+    };
 
 
 
@@ -71,7 +76,7 @@ function ChangePassword() {
         </Helmet>
         <h1 className="ceTitle">Change Password</h1>
         <div className="createBox">
-          <form onSubmit={handleSave}>
+          <form onSubmit={handleSave} onKeyDown={handleOnKeyDown}>
             <div className="r2">
               <div className="item itemSpec">
                 <label htmlFor="oldPass" className="recLabel expander">

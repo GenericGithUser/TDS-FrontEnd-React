@@ -97,14 +97,14 @@ function RecordInput({
             <table className="actTransTable">
               <colgroup>
                 <col style={{ width: "10px" }} />
-                <col style={{ width: "16vw" }} />
-                <col style={{ width: "1vw" }} />
+                <col style={{ width: "10vw" }} />
+                <col style={{ width: "7vw" }} />
               </colgroup>
               <thead className="transTableHead">
                 <tr>
                   <th>RecordID</th>
                   <th>Title</th>
-                  <th>⠀⠀⠀⠀⠀⠀⠀⠀⠀</th>
+                  <th>Add Record</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,12 +122,13 @@ function RecordInput({
                   </tr>
                 ) : (
                   displayedRecords.slice(0, 10).map((record) => (
-                    <tr key={record.record_id}>
+                    <tr key={record.record_id} className="widener">
                       <td>{`MEM-${String(record.record_id).padStart(4, "0")}`}</td>
                       <td>{record.records_title}</td>
                       <td>
                         <input
                           type="checkbox"
+                          className="recChkBox"
                           checked={!!selectedRecords[record.record_id]}
                           onChange={() => handleCheckbox(record)}
                         />

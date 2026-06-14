@@ -12,7 +12,7 @@ function ResetPassword() {
     const [newRePassword, setReNewPassword] = useState("");
     const [matched, setMatched] = useState(false);
     const navigate = useNavigate();
-    const { user } = useAuth(); 
+    const { user, updateUser } = useAuth(); 
 
 
     if (!user) {
@@ -31,9 +31,11 @@ function ResetPassword() {
 
       if (result.success) {
         // Update local user object to clear the flag
-        const updatedUser = { ...user, must_change_password: false, mustChangePassword: false };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        navigate('/');
+        updateUser({
+          must_change_password: false,
+          mustChangePassword: false,
+        });
+        navigate('/dashboard');
     }
     };
     

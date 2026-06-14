@@ -19,10 +19,9 @@ function UserTable() {
     const {users, loading, error, refetch, fetchDisabledUsers} = GetUsers(searchQuery, includeDeleted);
 
     const openDialog = (item, delBtn) => {
-      console.log("Triggered");
       
       setDialogData(item);
-      console.log(dialogData);
+      
       setIsDialogOpen(true);
       setIsDeleteButton(delBtn);
       setOnRecords(false);
@@ -62,8 +61,8 @@ function UserTable() {
       }
     }, [onlyDeleted])
     const [sortConfig, setSortConfig] = useState({
-          key: null,
-          direction: "asc",
+          key: "request_reset",
+          direction: "desc",
         });
     
         const requestSort = (key) => {

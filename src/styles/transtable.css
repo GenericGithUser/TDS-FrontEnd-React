@@ -82,5 +82,13 @@
 }
 
 .shrinker{
-    width: 70% !important;
+    width: 75% !important;
+}
+.widener{
+    font-size: 1.5ch !important;
+    padding: 15px !important;
+}
+.recChkBox{
+    width: 2vw;
+    height: 2vw;
 }

@@ -52,13 +52,18 @@ function MostRecentAdmin(){
         <div className="transTable">
           <table className="actTransTable">
             <colgroup>
-              <col style={{ width: "5vw" }} />
-              <col style={{ width: "20px" }} />
+              <col style={{ width: "10vw" }} />
+              <col style={{ width: "10vw" }} />
+              <col style={{ width: "15vw" }} />
             </colgroup>
             <thead className="transTableHead">
               <tr>
                 <th>Time</th>
-                <th>Log Details</th>
+                <th>Method</th>
+                <th>URL</th>
+                <th>Status</th>
+                <th>Duration</th>
+                <th>IP</th>
               </tr>
             </thead>
             <tbody>
@@ -68,7 +73,7 @@ function MostRecentAdmin(){
               ) : errors ? (
                 <tr>
                   <td colSpan={2}>
-                    <ErrorMessage message={errors}/>
+                    <ErrorMessage message={errors} />
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
@@ -81,11 +86,11 @@ function MostRecentAdmin(){
                 logs.slice(0, 5).map((log) => (
                   <tr key={log.id} className="fade-in">
                     <td>{new Date(log.timestamp).toLocaleString()}</td>
-                    <td>
-                      
-                        {log.rawLog}
-                      
-                    </td>
+                    <td>{log.method}</td>
+                    <td>{log.url}</td>
+                    <td>{log.status}</td>
+                    <td>{log.durationMs}</td>
+                    <td>{log.ip}</td>
                   </tr>
                 ))
               )}
