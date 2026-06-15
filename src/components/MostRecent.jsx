@@ -184,94 +184,114 @@ function mostRecent({filter}){
                     <ErrorMessage message={error} onRetry={refetch} />
                   </td>
                 </tr>
-              ) : transmissions.filter(filter ? (data)=> data.record_status === filter : (data)=>data ).length === 0 ? (
+              ) : transmissions.filter(
+                  filter
+                    ? (data) => data.record_status === filter
+                    : (data) => data,
+                ).length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center" }} className='fade-in'>
+                  <td
+                    colSpan={8}
+                    style={{ textAlign: "center" }}
+                    className="fade-in"
+                  >
                     <h1>No Data Available</h1>
                   </td>
                 </tr>
               ) : (
-                sortedTransmissions.filter(filter ? (data)=> data.record_status === filter : (data)=>data ).slice(0, 4).map((data) => (
-                  <tr key={data.record_id} className="fade-in">
-                    <td>{data.trans_id}</td>
-                    <td>{data.record_id}</td>
-                    <td>{data.division}</td>
-                    <td>{data.item_no}</td>
-                    <td>{data.record_titles}</td>
-                    <td>{data.sent_date}</td>
-                    <td>
-                      {data.record_status.toUpperCase() === "RECEIVED" && (
-                        <span className="received">
-                          {data.record_status.toUpperCase()}
-                        </span>
-                      )}
-                      {data.record_status.toUpperCase() === "SENT" && (
-                        <span className="sent">
-                          {data.record_status.toUpperCase()}
-                        </span>
-                      )}
-                      {data.record_status.toUpperCase() === "PENDING" && (
-                        <span className="pending">
-                          {data.record_status.toUpperCase()}
-                        </span>
-                      )}
-                      {data.record_status.toUpperCase() === "INCOMPLETE" && (
-                        <span className="incomplete">
-                          {data.record_status.toUpperCase()}
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {data.record_status === "received" && (
-                        <button
-                          type="button"
-                          className="btnView"
-                          onClick={() => openDialog(data, false)}
-                        >
-                          View
-                        </button>
-                      )}
-                      {data.record_status === "sent" && (
-                        <button
-                          type="button"
-                          className="btnView"
-                          onClick={() => openDialog(data, false)}
-                        >
-                          View
-                        </button>
-                      )}
-                      {data.record_status === "pending" && (
-                        <>
+                sortedTransmissions
+                  .filter(
+                    filter
+                      ? (data) => data.record_status === filter
+                      : (data) => data,
+                  )
+                  .slice(0, 4)
+                  .map((data) => (
+                    <tr key={data.record_id} className="fade-in">
+                      <td>{data.trans_id}</td>
+                      <td>
+                        {data.record_id
+                          .split(",")
+                          .map((id) => parseInt(id.trim(), 10))
+                          .map((ids) => `SR-${String(ids).padStart(4, "0")} `)}
+                      </td>
+                      <td>{data.division}</td>
+                      <td>{data.item_no}</td>
+                      <td>{data.record_titles}</td>
+                      <td>{data.sent_date}</td>
+                      <td>
+                        {data.record_status.toUpperCase() === "RECEIVED" && (
+                          <span className="received">
+                            {data.record_status.toUpperCase()}
+                          </span>
+                        )}
+                        {data.record_status.toUpperCase() === "SENT" && (
+                          <span className="sent">
+                            {data.record_status.toUpperCase()}
+                          </span>
+                        )}
+                        {data.record_status.toUpperCase() === "PENDING" && (
+                          <span className="pending">
+                            {data.record_status.toUpperCase()}
+                          </span>
+                        )}
+                        {data.record_status.toUpperCase() === "INCOMPLETE" && (
+                          <span className="incomplete">
+                            {data.record_status.toUpperCase()}
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {data.record_status === "received" && (
                           <button
                             type="button"
                             className="btnView"
                             onClick={() => openDialog(data, false)}
                           >
-                            Check
+                            View
                           </button>
-                          {user.usr_role === "PREPARER" && (
+                        )}
+                        {data.record_status === "sent" && (
+                          <button
+                            type="button"
+                            className="btnView"
+                            onClick={() => openDialog(data, false)}
+                          >
+                            View
+                          </button>
+                        )}
+                        {data.record_status === "pending" && (
+                          <>
                             <button
                               type="button"
-                              className="btnEdit"
-                              onClick={() => handleEditTrans(data)}
+                              className="btnView"
+                              onClick={() => openDialog(data, false)}
                             >
-                              Edit
+                              Check
                             </button>
-                          )}
-                        </>
-                      )}
-                      {data.record_status === "incomplete" && (
-                        <button
-                          type="button"
-                          className="btnEdit"
-                          onClick={() => openDialog(data, false)}
-                        >
-                          Resolve
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                            {user.usr_role === "PREPARER" && (
+                              <button
+                                type="button"
+                                className="btnEdit"
+                                onClick={() => handleEditTrans(data)}
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </>
+                        )}
+                        {data.record_status === "incomplete" && (
+                          <button
+                            type="button"
+                            className="btnEdit"
+                            onClick={() => openDialog(data, false)}
+                          >
+                            Resolve
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>

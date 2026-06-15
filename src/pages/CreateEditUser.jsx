@@ -43,7 +43,6 @@ function CreateEditUser() {
     const createPassword = () => {
       const userName = name.trim().split(/\s+/).pop();
       const tempPassword = `${userName}123`;
-      console.log(tempPassword);
 
       return tempPassword;
       
@@ -130,7 +129,7 @@ function CreateEditUser() {
         setPosition(navData?.data?.position);
         setRole(navData?.data?.usr_role);
       },[]);
-      console.log(navData?.data);
+
     }
     
     return (
@@ -363,7 +362,7 @@ function CreateEditUser() {
                   </div>
                 </div>
                 <div className="item">
-                  <div className="item">
+                  <div className="item itemCentered">
                     <label className="recLabel" htmlFor="passRet">
                       Retain Old Password? :
                     </label>

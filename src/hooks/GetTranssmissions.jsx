@@ -4,7 +4,7 @@ import api from "../api/client";
 import toast from "react-hot-toast";
 
 
-export function GetTransmissions(searchQuery = "") {
+export function GetTransmissions(searchQuery = "", branchId = null) {
   const { user } = useAuth();
   const [transmissions, setTransmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,22 +16,38 @@ export function GetTransmissions(searchQuery = "") {
       setError(null);
 
       let result;
+      const effectiveBranch = branchId  // ← explicit branch override
+                ?? (user.is_admin || user.is_head_office ? null : user.branch_id);
+      // if (searchQuery) {
+      //   if (user.is_admin || user.is_head_office) {
+      //     result = await api.get(
+      //       `/transmissions/search?q=${encodeURIComponent(searchQuery)}`,
+      //     );
+      //   } else {
+      //     result = await api.get(
+      //       `/transmissions/search?q=${encodeURIComponent(searchQuery)}&branchId=${user.branch_id}`,
+      //     );
+      //   }
+      // } else if (user.is_admin || user.is_head_office) {
+      //   // Admin and head office see all transmissions
+      //   result = await api.get("/transmissions");
+      // } else {
+      //   // Branch staff only see their own branch
+      //   result = await api.get(`/transmissions/branch/${user.branch_id}`);
+      // }
+
       if (searchQuery) {
-        if (user.is_admin || user.is_head_office) {
-          result = await api.get(
-            `/transmissions/search?q=${encodeURIComponent(searchQuery)}`,
-          );
-        } else {
-          result = await api.get(
-            `/transmissions/search?q=${encodeURIComponent(searchQuery)}&branchId=${user.branch_id}`,
-          );
-        }
+        const params = new URLSearchParams({ q: searchQuery });
+        if (effectiveBranch) params.append("branchId", effectiveBranch);
+        result = await api.get(`/transmissions/search?${params}`);
       } else if (user.is_admin || user.is_head_office) {
-        // Admin and head office see all transmissions
-        result = await api.get("/transmissions");
+        const params = new URLSearchParams();
+        if (effectiveBranch) params.append("branchId", effectiveBranch);
+        result = await api.get(
+          `/transmissions/${params.toString() ? `?${params}` : ""}`,
+        );
       } else {
-        // Branch staff only see their own branch
-        result = await api.get(`/transmissions/branch/${user.branch_id}`);
+        result = await api.get(`/transmissions/branch/${effectiveBranch}`);
       }
 
       // client.js interceptor already unwraps res.data
@@ -42,7 +58,7 @@ export function GetTransmissions(searchQuery = "") {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, user.branch_id, user.is_admin, user.is_head_office]);
+  }, [searchQuery, branchId, user.branch_id, user.is_admin, user.is_head_office]);
 
   useEffect(() => {
     fetchTransmissions();

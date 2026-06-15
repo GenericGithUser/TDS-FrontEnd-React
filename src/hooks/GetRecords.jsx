@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 
 
-export function GetRecords(searchQuery = ''){
+export function GetRecords(searchQuery = '', branchId = null){
      const { user } = useAuth();
      const [records, setRecords] = useState([]);
      const [loading, setLoading] = useState(true);
@@ -17,25 +17,43 @@ export function GetRecords(searchQuery = ''){
           setError(null);
 
           let result;
+          const effectiveBranch =
+            branchId ?? // ← explicit branch override
+            (user.is_admin || user.is_head_office ? null : user.branch_id);
 
+          // if (searchQuery) {
+          //   const params = new URLSearchParams({ q: searchQuery });
+          //   if (user.is_admin || user.is_head_office) {
+          //       result = await api.get(
+          //         `/records/search?q=${encodeURIComponent(searchQuery)}&branchId=${branchId}`,
+          //       );
+          //   } else{
+          //       result = await api.get(
+          //         `/records/search?q=${encodeURIComponent(searchQuery)}&branchId=${user.branch_id}`,
+          //       );
+          //   }
+            
+          // } else if (user.is_admin || user.is_head_office) {
+          //   result = await api.get(`/records?q=branchId=${branchId}`);
+          // } else {
+          //   // Branch staff only see their own branch's records
+          //   result = await api.get(`/records/branch/${user.branch_id}`);
+            
+          // }
           if (searchQuery) {
-            if (user.is_admin || user.is_head_office) {
-                result = await api.get(
-                  `/records/search?q=${encodeURIComponent(searchQuery)}`,
-                );
-            } else{
-                result = await api.get(
-                  `/records/search?q=${encodeURIComponent(searchQuery)}&branchId=${user.branch_id}`,
-                );
-            }
-            
+            const params = new URLSearchParams({ q: searchQuery });
+            if (effectiveBranch) params.append("branchId", effectiveBranch);
+            result = await api.get(`/records/search?${params}`);
           } else if (user.is_admin || user.is_head_office) {
-            result = await api.get("/records");
+            const params = new URLSearchParams();
+            if (effectiveBranch) params.append("branchId", effectiveBranch);
+            result = await api.get(
+              `/records${params.toString() ? `?${params}` : ""}`,
+            );
           } else {
-            // Branch staff only see their own branch's records
-            result = await api.get(`/records/branch/${user.branch_id}`);
-            
+            result = await api.get(`/records/branch/${effectiveBranch}`);
           }
+
           
           setRecords(result.data ?? []);
           
@@ -44,7 +62,7 @@ export function GetRecords(searchQuery = ''){
         } finally {
           setLoading(false);
         } 
-     }, [ searchQuery, user.branch_id, user.is_admin, user.is_head_office]);
+     }, [ searchQuery, branchId,user.branch_id, user.is_admin, user.is_head_office]);
      useEffect(()=>{
         fetchRecords();
      }, [fetchRecords]);

@@ -6,6 +6,7 @@ import UsableDialog from "./usableDialog";
 // import dummyData from "../assets/dummyData.js";
 import { useAuth } from "../context/AuthContext";
 import { GetRecords } from "../hooks/GetRecords";
+import { GetBranch } from "../hooks/GetBranch.jsx";
 import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 
 function recordTable() {
@@ -14,11 +15,14 @@ function recordTable() {
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);
     const [onRecords, setOnRecords] = useState(false);
+    const [branchQuery, setBranchQuery] = useState("");
     const { user } = useAuth();
     const [searchInput, setSearchInput ] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [unassigned, setUnassigned] = useState(new Set());
-    const { records, loading, error, fetchUnassignedRecords, refetch } = GetRecords(searchQuery);
+    const { records, loading, error, fetchUnassignedRecords, refetch } =
+      GetRecords(searchQuery, branchQuery ? parseInt(branchQuery) : null);
+    const { branches, branchError, branchLoading } = GetBranch();
 
     const openDialog = (item, delBtn) => {
       setDialogData(item);
@@ -45,6 +49,10 @@ function recordTable() {
          setSearchQuery("");
        }
      };
+
+     const handleBranchSelection = (e) =>{
+      setBranchQuery(e.target.value)
+     }
 
     const [sortConfig, setSortConfig] = useState({
       key: null,
@@ -148,6 +156,35 @@ function recordTable() {
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
+          {user.is_admin || user.is_head_office ? (
+            <div className="opts">
+              <label htmlFor="onlyBranch" className="lblDis">
+                Show By Branch?
+              </label>
+              <select
+                name="onlyBranch"
+                id="selBranch"
+                className="dropdownSpecial"
+                value={branchQuery}
+                onChange={(e) => handleBranchSelection(e)}
+              >
+                <option value="">--Select A Branch--</option>
+                {branchLoading ? (
+                  <option value="">Loading.....</option>
+                ) : branchError ? (
+                  <option value="">{branchError.message}</option>
+                ) : (
+                  branches.map((branch) => (
+                    <option
+                      value={branch.branch_id}
+                    >{`${branch.office_dept} | ${branch.business_area}`}</option>
+                  ))
+                )}
+              </select>
+            </div>
+          ) : (
+            ""
+          )}
         </div>
         <div className="transTable extendWidth">
           <table className="actTransTable">

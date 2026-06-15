@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
 import { useAuth } from "../context/AuthContext";
 import { GetTransmissions } from "../hooks/GetTranssmissions";
-
+import { GetBranch } from "../hooks/GetBranch.jsx";
 import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 import "../styles/loading.css";
 
@@ -17,12 +17,17 @@ function TransTable() {
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);  
     const [onRecords, setOnRecords] = useState(false);
+    const [branchQuery, setBranchQuery] = useState("");
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth();
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const { transmissions, loading, error, refetch } = GetTransmissions(searchQuery);
+    const { branchError, branchLoading, branches } = GetBranch();
+    const { transmissions, loading, error, refetch } = GetTransmissions(
+      searchQuery,
+      branchQuery ? parseInt(branchQuery) : null,
+    );
 
    const recStatus = (user.usr_role === "ADMIN" || user.usr_role === "RECEIVER") ? "FINISHED" : "RECEIVED";
    const sentStatus = (user.usr_role === "RECEIVER") ? "INCOMING" : "SENT";
@@ -66,6 +71,10 @@ function TransTable() {
         setSearchQuery('');
       }
     }
+    
+    const handleBranchSelection = (e) => {
+      setBranchQuery(e.target.value);
+    };
 
     const [sortConfig, setSortConfig] = useState({
       key: null,
@@ -156,6 +165,35 @@ function TransTable() {
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
+          {user.is_admin || user.is_head_office ? (
+            <div className="opts">
+              <label htmlFor="onlyBranch" className="lblDis">
+                Show By Branch?
+              </label>
+              <select
+                name="onlyBranch"
+                id="selBranch"
+                className="dropdownSpec"
+                value={branchQuery}
+                onChange={(e) => handleBranchSelection(e)}
+              >
+                <option value="">--Select A Branch--</option>
+                {branchLoading ? (
+                  <option value="">Loading.....</option>
+                ) : branchError ? (
+                  <option value="">{branchError.message}</option>
+                ) : (
+                  branches.map((branch) => (
+                    <option
+                      value={branch.branch_id}
+                    >{`${branch.office_dept} | ${branch.business_area}`}</option>
+                  ))
+                )}
+              </select>
+            </div>
+          ) : (
+            ""
+          )}
         </div>
         <div className="transTable extendWidth">
           <table className="actTransTable">
@@ -268,7 +306,15 @@ function TransTable() {
                 sortedTransmissions.slice(0, 50).map((data) => (
                   <tr key={data.trans_id} className="fade-in">
                     <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
-                    <td>{data.record_id}</td>
+                    <td>
+                      {data.record_id
+                        .split(",")
+                        .map((id) => parseInt(id.trim(), 10))
+                        .map(
+                          (ids) =>
+                            `SR-${String(ids).padStart(4, "0")} `,
+                        )}
+                    </td>
                     {user.usr_role === "ADMIN" ||
                     user.usr_role === "RECEIVER" ? (
                       <td>{data.office_dept}</td>
