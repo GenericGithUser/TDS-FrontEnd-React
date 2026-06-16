@@ -104,6 +104,7 @@ function mostRecentReceiver({filter}){
        return sorted;
      }, [transmissions, sortConfig]);
 
+
     return (
       <>
         <div className="transTable">
@@ -205,8 +206,11 @@ function mostRecentReceiver({filter}){
                   .slice(0, 4)
                   .map((data) => (
                     <tr key={data.record_id} className="fade-in">
-                      <td>{data.trans_id}</td>
-                      <td>{data.record_id}</td>
+                      <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
+                      <td>{data.record_id
+                          .split(",")
+                          .map((id) => parseInt(id.trim(), 10))
+                          .map((ids) => `SR-${String(ids).padStart(4, "0")} `)}</td>
                       <td>{data.office_dept}</td>
                       <td>{data.division}</td>
                       <td>{data.item_no}</td>

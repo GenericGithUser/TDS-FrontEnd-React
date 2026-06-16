@@ -134,6 +134,7 @@ function Toolbar(){
                         className={
                           isActive ? "expand navItem active" : "expand navItem"
                         }
+                        size="100%"
                       />
                       <p>Users</p>
                     </>
@@ -146,6 +147,7 @@ function Toolbar(){
                         className={
                           isActive ? "expand navItem active" : "expand navItem"
                         }
+                        size="100%"
                       />
                       <p>Branches</p>
                     </>
@@ -169,7 +171,7 @@ function Toolbar(){
           <div className="logDiv">
             {/* <SlLogout className="logout" onClick={logout} />
             <p className="logoutlbl">Log-out</p> */}
-            <Settings/>
+            <Settings />
           </div>
         </div>
       </>

@@ -88,15 +88,3 @@
     color: var(--blue-white);
 }
 
-@media (min-width: 1440px){
-    #finNum,
-        #sentNum,
-        #incNum,
-        #penNum {
-            text-align: end !important;
-            font-size: 5ch;
-            /* -webkit-text-stroke: 2px rgb(255, 255, 255); */
-    
-    
-        }
-}

@@ -10,7 +10,7 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchTransmissions = useCallback(async (searchQuery) => {
+  const fetchTransmissions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -35,7 +35,7 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
       //   // Branch staff only see their own branch
       //   result = await api.get(`/transmissions/branch/${user.branch_id}`);
       // }
-
+      
       if (searchQuery) {
         const params = new URLSearchParams({ q: searchQuery });
         if (effectiveBranch) params.append("branchId", effectiveBranch);

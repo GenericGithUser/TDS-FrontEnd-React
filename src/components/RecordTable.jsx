@@ -164,7 +164,7 @@ function recordTable() {
               <select
                 name="onlyBranch"
                 id="selBranch"
-                className="dropdownSpecial"
+                className="dropdownSpec"
                 value={branchQuery}
                 onChange={(e) => handleBranchSelection(e)}
               >
@@ -281,7 +281,7 @@ function recordTable() {
                 </tr>
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: "center" }}>
+                  <td colSpan={8} style={{ textAlign: "center" }}>
                     <h1>
                       {searchInput ? "No Record of Found" : "No Data Available"}
                     </h1>

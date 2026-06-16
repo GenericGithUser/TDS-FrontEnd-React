@@ -303,17 +303,16 @@ function TransTable() {
                   </td>
                 </tr>
               ) : (
-                sortedTransmissions.slice(0, 50).map((data) => (
+                sortedTransmissions.map((data) => (
                   <tr key={data.trans_id} className="fade-in">
                     <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                     <td>
-                      {data.record_id
-                        .split(",")
+                      {data?.record_id.length > 1 ? data?.record_id.split(",")
                         .map((id) => parseInt(id.trim(), 10))
                         .map(
                           (ids) =>
                             `SR-${String(ids).padStart(4, "0")} `,
-                        )}
+                        ): data.record_id}
                     </td>
                     {user.usr_role === "ADMIN" ||
                     user.usr_role === "RECEIVER" ? (

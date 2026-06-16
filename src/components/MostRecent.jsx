@@ -208,7 +208,7 @@ function mostRecent({filter}){
                   .slice(0, 4)
                   .map((data) => (
                     <tr key={data.record_id} className="fade-in">
-                      <td>{data.trans_id}</td>
+                      <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                       <td>
                         {data.record_id
                           .split(",")
