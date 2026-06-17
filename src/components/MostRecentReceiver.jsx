@@ -110,11 +110,11 @@ function mostRecentReceiver({filter}){
         <div className="transTable">
           <table className="actTransTable">
             <colgroup>
+              <col style={{ width: "10vw" }} />
+              <col style={{ width: "10vw" }} />
+              <col style={{ width: "10vw" }} />
+              <col style={{ width: "10vw" }} />
               <col style={{ width: "5vw" }} />
-              <col style={{ width: "5vw" }} />
-              <col style={{ width: "10vw" }} />
-              <col style={{ width: "10vw" }} />
-              <col style={{ width: "10vw" }} />
             </colgroup>
             <thead className="transTableHead">
               <tr>

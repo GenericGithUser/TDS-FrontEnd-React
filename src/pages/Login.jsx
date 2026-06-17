@@ -45,7 +45,7 @@ function Login(){
         }
         else{
             setError(result.error);
-            toast.error(error, {
+            toast.error(result.error, {
               position: "top-center",
               background: "#f89d9d",
               color: "#ff5757",

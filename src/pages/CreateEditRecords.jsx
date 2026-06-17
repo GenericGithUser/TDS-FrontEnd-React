@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { Helmet } from 'react-helmet-async'
 import { GetRecords } from '../hooks/GetRecords'
 import '../styles/loading.css'
+import toast from 'react-hot-toast'
 
 function CreateEditRecord() {
     const { navData, clearRouteData, setRouteData } = useNavigationData();
@@ -36,14 +37,25 @@ function CreateEditRecord() {
       return <h1>No NavData</h1>;
     }
 
-       
+    
     const handleSave = () => {
       const destination = navData.returnTo;
+      
       const recordData = {records_title: title, rec_description: description, rec_code: code, retention_period: retPeriod, remarks: remark}
       const checklistItems = checklist.split(',');
       createRecord(recordData, checklistItems);
       clearRouteData(); // ✅ Clear ONLY after successful action
       navigate(destination); // Go back
+    };
+
+    const checkFirst = (e) => {
+      e.preventDefault();
+      if (branchCode === code.trim() || branchCode.length > code.length) {
+        toast.error("Code must have Values!");
+        return;
+      } else {
+        handleSave();
+      }
     };
     const handleUpdate = () => {
       let origItems = navData?.checklistData.map((i) => i.checklist_item);
@@ -144,7 +156,7 @@ function CreateEditRecord() {
         </h1>
         {navData.mode === "create" && (
           <div className="fade-in createBox">
-            <form onSubmit={handleSave} className="fade-in">
+            <form onSubmit={checkFirst} className="fade-in">
               <div className="r1">
                 <div className="item">
                   <label htmlFor="recTitle" className="recLabel">

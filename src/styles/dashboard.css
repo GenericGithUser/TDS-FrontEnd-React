@@ -43,5 +43,5 @@ header{
 
 .board>header>.subtitle>.branchTitle {
     color: var(--light-blue);
-    
+    font-style: italic;
 }

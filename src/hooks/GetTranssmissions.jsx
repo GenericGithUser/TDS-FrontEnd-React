@@ -66,7 +66,7 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
     try {
       const result = await api.get(`/transmissions/${transId}`);
       if (result.success) {
-        toast.success(result.message || "Pre-populated Transmission!");
+        
       }
       return { success: true, data: result.data };
     } catch (err) {

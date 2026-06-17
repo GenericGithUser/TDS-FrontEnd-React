@@ -18,7 +18,7 @@ function Dashboard(){
             <div className="board">
               <header>
                 <h2 className="subtitle">
-                  Hello <span className="userTitle">{user?.emp_name}</span>! 
+                  Hello, <span className="userTitle">{user?.emp_name}</span>
                   {!user.is_admin && (
                     <>{""} from {""}
                   <span className="branchTitle">{user.office_dept}</span>
