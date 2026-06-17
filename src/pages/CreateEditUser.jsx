@@ -353,9 +353,20 @@ function CreateEditUser() {
                       onChange={(e) => setRole(e.target.value)}
                       required
                     >
-                      <option value="PREPARER">PREPARER</option>
-                      <option value="APPROVER">APPROVER</option>
-                      <option value="RECEIVER">RECEIVER</option>
+                      {parseInt(branch) !== 500 && branch !== "" ? (
+                        <>
+                          <option value="">--Select A Role--</option>
+                          <option value="PREPARER">PREPARER</option>
+                          <option value="APPROVER">APPROVER</option>
+                        </>
+                      ) : parseInt(branch) === 500 ? (
+                        <>
+                          <option value="">--Select A Role--</option>
+                          <option value="RECEIVER">RECEIVER</option>
+                        </>
+                      ) : (
+                        <option value="">--Select A Branch First--</option>
+                      )}
                     </select>
                   </div>
                 </div>

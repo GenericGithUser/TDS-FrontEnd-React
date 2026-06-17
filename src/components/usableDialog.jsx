@@ -552,7 +552,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                       {/* ── Transmission-level info (same for all records) ── */}
                       <tr>
                         <td className="titleD">Transmission ID:</td>
-                        <td className="data">{fullTrans?.trans_id}</td>
+                        <td className="data">{`TR-${String(fullTrans?.trans_id).padStart(4, "0")}`}</td>
                       </tr>
                       <tr>
                         <td className="titleD">Division:</td>
@@ -620,7 +620,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                             <td className="titleD">Item No.:</td>
                             <td className="data">{currentRecord.item_no}</td>
                             <td className="titleD">Record ID:</td>
-                            <td className="data">{currentRecord.record_id}</td>
+                            <td className="data">{`SR-${String(fullTrans?.trans_id).padStart(4, "0")}`}</td>
                           </tr>
                           <tr>
                             <td className="titleD">Title:</td>
@@ -648,7 +648,10 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                               <div
                                 className="btnFin btnCancel restrictSizeBtn"
                                 onClick={() =>
-                                  checkListButtonOpening(currentRecord.record_id, "received")
+                                  checkListButtonOpening(
+                                    currentRecord.record_id,
+                                    "received",
+                                  )
                                 }
                               >
                                 See Checklist Items
