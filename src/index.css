@@ -15,7 +15,7 @@
   --light-green: #7ad168;
   --blue-white: #f3fdff;
   --bg: #a3dcea;
-  --yellow: #ebc42a;
+  --yellow: #dab31a;
   --violet: #5e17eb;
   --red: #ff5757;
 
@@ -29,7 +29,7 @@ body {
 }
 
 .fin {
-  color: var(--light-green);
+  color: var(--dark-green);
 }
 
 .sen {
