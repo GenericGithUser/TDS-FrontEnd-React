@@ -36,7 +36,7 @@ function RecordItem({ recordData, delItm, transId }){
           <div className="recordData">
             <span className="num1">{recordData.itemNum} </span>
             <span className="id">
-              {`MEM-${String(recordData.record_id).padStart(4, "0")}`}
+              {`SR-${String(recordData.record_id).padStart(4, "0")}`}
             </span>
             <span className="title">{recordData.records_title}</span>
 

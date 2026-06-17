@@ -123,7 +123,7 @@ function RecordInput({
                 ) : (
                   displayedRecords.slice(0, 10).map((record) => (
                     <tr key={record.record_id} className="widener">
-                      <td>{`MEM-${String(record.record_id).padStart(4, "0")}`}</td>
+                      <td>{`SR-${String(record.record_id).padStart(4, "0")}`}</td>
                       <td>{record.records_title}</td>
                       <td>
                         <input
