@@ -116,7 +116,7 @@
 
 /* ── Stats card skeleton ───────────────────────────────────────────────────── */
 .skeleton-card {
-    background: #a9e2b6;
+    background: rgb(184, 205, 218);
     border-radius: 8px;
     padding: 20px;
     display: flex;

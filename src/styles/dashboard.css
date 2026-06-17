@@ -19,6 +19,7 @@
 }
 
 header{
+    font-style: italic;
     margin-bottom: 15px;
 }
 
@@ -27,6 +28,7 @@ header{
 }
 
 .boardHead>.title {
+    font-style: italic;
     color: var(--dark-blue);
     width: 80vw;
     padding: 10px;
@@ -37,7 +39,8 @@ header{
 }
 
 .board>header>.subtitle>.userTitle {
-    color: var(--light-green);
+    font-style: italic;
+    color: var(--dark-green);
     
 }
 

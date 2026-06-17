@@ -47,7 +47,7 @@
 #sentNum,
 #incNum,
 #penNum {
-    text-align: end !important;
+    text-align: right !important;
     
     /* -webkit-text-stroke: 2px rgb(255, 255, 255); */
     
@@ -117,7 +117,7 @@
 
 .dBoxSpecc{
     padding: 5px;
-    background-color: #dcdee8;
+    background-color: rgb(184, 205, 218);
     display: flex;
     flex-direction: column;
     border-radius: 10px;
