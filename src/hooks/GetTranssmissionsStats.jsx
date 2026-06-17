@@ -17,13 +17,21 @@ export function GetTransmissionStats() {
       let result;
       if (user.is_admin || user.is_head_office) {
         result = await api.get("/transmissions/stats");
-      }
-      else{
+        if (user.is_head_office === true) {
+          const branchStats = await api.get("/transmissions/branch/allstats");
+          // Merge the response.data objects so setStats receives combined data
+          const recStats = await api.get("/transmissions/stats/timeframe");
+          result = {
+            ...result,
+            data: { ...(result.data ?? {}), ...(branchStats.data ?? {}), ...(recStats.data ?? {}) },
+          };
+        }
+      } else {
         result = await api.get(
           `/transmissions/branch/stats/${parseInt(user.branch_id)}`,
         );
       }
-      
+      console.log("Stats fetched:", result); // DEBUG: log the fetched stats
       setStats(result.data ?? []);
     } catch (err) {
       // FIXED: was 'error', referenced as 'err'

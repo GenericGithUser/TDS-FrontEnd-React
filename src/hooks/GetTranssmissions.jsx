@@ -18,23 +18,6 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
       let result;
       const effectiveBranch = branchId  // ← explicit branch override
                 ?? (user.is_admin || user.is_head_office ? null : user.branch_id);
-      // if (searchQuery) {
-      //   if (user.is_admin || user.is_head_office) {
-      //     result = await api.get(
-      //       `/transmissions/search?q=${encodeURIComponent(searchQuery)}`,
-      //     );
-      //   } else {
-      //     result = await api.get(
-      //       `/transmissions/search?q=${encodeURIComponent(searchQuery)}&branchId=${user.branch_id}`,
-      //     );
-      //   }
-      // } else if (user.is_admin || user.is_head_office) {
-      //   // Admin and head office see all transmissions
-      //   result = await api.get("/transmissions");
-      // } else {
-      //   // Branch staff only see their own branch
-      //   result = await api.get(`/transmissions/branch/${user.branch_id}`);
-      // }
       
       if (searchQuery) {
         const params = new URLSearchParams({ q: searchQuery });

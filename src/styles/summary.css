@@ -34,6 +34,10 @@
 
 }
 
+.boxDescSpec{
+    width: 100%;
+}
+
 #finNum,
 #sentNum,
 #incNum,
@@ -88,3 +92,45 @@
     color: var(--blue-white);
 }
 
+.dataBox3{
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4px;
+}   
+
+.dBoxSpec { 
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px;
+    border-radius: 10px;
+    color: rgb(75, 80, 85);
+    
+
+}
+
+.dBoxSpecc{
+    padding: 5px;
+    background-color: rgb(197, 233, 197);
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    color: rgb(75, 80, 85);
+    padding: 10px;
+
+}
+.restrictor{
+    height: 20vh !important;
+}
+.statRecent{
+    background-color: rgb(243, 235, 121);
+    padding: 5px;
+    border-radius: 10px;
+}
+.finText{
+    font-size: 3ch;
+}
+
+.specText{
+    color: var(--light-blue);
+    text-align: end;
+}
