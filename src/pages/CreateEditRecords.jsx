@@ -217,6 +217,7 @@ function CreateEditRecord() {
                       className="recInput"
                       value={checklist}
                       onChange={(e) => setChecklist(e.target.value)}
+                      required
                     />
                   </div>
                 </div>
@@ -282,6 +283,7 @@ function CreateEditRecord() {
                     className="recInput"
                     onChange={(e) => setTitle(e.target.value)}
                     value={title}
+                    required
                   />
                 </div>
                 <div className="item">
@@ -295,6 +297,7 @@ function CreateEditRecord() {
                     className="recInput"
                     onChange={(e) => setCode(e.target.value)}
                     value={code}
+                    required
                   />
                 </div>
               </div>
@@ -326,6 +329,7 @@ function CreateEditRecord() {
                       className="recInput"
                       onChange={(e) => setChecklist(e.target.value)}
                       value={checklist}
+                      required
                     />
                   </div>
                 </div>
@@ -341,6 +345,7 @@ function CreateEditRecord() {
                       className="recInput"
                       onChange={(e) => setRetPeriod(e.target.value)}
                       value={retPeriod}
+                      required
                     />
                   </div>
                   <div className="item">
