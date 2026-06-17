@@ -711,7 +711,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                       {/* ── Transmission-level info (same for all records) ── */}
                       <tr>
                         <td className="titleD">Transmission ID:</td>
-                        <td className="data">{fullTrans?.trans_id}</td>
+                        <td className="data">{`TR-${String(fullTrans?.trans_id).padStart(4, "0")}`}</td>
                       </tr>
                       <tr>
                         <td className="titleD">Division:</td>
@@ -779,7 +779,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                             <td className="titleD">Item No.:</td>
                             <td className="data">{currentRecord.item_no}</td>
                             <td className="titleD">Record ID:</td>
-                            <td className="data">{currentRecord.record_id}</td>
+                            <td className="data">{`TR-${String(currentRecord?.record_id).padStart(4, "0")}`}</td>
                           </tr>
                           <tr>
                             <td className="titleD">Title:</td>
@@ -847,7 +847,10 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                   ""
                 )}
                 {user.is_admin && (
-                  <button onClick={openNNDialog} className="btnOrange btnCancel">
+                  <button
+                    onClick={openNNDialog}
+                    className="btnOrange btnCancel"
+                  >
                     DELETE TRANSMISSION
                   </button>
                 )}
@@ -865,13 +868,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.trans_id}
+                        {`TR-${String(data?.trans_id).padStart(4, "0")}`}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.record_id}
+                        {`TR-${String(data?.record_id).padStart(4, "0")}`}
                       </td>
                     </tr>
                     <tr>
@@ -927,13 +930,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.trans_id}
+                        <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.record_id}
+                        <td>{`TR-${String(data?.record_id).padStart(4, "0")}`}</td>
                       </td>
                     </tr>
                     <tr>
@@ -977,7 +980,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                       {/* ── Transmission-level info ── */}
                       <tr>
                         <td className="titleD">Transmission ID:</td>
-                        <td className="data">{fullTrans?.trans_id}</td>
+                        <td className="data">{`TR-${String(fullTrans?.trans_id).padStart(4, "0")}`}</td>
                         <td className="titleD">Office:</td>
                         <td className="data">{fullTrans?.office_dept}</td>
                       </tr>
@@ -1073,9 +1076,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                                   {checkLoading ? (
                                     <Spinner text="Loading checklist..." />
                                   ) : checkError ? (
-                                    <p style={{ color: "red" }}>
-                                      {checkError}
-                                    </p>
+                                    <p style={{ color: "red" }}>{checkError}</p>
                                   ) : checkItems.length === 0 ? (
                                     <p
                                       style={{
@@ -1224,7 +1225,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                       {/* ── Transmission-level info (same for all records) ── */}
                       <tr>
                         <td className="titleD">Transmission ID:</td>
-                        <td className="data">{fullTrans?.trans_id}</td>
+                        <td className="data">{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                       </tr>
                       <tr>
                         <td className="titleD">Division:</td>
@@ -1292,7 +1293,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                             <td className="titleD">Item No.:</td>
                             <td className="data">{currentRecord.item_no}</td>
                             <td className="titleD">Record ID:</td>
-                            <td className="data">{currentRecord.record_id}</td>
+                            <td className="data">{`SR-${String(currentRecord?.record_id).padStart(4, "0")}`}</td>
                           </tr>
                           <tr>
                             <td className="titleD">Title:</td>
@@ -1374,10 +1375,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                   <button onClick={onClose} className="btnCancel">
                     OK
                   </button>
-                  <button
-                    onClick={openNNDialog}
-                    className="btnRed btnCancel"
-                  >
+                  <button onClick={openNNDialog} className="btnRed btnCancel">
                     CANCEL TRANSMISSION
                   </button>
                 </div>
@@ -1467,13 +1465,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {data.trans_id}
+                        <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {data.record_id}
+                        <td>{`TR-${String(data?.record_id).padStart(4, "0")}`}</td>
                       </td>
                     </tr>
                     <tr>
@@ -1516,13 +1514,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {fullTrans?.trans_id}
+                        {`TR-${String(fullTrans?.trans_id).padStart(4, "0")}`}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {currentRecord?.record_id}
+                        {`TR-${String(currentRecord?.record_id).padStart(4, "0")}`}
                       </td>
                     </tr>
                     <tr>
@@ -1598,13 +1596,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                     <tr>
                       <td className="titleD">TransmissionID: </td>
                       <td id="transIDData" className="data">
-                        {fullTrans?.trans_id}
+                        {`TR-${String(fullTrans?.trans_id).padStart(4, "0")}`}
                       </td>
                     </tr>
                     <tr>
                       <td className="titleD">RecordID: </td>
                       <td id="recordIdData" className="data">
-                        {currentRecord?.record_id}
+                        {`TR-${String(currentRecord?.trans_id).padStart(4, "0")}`}
                       </td>
                     </tr>
                     <tr>
@@ -1670,7 +1668,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
         <>
           <dialog className="delPrompt" ref={dialogRef}>
             <h1 className="diagTitle">Confirm Deletion</h1>
-            <img src="/assets/warning.png" alt="warning"  />
+            <img src="/assets/warning.png" alt="warning" />
             <h3 className="confirmMesg">
               Are you sure you want to delete this transmission?
             </h3>
@@ -1680,13 +1678,13 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                   <tr>
                     <td className="titleD">TransmissionID: </td>
                     <td id="transIDData" className="data">
-                      {data.trans_id}
+                      {`TR-${String(data?.trans_id).padStart(4, "0")}`}
                     </td>
                   </tr>
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.record_id}
+                      {`TR-${String(data?.record_id).padStart(4, "0")}`}
                     </td>
                   </tr>
                   <tr>
@@ -1708,23 +1706,23 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
             </div>
           </dialog>
           <dialog className="diagEdit" ref={nestedDialogRef}>
-              <h1 className="diagTitle">Request Edits</h1>
-              <form action="" method="post" className="changes">
-                <label htmlFor="changeForm">Enter Edits to be made:</label>
-                <textarea name="changeForm" id="changeForm"></textarea>
-              </form>
-              <div className="buttons">
-                <button
-                  className="btnInc btnCancel"
-                  onClick={handleNestedDialogSubmit}
-                >
-                  Send Requests
-                </button>
-                <button onClick={closeNestedDialog} className="btnCancel">
-                  Cancel
-                </button>
-              </div>
-            </dialog>
+            <h1 className="diagTitle">Request Edits</h1>
+            <form action="" method="post" className="changes">
+              <label htmlFor="changeForm">Enter Edits to be made:</label>
+              <textarea name="changeForm" id="changeForm"></textarea>
+            </form>
+            <div className="buttons">
+              <button
+                className="btnInc btnCancel"
+                onClick={handleNestedDialogSubmit}
+              >
+                Send Requests
+              </button>
+              <button onClick={closeNestedDialog} className="btnCancel">
+                Cancel
+              </button>
+            </div>
+          </dialog>
         </>
       );
     } else if (isDeleteButton === true && onRecords === true ){
@@ -1742,7 +1740,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.record_id}
+                      <td>{`TR-${String(data?.record_id).padStart(4, "0")}`}</td>
                     </td>
                   </tr>
                   <tr>

@@ -17,27 +17,30 @@ function ForgotPassword() {
 
     const handleSave = async (e) => {
       e.preventDefault();
-      const parsedId = parseInt(empId.replace(/^\D+/, ""), 10);
-      const result = await api.post(`/reset/password/email`, {
-        userId: parsedId,
-        email,
-      });
+      try{
+        const parsedId = parseInt(empId.replace(/^\D+/, ""), 10);
+        const result = await api.post(`/reset/password/email`, {
+          userId: parsedId,
+          email,
+        });
 
-      if (result.success) {
-        const sendReq = await api.patch(`/reset/password/request`, {userId: parsedId});
-        if (sendReq.success) {
-          toast.success("Your Request Has been Sent!");
-          navigate("/login")
-        }else{
-          toast.error(sendReq.message);
+        if (result.success) {
+          try {
+            const sendReq = await api.patch(`/reset/password/request`, {userId: parsedId});
+            if (sendReq.success) {
+              toast.success("Your Request Has been Sent!");
+              navigate("/login")
+            }
+          } catch (error) {
+            toast.error(error.message || "Error sending request!");
+          }
         }
-      }
-      else{
-        toast.error("No Users with that Credentials Found!")
-      }
 
-      
+      }
+      catch(err){
+      toast.error(err.message || "No Users with that Credentials Found!");
     };
+  }
     
     return (
       <>

@@ -20,6 +20,7 @@ function CreateEditUser() {
     const { user } = useAuth();
     const {loading, error, users, createUser, updateUser } = GetUsers();
     const {branchError, branchLoading, branches} = GetBranch();
+    let branchID ; 
     
 
     const titlePrefix = 
@@ -46,6 +47,12 @@ function CreateEditUser() {
 
       return tempPassword;
       
+    }
+
+    const handleBranchId = (value)=>{
+      branchID = value;
+      setBranch(value);
+      console.log(branchID);
     }
     
     const createUserData = () => {
@@ -168,7 +175,7 @@ function CreateEditUser() {
                     id="branchSelect"
                     className="recInput"
                     value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
+                    onChange={(e) => handleBranchId(e.target.value)}
                     required
                   >
                     <option value="">--Select A Branch--</option>
@@ -214,9 +221,20 @@ function CreateEditUser() {
                       onChange={(e) => setRole(e.target.value)}
                       required
                     >
-                      <option value="PREPARER">PREPARER</option>
-                      <option value="APPROVER">APPROVER</option>
-                      <option value="RECEIVER">RECEIVER</option>
+                      {parseInt(branch) !== 500 && branch !== "" ? (
+                        <>
+                          <option value="">--Select A Role--</option>
+                          <option value="PREPARER">PREPARER</option>
+                          <option value="APPROVER">APPROVER</option>
+                        </>
+                      ) : parseInt(branch) === 500 ? (
+                        <>
+                          <option value="">--Select A Role--</option>
+                          <option value="RECEIVER">RECEIVER</option>
+                        </>
+                      ) : (
+                        <option value="">--Select A Branch First--</option>
+                      )}
                     </select>
                   </div>
                 </div>
@@ -240,8 +258,7 @@ function CreateEditUser() {
                 </div>
                 <div className="item">
                   <label className="recLabel lblSpecial">
-                    Password would be Generated Automatically, a link would be
-                    sent on the users email
+                    Password would be Generated Automatically, (LastName+123)
                   </label>
                 </div>
               </div>
@@ -255,7 +272,6 @@ function CreateEditUser() {
                   type="submit"
                   value="SAVE NEW USER"
                   className="btnGreen"
-                  
                 ></input>
                 <button className="btnCancel" onClick={handleCancel}>
                   CANCEL

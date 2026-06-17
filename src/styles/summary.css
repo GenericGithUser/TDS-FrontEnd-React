@@ -134,3 +134,10 @@
     color: var(--light-blue);
     text-align: end;
 }
+
+@media screen and (min-width: 1440px){
+    .restrictor {
+
+         height: 15vh !important;
+    }
+}

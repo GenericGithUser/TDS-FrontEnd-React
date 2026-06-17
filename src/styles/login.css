@@ -34,6 +34,8 @@
     align-items: center;
     box-shadow: 0px 3px 4px 4px #31a9199c;
 }
+
+
 .main > .loginForm > .logoImg{
     width: 17vw;
     margin-top: -80px;
@@ -93,5 +95,14 @@
 }
 .main>.loginForm>.innerForm>.logButton:active{
     background-color: #054a8a;
+}
+
+@media screen and (min-width: 1440px) {
+    .main>.loginForm {
+        width: 27vw;
+    }
+    .main>.loginForm>.innerForm>.inputs{
+        width: 25vw;
+    }
 }
 
