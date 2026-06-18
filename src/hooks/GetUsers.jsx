@@ -19,6 +19,9 @@ export function GetUsers(searchQuery = '', includeDeleted = false){
           const params = new URLSearchParams();
           // FIXED: was referencing undefined 'searchTerm', should be 'searchQuery'
           if (searchQuery) {
+            if (searchQuery.includes("MEM-")) {
+              searchQuery = parseInt(searchQuery.replace(/\D/g, ""));
+            }
             params.append("q", searchQuery); // ← was 'searchTerm'
           }
 

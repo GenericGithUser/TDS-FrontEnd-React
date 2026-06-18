@@ -16,6 +16,11 @@ export function GetBranch(searchQuery = ''){
 
             let result;
             if (searchQuery) {
+                if (
+                  searchQuery.includes("MB-") 
+                ) {
+                  searchQuery = parseInt(searchQuery.replace(/\D/g, ""));
+                }
                 result = await api.get(`/branches/search?q=${encodeURI(searchQuery)}`);
             }
             else{

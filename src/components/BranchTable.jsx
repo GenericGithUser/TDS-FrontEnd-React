@@ -144,6 +144,7 @@ function BranchTable() {
               id="searchBar"
               value={searchInput}
               onChange={handleSearchChange}
+              placeholder="Search by Office/BusinessArea/ID"
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>

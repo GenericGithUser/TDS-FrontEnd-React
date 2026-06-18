@@ -146,6 +146,7 @@ function UserTable() {
               id="searchBar"
               value={searchInput}
               onChange={handleSearchChange}
+              placeholder="Search By Name/ID"
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
             <br />
