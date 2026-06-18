@@ -46,7 +46,7 @@ function mostRecent({filter}){
     }
 
     const [sortConfig, setSortConfig] = useState({
-      key: null,
+      key: "record_status",
       direction: "asc",
     });
 
@@ -114,7 +114,7 @@ function mostRecent({filter}){
       return sorted;
     }, [transmissions, sortConfig]);
     
-    
+    console.log(transmissions);
     return (
       <>
         <div className="transTable">
@@ -151,7 +151,7 @@ function mostRecent({filter}){
                   style={{ cursor: "pointer" }}
                   onClick={() => requestSort("item_no")}
                 >
-                  Item No.{getSortIndicator("item_no")}
+                  Item Count{getSortIndicator("item_no")}
                 </th>
                 <th
                   style={{ cursor: "pointer" }}
@@ -207,7 +207,7 @@ function mostRecent({filter}){
                   )
                   .slice(0, 4)
                   .map((data) => (
-                    <tr key={data.record_id} className="fade-in">
+                    <tr key={data.record_id} className={`fade-in ${data?.feedback == "" || data?.feedback != null ? 'backRed' : ''}`} >
                       <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                       <td>
                         {data.record_id

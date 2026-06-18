@@ -37,8 +37,8 @@ function mostRecentReceiver({filter}){
       setIsDeleteButton(false);
     }
      const [sortConfig, setSortConfig] = useState({
-       key: null,
-       direction: "asc",
+       key: "record_status",
+       direction: "desc",
      });
 
      const requestSort = (key) => {
@@ -147,7 +147,7 @@ function mostRecentReceiver({filter}){
                   style={{ cursor: "pointer" }}
                   onClick={() => requestSort("item_no")}
                 >
-                  Item No.{getSortIndicator("item_no")}
+                  Item Count{getSortIndicator("item_no")}
                 </th>
                 <th
                   style={{ cursor: "pointer" }}

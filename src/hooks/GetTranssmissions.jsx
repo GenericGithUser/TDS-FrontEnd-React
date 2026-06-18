@@ -20,6 +20,10 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
                 ?? (user.is_admin || user.is_head_office ? null : user.branch_id);
       
       if (searchQuery) {
+        if (searchQuery.includes("TR-") || searchQuery.includes("SR-")){
+          searchQuery = parseInt(searchQuery.replace(/\D/g, ''));
+        }
+        
         const params = new URLSearchParams({ q: searchQuery });
         if (effectiveBranch) params.append("branchId", effectiveBranch);
         result = await api.get(`/transmissions/search?${params}`);

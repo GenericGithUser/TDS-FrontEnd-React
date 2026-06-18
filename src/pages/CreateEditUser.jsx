@@ -90,6 +90,7 @@ function CreateEditUser() {
         role: null,
         position: null,
       };
+      console.log(editData);
       if (navData?.data?.emp_name.trim() !== name.trim() && name !== "") {
         editData.emp_name = name;
       }

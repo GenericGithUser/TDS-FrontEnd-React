@@ -7,6 +7,7 @@ import { GetChecklistItems } from "../hooks/GetChecklistItems";
 import { GetRecords } from "../hooks/GetRecords";
 import { GetUsers } from "../hooks/GetUsers";
 import { GetTransmissions } from "../hooks/GetTranssmissions";
+import { GetTransmissionStats } from "../hooks/GetTranssmissionsStats.jsx";
 import { Spinner } from "./Loading";
 import toast from "react-hot-toast";
 import api from "../api/client.js";
@@ -466,6 +467,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
         checklistData: chkData,
         returnTo: location,
       };
+      console.log(sendData);
       setRouteData(sendData);
       navigate("edit");
       onClose();
@@ -1779,7 +1781,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                   <tr>
                     <td className="titleD">RecordID: </td>
                     <td id="recordIdData" className="data">
-                      {data.record_id}
+                      {`TR-${String(data?.record_id).padStart(4, "0")}`}
                     </td>
                   </tr>
                   <tr>
@@ -2028,7 +2030,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                     <td className="titleD">Employees: </td>
                     <td id="feedbackData" className="data">
                       {users.map((u) => (
-                        <div className="empItem">{`MEM-${String(u.employee_id).padStart(4, "0")} | ${u.emp_name} | ${u.position}`}</div>
+                        <div className="empItem">{`MEM-${String(u.employee_id).padStart(4, "0")} | ${u.emp_name} | ${u.position} | ${u.usr_role}`}</div>
                       ))}
                     </td>
                   </tr>

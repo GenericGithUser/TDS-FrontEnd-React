@@ -3,11 +3,30 @@ import '../styles/loading.css'
 import { useAuth } from '../context/AuthContext';
 import { GetTransmissionStats } from '../hooks/GetTranssmissionsStats';
 import { StatsSkeleton } from "../components/Loading";
+import { useState } from 'react';
 function summaryBoard( { sendFilter }  ){
     const { user } = useAuth();
     const { stats, loading, error } = GetTransmissionStats();
+    const [clicked, setClicked] = useState(false);
+    const [activeFilter, setActiveFilter] = useState(""); 
 
-
+    const handleFilter = (filter)=>{
+      if (clicked === false) {
+        sendFilter(filter);
+        setActiveFilter(filter);
+        setClicked(true);
+      }
+      else if(clicked === true && activeFilter !== filter){ 
+        sendFilter(filter);
+        setActiveFilter(filter);
+        setClicked(true);
+      }  
+      else{
+        sendFilter("");
+        setClicked(false);
+        setActiveFilter("");
+      }
+    }
     return (
       <>
         {user.is_head_office && (
@@ -146,7 +165,7 @@ function summaryBoard( { sendFilter }  ){
               <button
                 type="submit"
                 className="btnFin btn"
-                onClick={() => sendFilter("received")}
+                onClick={() => handleFilter("received")}
               >
                 View Recent
               </button>
@@ -155,7 +174,7 @@ function summaryBoard( { sendFilter }  ){
               <button
                 type="submit"
                 className="btnSen btn"
-                onClick={() => sendFilter("sent")}
+                onClick={() => handleFilter("sent")}
               >
                 View Recent
               </button>
@@ -164,7 +183,7 @@ function summaryBoard( { sendFilter }  ){
               <button
                 type="submit"
                 className="btnInc btn"
-                onClick={() => sendFilter("incomplete")}
+                onClick={() => handleFilter("incomplete")}
               >
                 View Recent
               </button>
@@ -174,7 +193,7 @@ function summaryBoard( { sendFilter }  ){
                 <button
                   type="submit"
                   className="btnPen btn"
-                  onClick={() => sendFilter("pending")}
+                  onClick={() => handleFilter("pending")}
                 >
                   View Recent
                 </button>

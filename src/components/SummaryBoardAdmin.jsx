@@ -15,7 +15,7 @@ function summaryBoardAdmin(){
             <div className="dataBox">
               <div className="dBox">
                 <h2 className="boxDesc fin">Total Transmissions</h2>
-                <h1 className="finNum num" id="finNum">
+                <h1 className="finNum num fin" id="finNum">
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (
@@ -27,7 +27,7 @@ function summaryBoardAdmin(){
               </div>
               <div className="dBox">
                 <h2 className="boxDesc sen">Total Records</h2>
-                <h1 className="finNum num" id="sentNum">
+                <h1 className="finNum num sen" id="sentNum">
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (
@@ -39,7 +39,7 @@ function summaryBoardAdmin(){
               </div>
               <div className="dBox">
                 <h2 className="boxDesc inc">Number of Employees</h2>
-                <h1 className="finNum num" id="incNum">
+                <h1 className="finNum num inc" id="incNum">
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (
@@ -51,7 +51,7 @@ function summaryBoardAdmin(){
               </div>
               <div className="dBox ">
                 <h2 className="boxDesc pen">Number of Branches</h2>
-                <h1 className="finNum num" id="penNum">
+                <h1 className="finNum num pen" id="penNum">
                   {error ? (
                     <p>{error}</p>
                   ) : loading ? (

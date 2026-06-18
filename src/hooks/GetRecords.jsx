@@ -41,6 +41,9 @@ export function GetRecords(searchQuery = '', branchId = null){
             
           // }
           if (searchQuery) {
+            if (searchQuery.includes("TR-") || searchQuery.includes("SR-")) {
+              searchQuery = parseInt(searchQuery.replace(/\D/g, ""));
+            }
             const params = new URLSearchParams({ q: searchQuery });
             if (effectiveBranch) params.append("branchId", effectiveBranch);
             result = await api.get(`/records/search?${params}`);
@@ -101,15 +104,15 @@ export function GetRecords(searchQuery = '', branchId = null){
             ...(item.checklist_id && { checklist_id: item.checklist_id }), // fallback chain
           }))
           .filter((item) => item.checklist_item?.trim()); // remove empty items
-        
+
         // console.log("📤 Sending update payload:", {
         //   recordId,
         //   recordDataKeys: Object.keys(recordData),
         //   checklistCount: formattedChecklist.length,
         //   sampleItem: formattedChecklist[0], // see structure
         //   hasIds: formattedChecklist.some((i) => i.checklist_id), // are IDs included?
-        // });    
-
+        // });
+        console.log("calling URL:", `/records/checklist/${recordId}`); //
         const result = await api.put(`/records/checklist/${recordId}`, {
           ...recordData,
           checklist_items: formattedChecklist,

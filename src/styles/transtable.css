@@ -23,6 +23,7 @@
     padding: 3px;
     border-radius: 10px;
     border: 2px solid var(--light-green);
+    width: 30vw;
     transition: all 0.2s ease-in-out;
 }
 

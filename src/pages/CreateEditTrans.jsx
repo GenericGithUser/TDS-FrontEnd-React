@@ -265,7 +265,7 @@ function CreateEditTrans() {
       } else {
         // 1. Create the transmission
         const createResult = await createTransmission({
-          sent_date: new Date().toISOString().split("T")[0],
+          sent_date: null,
           sd_branch_id: user.branch_id,
           division_id: selectedDivision.id, // send ID not name
           p_employee_id: user.employee_id,

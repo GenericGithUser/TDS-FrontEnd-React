@@ -162,6 +162,7 @@ function TransTable() {
               value={searchInput}
               onChange={handleSearchChange}
               id="searchBar"
+              placeholder="Search by Title/Code/TransId?"
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
@@ -251,7 +252,7 @@ function TransTable() {
                   style={{ cursor: "pointer" }}
                   onClick={() => requestSort("item_no")}
                 >
-                  Item No.{getSortIndicator("item_no")}
+                  Item Count.{getSortIndicator("item_no")}
                 </th>
                 <th
                   style={{ cursor: "pointer" }}
@@ -304,15 +305,18 @@ function TransTable() {
                 </tr>
               ) : (
                 sortedTransmissions.map((data) => (
-                  <tr key={data.trans_id} className="fade-in">
+                  <tr
+                    key={data.trans_id}
+                    className={`fade-in ${data?.feedback == "" || data?.feedback != null ? "backRed" : ""}`}
+                  >
                     <td>{`TR-${String(data?.trans_id).padStart(4, "0")}`}</td>
                     <td>
-                      {data?.record_id.length > 1 ? data?.record_id.split(",")
-                        .map((id) => parseInt(id.trim(), 10))
-                        .map(
-                          (ids) =>
-                            `SR-${String(ids).padStart(4, "0")} `,
-                        ): data.record_id}
+                      {data?.record_id.length > 1
+                        ? data?.record_id
+                            .split(",")
+                            .map((id) => parseInt(id.trim(), 10))
+                            .map((ids) => `SR-${String(ids).padStart(4, "0")} `)
+                        : data.record_id}
                     </td>
                     {user.usr_role === "ADMIN" ||
                     user.usr_role === "RECEIVER" ? (

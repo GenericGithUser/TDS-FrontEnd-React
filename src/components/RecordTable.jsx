@@ -153,6 +153,7 @@ function recordTable() {
               id="searchBar"
               value={searchInput}
               onChange={handleSearchChange}
+              placeholder="Search by Title/Code/RecordId?"
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
@@ -288,7 +289,7 @@ function recordTable() {
                   </td>
                 </tr>
               ) : (
-                sortedRecords.slice(0, 50).map((data) => (
+                sortedRecords.map((data) => (
                   <tr key={data.record_id} className="fade-in">
                     <td>{`SR-${String(data?.record_id).padStart(4, "0")}`}</td>
                     {user.usr_role === "RECEIVER" ||
