@@ -19,12 +19,12 @@ api.interceptors.request.use((config) => {
   }
 
   // Add timestamp to GET requests to prevent 304 caching
-    if (config.method === 'get') {
-        config.params = {
-            ...config.params,
-            _t: Date.now()   // ← forces a fresh request every time
-        };
-    }
+    // if (config.method === 'get') {
+    //     config.params = {
+    //         ...config.params,
+    //         _t: Date.now()   // ← forces a fresh request every time
+    //     };
+    // }
   return config;
 });
 
