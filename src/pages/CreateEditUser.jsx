@@ -17,10 +17,13 @@ function CreateEditUser() {
     const [role, setRole] = useState("PREPARER");
     const [email, setEmail] = useState("");
     const [checked, setChecked] = useState(true);
+    const [middleInit, setMiddleInit] = useState("");
+    const [lastName, setLastName] = useState("");
     const { user } = useAuth();
     const {loading, error, users, createUser, updateUser } = GetUsers();
     const {branchError, branchLoading, branches} = GetBranch();
     let branchID ; 
+    let fullNameMain = "";
     
 
     const titlePrefix = 
@@ -42,9 +45,9 @@ function CreateEditUser() {
     }
 
     const createPassword = () => {
-      const userName = name.trim().split(/\s+/).pop();
+      const tempUserName = lastName.split(" ");
+      const userName = tempUserName.length > 1 ? tempUserName.join("") : tempUserName[0];
       const tempPassword = `${userName}123`;
-
       return tempPassword;
       
     }
@@ -56,9 +59,11 @@ function CreateEditUser() {
     }
     
     const createUserData = () => {
+
+      const fullName = `${name.trim()} ${middleInit.trim()} ${lastName.trim()}`;
       
       const userData = {
-        emp_name: name,
+        emp_name: fullName,
         emp_branch_id: parseInt(branch),
         email: email,
         password: createPassword(),
@@ -81,7 +86,7 @@ function CreateEditUser() {
 
     const handleUpdate = (e) =>{
       e.preventDefault();
-
+      let fullName=[];
       let editData = {
         emp_name: null,
         emp_branch_id: null,
@@ -91,8 +96,18 @@ function CreateEditUser() {
         position: null,
       };
       console.log(editData);
-      if (navData?.data?.emp_name.trim() !== name.trim() && name !== "") {
-        editData.emp_name = name;
+      if (fullNameMain[1].trim() !== name.trim() && name !== "") {
+        fullName.push(name);
+      }
+      if (fullNameMain[2].trim() !== middleInit.trim() && middleInit !== "") {
+        fullName.push(middleInit);
+      }
+      if (fullNameMain[3].trim() !== lastName.trim() && lastName !== "") {
+        fullName.push(lastName);
+      }
+      let fullNameFull = `${fullName[0].trim()} ${fullName[1].trim()} ${fullName[2].trim()}`;
+      if (fullNameFull) {
+        editData.emp_name = fullNameFull;
       }
       if (
         parseInt(navData?.data?.emp_branch_id) !== parseInt(branch) &&
@@ -130,8 +145,21 @@ function CreateEditUser() {
     };
 
     if (navData.mode === "edit") {
+      
+      if (navData?.data?.emp_name.includes(".")) {
+        fullNameMain = navData.data.emp_name.match(
+          /^(.+?)\s+([A-Z]\.)\s+(.+)$/,
+        );
+      }else{
+        fullNameMain = navData.data.emp_name.match(
+          /^(.+?)(?:\s+([A-Z]\.))?\s+(.+)$/,
+        );
+      }
+      
       useEffect(()=>{
-        setName(navData?.data?.emp_name);
+        setName(fullNameMain[1] || "");
+        setMiddleInit(fullNameMain.length > 2 ? fullNameMain[2] : "");
+        setLastName(fullNameMain.length > 2 ? fullNameMain[3] : fullNameMain[2] || ""); 
         setEmail(navData?.data?.email);
         setBranch(navData?.data?.emp_branch_id);
         setPosition(navData?.data?.position);
@@ -139,7 +167,6 @@ function CreateEditUser() {
       },[]);
 
     }
-    
     return (
       <>
         <Helmet>
@@ -155,7 +182,7 @@ function CreateEditUser() {
               <div className="r1">
                 <div className="item">
                   <label htmlFor="recName" className="recLabel">
-                    Name:
+                    First Name:
                   </label>
                   <input
                     type="text"
@@ -196,16 +223,16 @@ function CreateEditUser() {
               </div>
               <div className="r1">
                 <div className="item">
-                  <label htmlFor="recEmail" className="recLabel">
-                    Company Email:
+                  <label htmlFor="recInit" className="recLabel">
+                    Middle Initial:
                   </label>
                   <input
-                    type="email"
-                    name="email"
-                    id="recEmail"
+                    type="text"
+                    name="midInit"
+                    id="recInit"
                     className="recInput"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={middleInit}
+                    onChange={(e) => setMiddleInit(e.target.value)}
                     required
                   />
                 </div>
@@ -243,16 +270,16 @@ function CreateEditUser() {
               <div className="r1">
                 <div className="item itmSpecial">
                   <div className="item">
-                    <label htmlFor="recRetPeriod" className="recLabel">
-                      Position:
+                    <label htmlFor="recLastName" className="recLabel">
+                      Last Name:
                     </label>
                     <input
                       type="text"
-                      name="retPeriod"
-                      id="recRetPeriod"
+                      name="lastName"
+                      id="recLastName"
                       className="recInput"
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
                       required
                     />
                   </div>
@@ -265,8 +292,37 @@ function CreateEditUser() {
               </div>
 
               <div className="r1">
+                <div className="item">
+                  <label htmlFor="recEmail" className="recLabel">
+                    Company Email:
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="recEmail"
+                    className="recInput"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
                 <div className="item"></div>
-                <div className="item"></div>
+              </div>
+              <div className="r1">
+                <div className="item">
+                  <label htmlFor="recRetPeriod" className="recLabel">
+                    Position:
+                  </label>
+                  <input
+                    type="text"
+                    name="retPeriod"
+                    id="recRetPeriod"
+                    className="recInput"
+                    value={position}
+                    onChange={(e) => setPosition(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
               <div className="buttonCont">
                 <input
@@ -287,7 +343,7 @@ function CreateEditUser() {
               <div className="r1">
                 <div className="item">
                   <label htmlFor="recName" className="recLabel">
-                    Name:
+                    First Name:
                   </label>
                   <input
                     type="text"
@@ -328,16 +384,16 @@ function CreateEditUser() {
               </div>
               <div className="r1">
                 <div className="item">
-                  <label htmlFor="recEmail" className="recLabel">
-                    Company Email:
+                  <label htmlFor="recInit" className="recLabel">
+                    Middle Initial:
                   </label>
                   <input
-                    type="email"
-                    name="email"
-                    id="recEmail"
+                    type="text"
+                    name="midInit"
+                    id="recInit"
                     className="recInput"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={middleInit}
+                    onChange={(e) => setMiddleInit(e.target.value)}
                     required
                   />
                 </div>
@@ -375,16 +431,16 @@ function CreateEditUser() {
               <div className="r1">
                 <div className="item itmSpecial">
                   <div className="item">
-                    <label htmlFor="recRetPeriod" className="recLabel">
-                      Position:
+                    <label htmlFor="recLastName" className="recLabel">
+                      Last Name:
                     </label>
                     <input
                       type="text"
-                      name="retPeriod"
-                      id="recRetPeriod"
+                      name="lastName"
+                      id="recLastName"
                       className="recInput"
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
                       required
                     />
                   </div>
@@ -404,9 +460,37 @@ function CreateEditUser() {
                   </div>
                 </div>
               </div>
-              <div className="r1"></div>
               <div className="r1">
-                <div className="item"></div>
+                <div className="item">
+                  <label htmlFor="recEmail" className="recLabel">
+                    Company Email:
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="recEmail"
+                    className="recInput"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="r1">
+                <div className="item">
+                  <label htmlFor="recRetPeriod" className="recLabel">
+                    Position:
+                  </label>
+                  <input
+                    type="text"
+                    name="retPeriod"
+                    id="recRetPeriod"
+                    className="recInput"
+                    value={position}
+                    onChange={(e) => setPosition(e.target.value)}
+                    required
+                  />
+                </div>
                 <div className="item"></div>
               </div>
               <div className="buttonCont">

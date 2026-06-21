@@ -5,6 +5,7 @@ import UsableDialog from "./usableDialog";
 import DUMMY_USR from "../assets/dummyUserData";
 import { GetUsers } from "../hooks/GetUsers";
 import { TableSkeleton, ErrorMessage } from "./Loading";
+import { Switch } from "@base-ui/react";
 
 function UserTable() {
 
@@ -168,18 +169,21 @@ function UserTable() {
             />
           </form>
           <div className="opts">
-            <label htmlFor="onlyDisabled" className="lblDis">
-              Show Only Disabled?
+            <p className="lblDis">Show Only Disabled?</p>
+            <label htmlFor="onlyDisabled" className="lblDis toggle-switch">
+              <input
+                type="checkbox"
+                name="onlyDisabled"
+                id="onlyDisabled"
+                className="toggle-input"
+                checked={onlyDeleted}
+                onChange={(e) => {
+                  handleFetchDisabled(e);
+                }}
+              />
+              <span className="toggle-slider"></span>
             </label>
-            <input
-              type="checkbox"
-              name="onlyDisabled"
-              id="onlyDisabled"
-              checked={onlyDeleted}
-              onChange={(e) => {
-                handleFetchDisabled(e);
-              }}
-            />
+            
           </div>
         </div>
         <div className="transTable">

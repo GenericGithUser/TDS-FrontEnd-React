@@ -223,3 +223,14 @@
     border-radius: 15px;
     box-shadow: 0px 3px 4px 4px #31a9199c;
 }
+.thingsNeeded{
+    font-size: 1.5ch;
+    margin: auto;
+}
+
+.txtRed{
+    color: rgb(250, 114, 114);
+}
+.txtGreen{
+    color: #1a6b3c;
+}

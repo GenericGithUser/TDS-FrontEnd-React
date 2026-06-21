@@ -13,6 +13,7 @@ function Home(){
   const { user } = useAuth();
   const { stats, loading, error } = GetTransmissionStats();
   const [filter, setFilter] = useState("");
+  const [refetcher, setRefetcher] = useState("");
     return (
       <>
         <Helmet>
@@ -22,16 +23,16 @@ function Home(){
           <h2 className="sTitle">
             {user.usr_role === "ADMIN" && <>ADMIN </>}SUMMARY DASHBOARD
           </h2>
-          {user.usr_role !== "ADMIN" ? <SummaryBoard sendFilter={setFilter} /> : <SummaryBoardAdmin />}
+          {user.usr_role !== "ADMIN" ? <SummaryBoard sendFilter={setFilter} refetcher={refetcher} /> : <SummaryBoardAdmin />}
           <h2 className="sTitle">
             Most Recent {user.usr_role === "ADMIN" ? "Events" : "Transmissions"}
           </h2>
           {user.usr_role === "RECEIVER" ? (
-            <MostRecentReceiver filter={filter} />
+            <MostRecentReceiver filter={filter} refetcher={setRefetcher} />
           ) : user.usr_role === "ADMIN" ? (
             <MostRecentAdmin />
           ) :
-            <MostRecent filter={filter} />
+            <MostRecent filter={filter} refetcher={setRefetcher} />
           }
           <h1 className="total">
             Total Transmissions:{" "}

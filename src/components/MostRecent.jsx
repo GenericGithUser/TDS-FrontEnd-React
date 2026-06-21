@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { GetTransmissions } from "../hooks/GetTranssmissions.jsx";
 import { TableSkeleton, ErrorMessage } from "./Loading.jsx";
 
-function mostRecent({filter}){
+function mostRecent({filter, refetcher }){
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogData, setDialogData] = useState(null);
     const [isDeleteButton, setIsDeleteButton] = useState(false);  
@@ -43,6 +43,7 @@ function mostRecent({filter}){
     const closeDialog = () => {
       setIsDialogOpen(false);
       setIsDeleteButton(false);
+      refetcher(true);
     }
 
     const [sortConfig, setSortConfig] = useState({

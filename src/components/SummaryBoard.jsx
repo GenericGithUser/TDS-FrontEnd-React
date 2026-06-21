@@ -3,10 +3,10 @@ import '../styles/loading.css'
 import { useAuth } from '../context/AuthContext';
 import { GetTransmissionStats } from '../hooks/GetTranssmissionsStats';
 import { StatsSkeleton } from "../components/Loading";
-import { useState } from 'react';
-function summaryBoard( { sendFilter }  ){
+import { useEffect, useState } from 'react';
+function summaryBoard( { sendFilter, refetcher }  ){
     const { user } = useAuth();
-    const { stats, loading, error } = GetTransmissionStats();
+    const { stats, loading, error, refetch } = GetTransmissionStats();
     const [clicked, setClicked] = useState(false);
     const [activeFilter, setActiveFilter] = useState(""); 
 
@@ -26,7 +26,18 @@ function summaryBoard( { sendFilter }  ){
         setClicked(false);
         setActiveFilter("");
       }
-    }
+    } 
+    
+    useEffect(()=>{
+      refetch()
+      console.log("Triggered!");
+    }, [refetcher]);
+    // if (refetcher === true) {
+    //   refetcher = false;
+    //   console.log("triggered");
+    //   {()=> refetch()}
+    // }
+
     return (
       <>
         {user.is_head_office && (

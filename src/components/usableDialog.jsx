@@ -8,6 +8,7 @@ import { GetRecords } from "../hooks/GetRecords";
 import { GetUsers } from "../hooks/GetUsers";
 import { GetTransmissions } from "../hooks/GetTranssmissions";
 import { GetTransmissionStats } from "../hooks/GetTranssmissionsStats.jsx";
+import { GetBranch } from "../hooks/GetBranch.jsx";
 import { Spinner } from "./Loading";
 import toast from "react-hot-toast";
 import api from "../api/client.js";
@@ -36,6 +37,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
     const { getTransmissionById, updateStatusApprover, updateStatus, cancelTransmission, loading, error, deleteTransmission } = GetTransmissions();
     const [feedback, setFeedback] = useState('');
     const {softDeleteUser, restoreUser, getEmployeesByBranch} = GetUsers();
+    const { softDeleteBranch, restoreBranch } = GetBranch();
     const [users, setUsers] = useState([]);
 
 
@@ -411,6 +413,16 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
        }
        else if (onFeedback == 4){
         await restoreUser(data.user_id);
+        onRefetch();
+       }
+       else if (onFeedback == 5){
+        console.log("Soft deleting branch with ID:", data.branch_id);
+        await softDeleteBranch(parseInt(data.branch_id));
+        onRefetch();
+       }
+       else if (onFeedback == 6){
+        console.log("Restoring branch with ID:", data.branch_id);
+        await restoreBranch(parseInt(data.branch_id));
         onRefetch();
        }
 
@@ -1565,6 +1577,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                   <button
                     className="btnFin btnCancel"
                     onClick={handleReApprove}
+                    disabled={currentRecord?.feedback !== null}
                   >
                     Submit for Re-Approval
                   </button>
@@ -1585,7 +1598,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
       );
     }
 
-    else if (data.record_status == "incomplete" && isDeleteButton === false && onRecords === false && user.usr_role === "RECEIVER" || user.usr_role === "APPROVER") {
+    else if (data.record_status == "incomplete" && isDeleteButton === false && onRecords === false && (user.usr_role === "RECEIVER" || user.usr_role === "APPROVER")) {
       return (
         <>
           <dialog className="diagEdit" ref={dialogRef}>
@@ -1833,12 +1846,12 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
               </table>
             </div>
             <div className="buttons">
-              <button
+              {user.usr_role === "PREPARER" || user.usr_role === "ADMIN" ? (<button
                 className="btnFin btnCancel"
                 onClick={() => handleEditTrans(data)}
               >
                 EDIT
-              </button>
+              </button>) : ""}
               <button className="btnCancel" onClick={onClose}>
                 CANCEL
               </button>
@@ -2040,7 +2053,87 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                 <button className="btnCancel" onClick={onClose}>
                   OK
                 </button>
+                {data.is_deleted === "true" ? (
+                  <button
+                    className="btnInc btnCancel"
+                    onClick={openNestedDialog}
+                  >
+                    Re-Enable
+                  </button>
+                ) : (
+                  <button
+                    className="btnRed btnCancel"
+                    onClick={openNestedDialog}
+                  >
+                    DISABLE
+                  </button>
+                )}
               </div>
+            </div>
+          </dialog>
+          <dialog className="delPrompt" ref={nestedDialogRef}>
+            <h1 className="diagTitle">
+              Confirm {data.is_deleted === "true" ? "Re-Enabling" : "Disabling"}
+            </h1>
+            {data.is_deleted === "true" ? (
+              ""
+            ) : (
+              <img src="/assets/warning.png" alt="warning" />
+            )}
+            <h3 className="confirmMesg">
+              Are you sure you want to{" "}
+              {data.is_deleted === "true" ? "Re-Enable" : "Disable"} this
+              Branch??
+            </h3>
+            <div className="contents">
+              <table className="contentList">
+                <tbody>
+                  <tr>
+                    <td className="titleD">Branch ID: </td>
+                    <td id="transIDData" className="data">
+                      {`MB-${String(data.branch_id).padStart(4, "0")}`}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Office: </td>
+                    <td id="recordIdData" className="data">
+                      {data.office_dept}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Business Area: </td>
+                    <td id="titleIDData" className="data">
+                      {data.business_area}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="titleD">Branch: </td>
+                    <td id="titleIDData" className="data">
+                      {data.branch_code}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="buttons">
+              <button className="btnCancel" onClick={closeNestedDialog}>
+                Go Back
+              </button>
+              {data.is_deleted === "true" ? (
+                <button
+                  onClick={() => handleNestedDialogSubmit(6)}
+                  className="btnInc btnCancel"
+                >
+                  RE-ENABLE
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleNestedDialogSubmit(5)}
+                  className="btnRed btnCancel"
+                >
+                  DISABLE
+                </button>
+              )}
             </div>
           </dialog>
         </>

@@ -79,6 +79,26 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
     }
   }, []);
 
+  const getTransmissionsByStatus = useCallback(async (status) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await api.get(`/transmissions/status/${status}`);
+      if (result.success) {
+        setTransmissions(result.data ?? []);
+      }
+      return { success: true, data: result.data };
+    } catch (err) {
+      toast.error(err.message || "Failed to Fetch By Status");
+      setError(err.message || "Failed to Fetch By Status");
+      return { success: false, error: err.message };
+    }finally{
+      setLoading(false);
+    }
+  }, []);
+
+
   // ── Update division (edit mode) ───────────────────────────────────────────
   const updateTransmission = useCallback(async (transId, updateData) => {
     try {
@@ -239,6 +259,7 @@ export function GetTransmissions(searchQuery = "", branchId = null) {
     cancelTransmission,
     removeRecord,
     deleteTransmission,
-    replaceRecords
+    replaceRecords,
+    getTransmissionsByStatus
   };
 }

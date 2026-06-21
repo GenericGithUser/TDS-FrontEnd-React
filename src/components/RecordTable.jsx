@@ -26,9 +26,11 @@ function recordTable() {
 
     const openDialog = (item, delBtn) => {
       setDialogData(item);
+      setOnRecords(true);
       setIsDialogOpen(true);
       setIsDeleteButton(delBtn);
-      setOnRecords(true);
+      
+      console.log(onRecords)
     };
 
     const closeDialog = () => {

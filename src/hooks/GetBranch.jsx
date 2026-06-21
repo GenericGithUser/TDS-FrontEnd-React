@@ -77,6 +77,41 @@ export function GetBranch(searchQuery = ''){
         }
     }, []);
 
-    return { branches, branchLoading, branchError, refetch: fetchBranches, createBranch, updateBranch};
+    const softDeleteBranch = useCallback(async (branchId) => {
+      try {
+        const result = await api.patch(`/branches/disable/${branchId}`);
+
+        if (result.success) {
+          // Remove from list (or mark as deleted if showing deleted)
+          toast.success(result.message || "Branch Disabled Successfully!");
+          setBranches((prev) => prev.filter((u) => u.branch_id !== branchId));
+          return { success: true };
+        }
+      } catch (err) {
+        toast.error(err.message || "Failed to Disable Branch");
+        return { success: false, error: err.message };
+      }
+    }, []);
+
+    const restoreBranch = useCallback(
+      async (branchId) => {
+        try {
+          const result = await api.patch(`/branches/re-enable/${branchId}`);
+
+          if (result.success) {
+            // Refetch to get updated list with restored employee
+            toast.success(result.message || "Branch Restored Successfully!");
+            await fetchBranches(true);
+            return { success: true };
+          }
+        } catch (err) {
+          toast.error(err.message || "Failed to Restore Branch");
+          return { success: false, error: err.message };
+        }
+      },
+      [fetchBranches],
+    );
+
+    return { branches, branchLoading, branchError, refetch: fetchBranches, createBranch, updateBranch, softDeleteBranch, restoreBranch };
 
 }

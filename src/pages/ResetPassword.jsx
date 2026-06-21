@@ -10,7 +10,7 @@ import api from '../api/client'
 function ResetPassword() {
     const [newPassword, setNewPassword] = useState("");
     const [newRePassword, setReNewPassword] = useState("");
-    const [matched, setMatched] = useState(false);
+    const [hasEight, setHasEight] = useState(false);
     const navigate = useNavigate();
     const { user, updateUser } = useAuth(); 
 
@@ -101,6 +101,38 @@ function ResetPassword() {
                         <p className="goodPass">✅ Password Matches!</p>
                       </div>
                     ))}
+                  <div className="thingsNeeded">
+                    <p>Passwords Must have the Following:</p>
+                    <p
+                      className={
+                        newPassword.length > 0 && newPassword.length < 8
+                          ? "txtRed"
+                          : "txtGreen"
+                      }
+                    >
+                      At Least 8 Characters
+                    </p>
+                    <p
+                      className={
+                        newPassword.length > 0 &&
+                        !/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)
+                          ? "txtRed"
+                          : "txtGreen"
+                      }
+                    >
+                      Has At Least 1 Special Character (!, @, #, $, %, &,*)
+                    </p>
+                    <p
+                      className={
+                        newPassword.length > 0 &&
+                        (!/(.*?\d){2,}/.test(newPassword))
+                          ? "txtRed"
+                          : "txtGreen"
+                      }
+                    >
+                      Must at least have 2 Numbers
+                    </p>
+                  </div>
                   <div className="r1">
                     <div className="item"></div>
                     <div className="item"></div>

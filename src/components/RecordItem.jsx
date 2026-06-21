@@ -1,4 +1,5 @@
 import '../styles/recordItem.css'
+import '../styles/tabletemp.css'
 import { GetChecklistItems } from "../hooks/GetChecklistItems";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNavigationData } from "../components/NavigationDataContext";
@@ -32,7 +33,7 @@ function RecordItem({ recordData, delItm, transId }){
   };
     return (
       <>
-        <div className="includedRecord">
+        <div className={`includedRecord ${recordData.feedback !== null ? "backRed": ""}`}>
           <div className="recordData">
             <span className="num1">{recordData.itemNum} </span>
             <span className="id">

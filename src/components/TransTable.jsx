@@ -18,13 +18,14 @@ function TransTable() {
     const [isDeleteButton, setIsDeleteButton] = useState(false);  
     const [onRecords, setOnRecords] = useState(false);
     const [branchQuery, setBranchQuery] = useState("");
+    const [status, setStatus] = useState("");
     const navigate = useNavigate();
     const { setRouteData } = useNavigationData();
     const { user } = useAuth();
     const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const { branchError, branchLoading, branches } = GetBranch();
-    const { transmissions, loading, error, refetch } = GetTransmissions(
+    const { transmissions, loading, error, refetch, getTransmissionsByStatus } = GetTransmissions(
       searchQuery,
       branchQuery ? parseInt(branchQuery) : null,
     );
@@ -75,6 +76,18 @@ function TransTable() {
     const handleBranchSelection = (e) => {
       setBranchQuery(e.target.value);
     };
+
+    const handleStatusSelection = async (e) => {
+      setStatus(e.target.value);
+      
+      if (e.target.value === "") {
+        refetch();
+
+      }
+      else{
+        await getTransmissionsByStatus(e.target.value);
+      }
+    }
 
     const [sortConfig, setSortConfig] = useState({
       key: null,
@@ -166,8 +179,10 @@ function TransTable() {
             />
             <input type="submit" value="🔎Search" className="searchBtn" />
           </form>
-          {user.is_admin || user.is_head_office ? (
-            <div className="opts">
+          
+            <div className="opts extendWidth">
+              {user.is_admin || user.is_head_office ? (
+                <>
               <label htmlFor="onlyBranch" className="lblDis">
                 Show By Branch?
               </label>
@@ -191,10 +206,30 @@ function TransTable() {
                   ))
                 )}
               </select>
-            </div>
-          ) : (
+              </>) : (
             ""
           )}
+              <label htmlFor="onlyBranch" className="lblDis">
+                Show By Status?
+              </label>
+              <select
+                name="onlyBranch"
+                id="selBranch"
+                className="dropdownSpec"
+                value={status}
+                onChange={(e) => handleStatusSelection(e)}
+              >
+                <option value="">--Select A Status--</option>
+                <option value="received">{!user.is_admin || !user.is_head_office ? "Received" : "Finished"}</option>
+                <option value="sent">{!user.is_receiver ? "Sent" : "Incoming"}</option>
+                {user.usr_role === "PREPARER" || user.usr_role === "APPROVER" ? (
+                  <option value="pending">Pending</option>
+                ) : (
+                  ""
+                )}
+                <option value="incomplete">Incomplete</option>
+              </select>
+          </div>          
         </div>
         <div className="transTable extendWidth">
           <table className="actTransTable">
