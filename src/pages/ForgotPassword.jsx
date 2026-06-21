@@ -98,7 +98,7 @@ function ForgotPassword() {
                   <div className="buttonCont">
                     <input
                       type="submit"
-                      value="Request Resetting"
+                      value="Submit Request"
                       className="btnFin btnCancel"
                     ></input>
                     <button type="button" formNoValidate onClick={()=>navigate('/login')} className='btnCancel'>

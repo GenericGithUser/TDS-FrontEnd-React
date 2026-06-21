@@ -1377,7 +1377,7 @@ function UsableDialog( {isOpen, onClose, data, isDeleteButton, onRecords, onRefe
                         <p className="feedbackText">
                           <span className="blau">FeedBack: </span>
                           {currentRecord?.feedback === null
-                            ? "All Good"
+                            ? "Ready for Transmission"
                             : `Waiting for Response on: ${currentRecord?.feedback}`}
                         </p>
                       </>

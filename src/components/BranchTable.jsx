@@ -189,6 +189,12 @@ function BranchTable() {
                 >
                   Number of Employees{getSortIndicator("employee_count")}
                 </th>
+                <th
+                  style={{ cursor: "pointer" }}
+                  onClick={() => requestSort("is_deleted")}
+                >
+                  Disabled{getSortIndicator("is_deleted")}
+                </th>
 
                 {/* <th>Employee ID</th>
                 <th>Name</th>
@@ -221,6 +227,7 @@ function BranchTable() {
                     <td>{data.business_area}</td>
                     <td>{data.branch_code}</td>
                     <td>{data.employee_count}</td>
+                    <td>{data.is_deleted}</td>
                     <td>
                       <button
                         type="button"
